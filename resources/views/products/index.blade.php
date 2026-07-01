@@ -19,6 +19,8 @@
     <th>Kategori</th>
     <th>Harga</th>
     <th>Stok</th>
+    <th>Gambar</th>
+    <th>Aksi</th>
 </tr>
 
 @foreach($products as $product)
@@ -34,6 +36,31 @@
 <td>Rp {{ number_format($product->price) }}</td>
 
 <td>{{ $product->stock }}</td>
+
+<td>
+    <img src="{{ asset('storage/'.$product->image) }}"
+    width="80">
+</td>
+
+<td>
+
+<a href="{{ route('products.edit',$product->id) }}">
+    Edit
+</a>
+
+<form action="{{ route('products.destroy',$product->id) }}"
+method="POST">
+
+@csrf
+@method('DELETE')
+
+<button type="submit">
+    Hapus
+</button>
+
+</form>
+
+</td>
 
 </tr>
 

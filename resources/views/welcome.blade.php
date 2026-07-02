@@ -1,300 +1,129 @@
 @extends('layouts.app')
 
-@section('title', 'Coffee Experience - Learn About Coffee')
+@section('title', 'Tepi Kopi - Premium Coffee Experience')
 
 @section('content')
 
-<!-- ================= HERO SECTION ================= -->
+{{-- =========================================================================
+    HERO CAROUSEL SECTION
+========================================================================== --}}
+<section 
+    x-data="{
+        activeSlide: 0,
+        slides: [
+            { title: 'Biji Kopi\nTerbaik', img: '{{ asset('assets/images/corousel2.jpg') }}' },
+            { title: 'Alat Kopi\nSempurna', img: '{{ asset('assets/images/corousel1.jpg') }}' },
+            { title: 'Aroma\nSempurna', img: '{{ asset('assets/images/corousel3.jpg') }}' }
+        ],
+        init() {
+            setInterval(() => {
+                this.activeSlide = (this.activeSlide + 1) % this.slides.length
+            }, 5000)
+        }
+    }"
+    x-init="init()"
+    class="relative min-h-screen bg-[#1a1512] overflow-hidden">
 
-<section class="relative min-h-screen bg-[#faf8f5] flex items-center overflow-hidden">
+    {{-- Background Effect --}}
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-900/40 via-[#1a1512] to-[#1a1512]"></div>
 
-    <div class="absolute text-[25vw] font-black text-amber-900/[0.04] left-0">
-        COFFEE
-    </div>
+    <template x-for="(slide, index) in slides" :key="index">
+        <div x-show="activeSlide === index"
+            x-transition:enter="transition-all duration-1000"
+            x-transition:enter-start="opacity-0 scale-105"
+            x-transition:enter-end="opacity-100 scale-100"
+            class="absolute inset-0 flex items-center">
 
+            <div class="max-w-7xl mx-auto px-5 sm:px-8 grid md:grid-cols-2 gap-10 items-center w-full py-20">
+                <div class="text-white z-10">
+                    <span class="inline-block mb-5 px-4 py-2 rounded-full text-xs uppercase tracking-widest text-amber-500 border border-amber-600/50 bg-amber-950/30">
+                        Premium Selection
+                    </span>
+                    <h1 x-text="slide.title" class="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-tight whitespace-pre-line mb-8"></h1>
+                    <a href="/katalog" class="inline-block px-8 py-4 bg-amber-700 rounded-lg text-white font-bold uppercase tracking-widest hover:bg-amber-600 transition">
+                        Belanja Sekarang
+                    </a>
+                </div>
 
-    <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center relative z-10">
-
-        <div>
-
-            <p class="text-xs tracking-[0.4em] uppercase text-amber-700 mb-6">
-                Premium Coffee Experience
-            </p>
-
-
-            <h1 class="text-5xl md:text-7xl font-black text-amber-950 leading-tight">
-                Nikmati
-                <br>
-                Secangkir Kopi
-                <br>
-                Terbaik
-            </h1>
-
-
-            <p class="mt-8 text-gray-600 leading-relaxed max-w-lg">
-                Temukan perjalanan kopi mulai dari biji pilihan,
-                proses roasting, hingga menjadi minuman kopi
-                dengan aroma dan rasa yang sempurna.
-            </p>
-
-
-            <div class="mt-10 flex gap-5">
-
-                <a href="/products"
-                class="bg-amber-800 text-white px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-amber-900 transition">
-                    Belanja Kopi
-                </a>
-
-
-                <a href="#about"
-                class="border-b-2 border-amber-800 py-4 text-sm font-bold uppercase tracking-widest text-amber-900">
-                    Pelajari Kopi
-                </a>
-
+                <div class="relative">
+                    <div class="absolute inset-0 bg-amber-700/20 rounded-3xl rotate-3"></div>
+                    <img :src="slide.img" class="relative z-10 w-full h-[280px] sm:h-[400px] md:h-[500px] object-cover rounded-3xl shadow-2xl" alt="Coffee Slide">
+                </div>
             </div>
-
         </div>
+    </template>
+</section>
 
+{{-- =========================================================================
+    KATEGORI SECTION
+========================================================================== --}}
+<section class="py-16 sm:py-24 bg-amber-50">
+    <div class="max-w-7xl mx-auto px-5">
+        <h2 class="text-center text-3xl sm:text-4xl font-black text-amber-950 mb-12">Jelajahi Koleksi Kami</h2>
 
-        <div class="flex justify-center">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            @php
+                $kategori = [
+                    ['nama' => 'Biji Kopi', 'img' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=500&q=80', 'link' => 'biji'],
+                    ['nama' => 'Alat Kopi', 'img' => 'https://i.pinimg.com/736x/bd/ec/53/bdec533fd391ae00622fd6de2e9559b5.jpg', 'link' => 'alat'],
+                    ['nama' => 'Aksesoris', 'img' => 'https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=500&q=80', 'link' => 'aksesori']
+                ];
+            @endphp
 
-            <img
-            src="https://images.unsplash.com/photo-1495474472203-4ad7c1a5a5b7?auto=format&fit=crop&w=900&q=80"
-            class="rounded-t-full shadow-2xl w-[80%] h-[650px] object-cover">
-
-
+            @foreach($kategori as $item)
+                <div class="group relative overflow-hidden rounded-3xl h-[320px] sm:h-[400px]">
+                    <img src="{{ $item['img'] }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" alt="{{ $item['nama'] }}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8 text-white">
+                        <h3 class="text-2xl font-bold">{{ $item['nama'] }}</h3>
+                        <a href="/katalog?kategori={{ $item['link'] }}" class="text-amber-400 font-bold hover:text-amber-300">Lihat Semua →</a>
+                    </div>
+                </div>
+            @endforeach
         </div>
-
     </div>
-
 </section>
 
-
-
-
-<!-- ================= ABOUT COFFEE ================= -->
-
-
-<section id="about" class="py-24 bg-white">
-
-
-<div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-14 items-center">
-
-
-<div>
-
-
-<p class="text-xs uppercase tracking-[0.3em] text-amber-700">
-Tentang Kopi
-</p>
-
-
-<h2 class="text-4xl font-black text-amber-950 mt-4">
-Apa Itu Kopi?
-</h2>
-
-
-<p class="mt-6 text-gray-600 leading-relaxed">
-
-Kopi merupakan minuman yang berasal dari biji tanaman kopi
-yang telah melalui proses panjang mulai dari penanaman,
-pemanenan, pengolahan, pengeringan, hingga proses roasting.
-
-Setiap jenis kopi memiliki karakter rasa yang berbeda,
-tergantung dari daerah asal, ketinggian tempat tumbuh,
-jenis tanaman, dan metode pengolahannya.
-
-</p>
-
-
-<p class="mt-5 text-gray-600 leading-relaxed">
-
-Indonesia menjadi salah satu negara penghasil kopi terbaik
-di dunia dengan berbagai daerah penghasil kopi terkenal
-seperti Aceh Gayo, Toraja, Jawa Barat, Bali, dan Flores.
-
-</p>
-
-
-</div>
-
-
-
-<div>
-
-<img
-src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=900&q=80"
-class="rounded-3xl shadow-xl">
-
-
-</div>
-
-
-</div>
-
+{{-- =========================================================================
+    TESTIMONI SECTION
+========================================================================== --}}
+<section class="py-16 sm:py-24 bg-white text-amber-950">
+    <div class="max-w-7xl mx-auto px-5 text-center">
+        <h2 class="text-3xl sm:text-4xl font-black mb-12">Apa Kata Penikmat Kopi?</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach(['Budi', 'Siti', 'Rangga'] as $nama)
+                <div class="p-8 rounded-2xl bg-amber-50 border border-amber-100">
+                    <p class="italic">"Kualitas kopi di TepiKopi benar-benar premium!"</p>
+                    <h4 class="mt-6 font-bold text-amber-900">- {{ $nama }}</h4>
+                </div>
+            @endforeach
+        </div>
+    </div>
 </section>
 
-
-
-
-
-<!-- ================= JENIS KOPI ================= -->
-
-
-<section class="py-24 bg-amber-950 text-white">
-
-
-<div class="max-w-7xl mx-auto px-6">
-
-
-<div class="text-center mb-16">
-
-<p class="uppercase text-xs tracking-[0.4em] text-amber-300">
-Coffee Beans
-</p>
-
-
-<h2 class="text-4xl font-black mt-4">
-Jenis-Jenis Biji Kopi
-</h2>
-
-
-</div>
-
-
-
-<div class="grid md:grid-cols-4 gap-8">
-
-
-
-<!-- Arabica -->
-
-<div class="bg-white/10 rounded-2xl p-6 backdrop-blur">
-
-
-<img
-src="https://images.unsplash.com/photo-1512568400610-62da28bc8a13?auto=format&fit=crop&w=500&q=80"
-class="rounded-xl h-52 w-full object-cover">
-
-
-<h3 class="text-xl font-bold mt-5">
-Arabica
-</h3>
-
-
-<p class="text-sm text-amber-100/70 mt-3 leading-relaxed">
-
-Memiliki rasa lebih halus,
-aroma kompleks, tingkat keasaman lebih tinggi,
-dan sering digunakan untuk specialty coffee.
-
-</p>
-
-
-</div>
-
-
-
-
-
-<!-- Robusta -->
-
-
-<div class="bg-white/10 rounded-2xl p-6 backdrop-blur">
-
-
-<img
-src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=500&q=80"
-class="rounded-xl h-52 w-full object-cover">
-
-
-<h3 class="text-xl font-bold mt-5">
-Robusta
-</h3>
-
-
-<p class="text-sm text-amber-100/70 mt-3 leading-relaxed">
-
-Memiliki rasa lebih kuat,
-kadar kafein lebih tinggi,
-dan karakter rasa pahit yang khas.
-
-</p>
-
-
-</div>
-
-
-
-
-
-<!-- Liberica -->
-
-
-<div class="bg-white/10 rounded-2xl p-6 backdrop-blur">
-
-
-<img
-src="https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=500&q=80"
-class="rounded-xl h-52 w-full object-cover">
-
-
-<h3 class="text-xl font-bold mt-5">
-Liberica
-</h3>
-
-
-<p class="text-sm text-amber-100/70 mt-3 leading-relaxed">
-
-Memiliki ukuran biji lebih besar,
-aroma unik seperti buah dan kayu,
-serta cukup langka ditemukan.
-
-</p>
-
-
-</div>
-
-
-
-
-
-<!-- Excelsa -->
-
-
-<div class="bg-white/10 rounded-2xl p-6 backdrop-blur">
-
-
-<img
-src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80"
-class="rounded-xl h-52 w-full object-cover">
-
-
-<h3 class="text-xl font-bold mt-5">
-Excelsa
-</h3>
-
-
-<p class="text-sm text-amber-100/70 mt-3 leading-relaxed">
-
-Memiliki rasa unik dengan perpaduan
-asam, manis, dan aroma buah yang kuat.
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
+{{-- =========================================================================
+    FOOTER SECTION
+========================================================================== --}}
+<footer class="bg-amber-950 text-amber-500 py-14">
+    <div class="max-w-7xl mx-auto px-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div>
+            <h3 class="text-white text-xl font-bold mb-4">TepiKopi.</h3>
+            <p class="text-sm">Menyajikan kualitas kopi terbaik dari petani lokal.</p>
+        </div>
+        <div>
+            <h4 class="text-white font-bold mb-4">Navigasi</h4>
+            <a href="/" class="block mb-2 hover:text-white">Beranda</a>
+            <a href="/katalog" class="hover:text-white">Produk</a>
+        </div>
+        <div>
+            <h4 class="text-white font-bold mb-4">Kategori</h4>
+            <a href="/katalog?kategori=biji" class="block mb-2 hover:text-white">Biji Kopi</a>
+            <a href="/katalog?kategori=alat" class="hover:text-white">Alat Seduh</a>
+        </div>
+        <div>
+            <h4 class="text-white font-bold mb-4">Kontak</h4>
+            <p class="text-white">Bandung, Indonesia</p>
+        </div>
+    </div>
+</footer>
 
 @endsection

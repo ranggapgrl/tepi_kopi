@@ -4,34 +4,47 @@
 
 @section('content')
 
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+
 {{-- =========================================================================
     HERO CAROUSEL SECTION
 ========================================================================== --}}
-<section 
+<section
     x-data="{
         activeSlide: 0,
+        paused: false,
+        timer: null,
         slides: [
             { title: 'Biji Kopi\nTerbaik', img: '{{ asset('assets/images/corousel2.jpg') }}' },
             { title: 'Alat Kopi\nSempurna', img: '{{ asset('assets/images/corousel1.jpg') }}' },
             { title: 'Aroma\nSempurna', img: '{{ asset('assets/images/corousel3.jpg') }}' }
         ],
-        init() {
-            setInterval(() => {
-                this.activeSlide = (this.activeSlide + 1) % this.slides.length
-            }, 5000)
+        next() { this.activeSlide = (this.activeSlide + 1) % this.slides.length },
+        prev() { this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length },
+        go(i) { this.activeSlide = i },
+        start() {
+            this.timer = setInterval(() => { if (!this.paused) this.next() }, 5000)
         }
     }"
-    x-init="init()"
-    class="relative min-h-screen bg-[#1a1512] overflow-hidden">
+    x-init="start()"
+    @mouseenter="paused = true"
+    @mouseleave="paused = false"
+    class="relative min-h-[calc(100vh-4rem)] bg-[#1a1512] overflow-hidden">
 
     {{-- Background Effect --}}
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-900/40 via-[#1a1512] to-[#1a1512]"></div>
 
+    {{-- Slides: crossfade, both enter & leave animate together so there's no blank/overlap flash --}}
     <template x-for="(slide, index) in slides" :key="index">
         <div x-show="activeSlide === index"
-            x-transition:enter="transition-all duration-1000"
-            x-transition:enter-start="opacity-0 scale-105"
-            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:enter="transition-opacity ease-out duration-700"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-in duration-700"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
             class="absolute inset-0 flex items-center">
 
             <div class="max-w-7xl mx-auto px-5 sm:px-8 grid md:grid-cols-2 gap-10 items-center w-full py-20">
@@ -47,12 +60,41 @@
 
                 <div class="relative">
                     <div class="absolute inset-0 bg-amber-700/20 rounded-3xl rotate-3"></div>
-                    <img :src="slide.img" class="relative z-10 w-full h-[280px] sm:h-[400px] md:h-[500px] object-cover rounded-3xl shadow-2xl" alt="Coffee Slide">
+                    <img :src="slide.img"
+                         class="relative z-10 w-full h-[280px] sm:h-[400px] md:h-[500px] object-cover rounded-3xl shadow-2xl scale-100 transition-transform duration-[6000ms] ease-out"
+                         :class="activeSlide === index ? 'scale-110' : 'scale-100'"
+                         alt="Coffee Slide">
                 </div>
             </div>
         </div>
     </template>
+
+    {{-- Prev / Next Arrows --}}
+    <button @click="prev()"
+        class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-amber-700 text-white backdrop-blur-md transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+    <button @click="next()"
+        class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-amber-700 text-white backdrop-blur-md transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
+
+    {{-- Dot Indicators --}}
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+        <template x-for="(slide, index) in slides" :key="index">
+            <button @click="go(index)"
+                class="h-2 rounded-full transition-all duration-300"
+                :class="activeSlide === index ? 'w-8 bg-amber-500' : 'w-2 bg-white/40 hover:bg-white/70'">
+            </button>
+        </template>
+    </div>
 </section>
+
+{{-- Spacer so page content isn't hidden behind the fixed navbar on non-hero pages --}}
 
 {{-- =========================================================================
     KATEGORI SECTION
@@ -80,6 +122,66 @@
                 </div>
             @endforeach
         </div>
+    </div>
+</section>
+
+{{-- =========================================================================
+    PRODUK PILIHAN SECTION
+========================================================================== --}}
+<section class="py-16 sm:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="flex items-end justify-between mb-12">
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-black text-amber-950">Produk Pilihan</h2>
+                <p class="text-amber-800/70 mt-2">Favorit para penikmat kopi minggu ini</p>
+            </div>
+            <a href="/katalog" class="hidden sm:inline-block text-amber-700 font-bold hover:text-amber-900 transition">Lihat Semua →</a>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            @forelse($products ?? [] as $product)
+                <div class="group bg-amber-50 rounded-2xl overflow-hidden border border-amber-100 hover:shadow-xl transition-shadow">
+                    <a href="/katalog/{{ $product->slug ?? $product->id }}" class="block relative h-56 overflow-hidden">
+                        <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"
+                             class="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+                             alt="{{ $product->name }}">
+                        @if(isset($product->stock) && $product->stock <= 0)
+                            <span class="absolute top-3 left-3 bg-rose-700 text-white text-xs font-bold px-3 py-1 rounded-full">Stok Habis</span>
+                        @endif
+                    </a>
+                    <div class="p-5">
+                        <h3 class="font-bold text-amber-950 truncate">{{ $product->name }}</h3>
+                        <p class="text-amber-700 font-black mt-1">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
+                        <a href="/katalog/{{ $product->slug ?? $product->id }}"
+                           class="mt-4 block text-center px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition">
+                            Lihat Produk
+                        </a>
+                    </div>
+                </div>
+            @empty
+                @foreach([
+                    ['nama' => 'Arabika Gayo', 'harga' => 85000, 'img' => 'https://images.unsplash.com/photo-1587734195503-904fca47e0d9?auto=format&fit=crop&w=500&q=80'],
+                    ['nama' => 'Robusta Lampung', 'harga' => 65000, 'img' => 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=500&q=80'],
+                    ['nama' => 'V60 Dripper', 'harga' => 150000, 'img' => 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=500&q=80'],
+                    ['nama' => 'French Press', 'harga' => 220000, 'img' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=500&q=80'],
+                ] as $item)
+                    <div class="group bg-amber-50 rounded-2xl overflow-hidden border border-amber-100 hover:shadow-xl transition-shadow">
+                        <div class="block relative h-56 overflow-hidden">
+                            <img src="{{ $item['img'] }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" alt="{{ $item['nama'] }}">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-amber-950 truncate">{{ $item['nama'] }}</h3>
+                            <p class="text-amber-700 font-black mt-1">Rp{{ number_format($item['harga'], 0, ',', '.') }}</p>
+                            <a href="/katalog" class="mt-4 block text-center px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition">
+                                Lihat Produk
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            @endforelse
+        </div>
+
+        <a href="/katalog" class="sm:hidden mt-8 block text-center text-amber-700 font-bold hover:text-amber-900 transition">Lihat Semua Produk →</a>
     </div>
 </section>
 

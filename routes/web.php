@@ -1,13 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ContactController;
 
 // 1. Halaman Utama
-Route::get('/', function () { return view('welcome'); });
+Route::get('/', [HomeController::class, 'index']);
+
+// Halaman Tentang & Kontak
+Route::view('/about', 'about');
+Route::get('/contact', [ContactController::class, 'index']);
+Route::post('/contact', [ContactController::class, 'store']);
 
 // 2. Route untuk Pelanggan (Lihat Katalog)
 // Pastikan baris ini ada dan persis sama!

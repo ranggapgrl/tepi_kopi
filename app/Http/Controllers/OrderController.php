@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
@@ -18,21 +19,21 @@ class OrderController extends Controller
             return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
         }
 
-        // 1. Hitung total
+        // Hitung total
         $totalPrice = 0;
         foreach ($cartItems as $item) {
             $totalPrice += ($item->product->price * $item->quantity);
         }
         $totalPrice = $totalPrice + ($totalPrice * 0.11); // Plus pajak
 
-        // 2. Buat Data Pesanan (Order)
+        // Buat Order
         $order = Order::create([
             'user_id' => Auth::id() ?? 1,
             'total_price' => $totalPrice,
             'status' => 'Menunggu Pembayaran'
         ]);
 
-        // 3. Pindahkan isi keranjang ke rincian pesanan (OrderItem)
+        // Pindahkan cart items ke order items
         foreach ($cartItems as $item) {
             OrderItem::create([
                 'order_id' => $order->id,
@@ -41,13 +42,13 @@ class OrderController extends Controller
                 'price' => $item->product->price
             ]);
 
-            // Potong stok produk
+            // Kurangi stok
             $item->product->decrement('stock', $item->quantity);
         }
 
-        // 4. Kosongkan keranjang
+        // Kosongkan keranjang
         $cart->items()->delete();
 
-        return redirect('/products')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
+        return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
     }
 }

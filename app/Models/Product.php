@@ -8,15 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Product extends Model
 {
     protected $fillable = [
-        'category_id',
-        'name',
-        'description',
-        'price',
-        'image',
-        'stock'
+        'category_id', 'name', 'description', 'price', 'image', 'stock'
     ];
 
-    // Relasi balik: Satu produk hanya memiliki satu kategori
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

@@ -2,18 +2,51 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Category;
+use App\Models\Product;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Menambahkan daftar kategori menu untuk Tepi Kopi
-        Category::create(['name' => 'Signature Coffee']);
-        Category::create(['name' => 'Espresso Based']);
-        Category::create(['name' => 'Manual Brew']);
-        Category::create(['name' => 'Non-Coffee']);
-        Category::create(['name' => 'Pastry & Snacks']);
+        // Admin
+        User::create([
+            'name' => 'Admin Roastery',
+            'email' => 'admin@roastery.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        // Customer
+        User::create([
+            'name' => 'Budi Santoso',
+            'email' => 'customer@demo.com',
+            'password' => bcrypt('password'),
+            'role' => 'customer',
+        ]);
+
+        // Kategori
+        $biji = Category::create(['name' => 'Biji Kopi']);
+        $alat = Category::create(['name' => 'Alat Kopi']);
+        $aksesoris = Category::create(['name' => 'Aksesoris']);
+
+        // Produk
+        Product::create([
+            'category_id' => $biji->id,
+            'name' => 'Arabika Gayo',
+            'description' => 'Kopi single origin dari dataran tinggi Gayo, Aceh.',
+            'price' => 85000,
+            'stock' => 50,
+        ]);
+
+        Product::create([
+            'category_id' => $alat->id,
+            'name' => 'V60 Dripper',
+            'description' => 'Alat seduh kopi manual metode pour over.',
+            'price' => 150000,
+            'stock' => 20,
+        ]);
     }
 }

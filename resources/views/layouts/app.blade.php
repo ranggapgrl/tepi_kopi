@@ -25,11 +25,13 @@
                 <a href="/products" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Katalog</a>
                 <a href="/cart" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors relative">
                     <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
-                    <span class="absolute -top-2 -right-3 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
                 </a>
-                <a href="/admin" class="px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 text-sm font-bold rounded-lg transition-colors">
-                    Dashboard Admin
-                </a>
+
+                @if(auth()->check() && auth()->user()->role === 'admin')
+                    <a href="/admin" class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
+                        Dashboard Admin
+                    </a>
+                @endif
             </div>
 
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-amber-900 text-xl focus:outline-none">
@@ -39,8 +41,11 @@
 
         <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-white border-t border-amber-100 px-4 pt-2 pb-4 space-y-2 shadow-lg">
             <a href="/products" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Katalog</a>
-            <a href="/cart" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Keranjang Belanja</a>
-            <a href="/admin" class="block px-3 py-2 mt-4 bg-amber-800 text-white rounded-md text-base font-medium text-center">Dashboard Admin</a>
+            <a href="/cart" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Keranjang</a>
+            
+            @if(auth()->check() && auth()->user()->role === 'admin')
+                <a href="/admin" class="block px-3 py-2 mt-4 bg-amber-800 text-white rounded-md text-base font-medium text-center">Dashboard Admin</a>
+            @endif
         </div>
     </nav>
 

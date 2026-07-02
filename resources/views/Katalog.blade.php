@@ -35,7 +35,7 @@
         @foreach($products as $product)
         <div class="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-amber-200 transition-all duration-500 flex flex-col group">
 
-            <div class="relative aspect-square w-full bg-amber-50/50 overflow-hidden border-b border-amber-50">
+            <a href="/katalog/{{ $product->id }}" class="relative aspect-square w-full bg-amber-50/50 overflow-hidden border-b border-amber-50 block">
                 @if($product->image)
                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                 @else
@@ -47,12 +47,14 @@
                 <span class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-amber-900 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-md shadow-sm border border-amber-100">
                     {{ $product->category->name ?? 'Kopi' }}
                 </span>
-            </div>
+            </a>
 
             <div class="p-6 flex flex-col flex-grow">
-                <h3 class="text-lg font-bold text-amber-950 line-clamp-1 mb-1 group-hover:text-amber-600 transition-colors">
-                    {{ $product->name }}
-                </h3>
+                <a href="/katalog/{{ $product->id }}">
+                    <h3 class="text-lg font-bold text-amber-950 line-clamp-1 mb-1 group-hover:text-amber-600 transition-colors">
+                        {{ $product->name }}
+                    </h3>
+                </a>
                 <p class="text-xs text-gray-500 mb-4 line-clamp-2 min-h-[32px]">
                     {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
                 </p>

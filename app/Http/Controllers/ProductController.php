@@ -20,6 +20,21 @@ class ProductController extends Controller
     }
 
     /**
+     * PUBLIC — /katalog/{product}
+     * Halaman detail satu produk.
+     */
+    public function show(Product $product)
+    {
+        $related = Product::where('id', '!=', $product->id)
+            ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('product-detail', compact('product', 'related'));
+    }
+
+    /**
      * ADMIN ONLY — /products
      * Tabel kelola produk (tambah/edit/hapus). Route ini dilindungi
      * middleware ['auth', 'admin'] di routes/web.php.

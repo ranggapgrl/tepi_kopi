@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Auth\AuthController;
 
 // 1. Halaman Utama
 Route::get('/', [HomeController::class, 'index']);
@@ -16,9 +17,19 @@ Route::view('/about', 'about');
 Route::get('/contact', [ContactController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
 
+// Login, Register, Logout
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+
 // 2. Route untuk Pelanggan (Lihat Katalog)
 // Pastikan baris ini ada dan persis sama!
 Route::get('/katalog', [ProductController::class, 'index']);
+Route::get('/katalog/{product}', [ProductController::class, 'show']);
 
 // 3. Route untuk Admin (Kelola Produk) - Dilindungi Middleware Admin
 Route::middleware(['auth', 'admin'])->group(function () {

@@ -2,24 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Menambahkan daftar kategori menu untuk Tepi Kopi
+        Category::create(['name' => 'Signature Coffee']);
+        Category::create(['name' => 'Espresso Based']);
+        Category::create(['name' => 'Manual Brew']);
+        Category::create(['name' => 'Non-Coffee']);
+        Category::create(['name' => 'Pastry & Snacks']);
     }
 }

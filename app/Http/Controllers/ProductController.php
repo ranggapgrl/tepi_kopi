@@ -5,59 +5,120 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // Katalog untuk pelanggan
+    /**
+     * PUBLIC — /katalog
+     * Halaman belanja untuk semua pengunjung, tanpa kontrol admin.
+     */
     public function index()
     {
         $products = Product::with('category')->latest()->get();
+
+        return view('katalog', compact('products'));
+    }
+
+    /**
+     * PUBLIC — /katalog/{product}
+     * Halaman detail satu produk.
+     */
+    public function show(Product $product)
+    {
+        $related = Product::where('id', '!=', $product->id)
+            ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('product-detail', compact('product', 'related'));
+    }
+
+    /**
+     * ADMIN ONLY — /products
+     * Tabel kelola produk (tambah/edit/hapus). Route ini dilindungi
+     * middleware ['auth', 'admin'] di routes/web.php.
+     */
+    public function manage()
+    {
+        $products = Product::with('category')->latest()->get();
+
         return view('products.index', compact('products'));
     }
 
-    // Form tambah produk (admin)
+    /**
+     * ADMIN ONLY — /products/create
+     */
     public function create()
     {
         $categories = Category::all();
+
         return view('products.create', compact('categories'));
     }
 
-    // Simpan produk baru
+    /**
+     * ADMIN ONLY — POST /products
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'description' => 'nullable|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'image'       => 'nullable|image|max:2048',
         ]);
 
-        $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+            $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create([
-            'category_id' => $request->category_id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'image' => $imagePath
-        ]);
+        Product::create($validated);
 
-        return redirect('/products')->with('success', 'Produk berhasil ditambahkan!');
+        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    // Hapus produk
+    /**
+     * ADMIN ONLY — /products/{product}/edit
+     */
+    public function edit(Product $product)
+    {
+        $categories = Category::all();
+
+        return view('products.edit', compact('product', 'categories'));
+    }
+
+    /**
+     * ADMIN ONLY — PUT /products/{product}
+     */
+    public function update(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'image'       => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($validated);
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
+    }
+
+    /**
+     * ADMIN ONLY — DELETE /products/{product}
+     */
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
         $product->delete();
-        return redirect('/products')->with('success', 'Produk berhasil dihapus.');
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }
 }

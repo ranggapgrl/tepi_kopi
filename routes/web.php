@@ -18,6 +18,15 @@ Route::view('/about', 'about')->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store']);
 
+// Login, Register, Logout
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+
 // Katalog
 Route::get('/katalog', [ProductController::class, 'index'])->name('catalog');
 

@@ -22,12 +22,13 @@
             </a>
 
             <div class="hidden md:flex items-center space-x-8">
-                <a href="/products" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Katalog</a>
-                <a href="/cart" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors relative">
+                <a href="/katalog" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Katalog</a>
+                <a href="/cart" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
                     <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
                 </a>
 
                 @if(auth()->check() && auth()->user()->role === 'admin')
+                    <div class="h-6 w-[1px] bg-amber-200"></div> <a href="/products" class="text-sm font-bold text-rose-800 hover:text-rose-600 transition-colors">Kelola Produk</a>
                     <a href="/admin" class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
                         Dashboard Admin
                     </a>
@@ -40,11 +41,13 @@
         </div>
 
         <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-white border-t border-amber-100 px-4 pt-2 pb-4 space-y-2 shadow-lg">
-            <a href="/products" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Katalog</a>
+            <a href="/katalog" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Katalog</a>
             <a href="/cart" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Keranjang</a>
             
             @if(auth()->check() && auth()->user()->role === 'admin')
-                <a href="/admin" class="block px-3 py-2 mt-4 bg-amber-800 text-white rounded-md text-base font-medium text-center">Dashboard Admin</a>
+                <hr class="my-2 border-amber-100">
+                <a href="/products" class="block px-3 py-2 rounded-md text-base font-bold text-rose-800 hover:bg-rose-50">Kelola Produk</a>
+                <a href="/admin" class="block px-3 py-2 bg-amber-800 text-white rounded-md text-base font-bold text-center">Dashboard Admin</a>
             @endif
         </div>
     </nav>

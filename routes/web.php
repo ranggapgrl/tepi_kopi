@@ -6,20 +6,20 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
 
-// 1. Halaman Awal (Landing Page keren ala Editorial yang baru kita buat)
-Route::get('/', function () {
-    return view('welcome');
+// 1. Halaman Utama
+Route::get('/', function () { return view('welcome'); });
+
+// 2. Route untuk Pelanggan (Lihat Katalog)
+// Pastikan baris ini ada dan persis sama!
+Route::get('/katalog', [ProductController::class, 'index']);
+
+// 3. Route untuk Admin (Kelola Produk) - Dilindungi Middleware Admin
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('products', ProductController::class);
+    Route::get('/admin', [AdminController::class, 'index']);
 });
 
-// 2. Semua Route untuk Produk (Katalognya sekarang murni di /products)
-Route::resource('products', ProductController::class);
-
-// 3. Route untuk Keranjang Belanja
+// 4. Route Keranjang & Checkout
 Route::get('/cart', [CartController::class, 'index']);
 Route::post('/cart/add', [CartController::class, 'store']);
-
-// 4. Route untuk Checkout
 Route::post('/checkout', [OrderController::class, 'checkout']);
-
-// 5. Route untuk Dashboard Admin
-Route::get('/admin', [AdminController::class, 'index']);

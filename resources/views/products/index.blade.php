@@ -14,9 +14,12 @@
             <div class="text-sm bg-amber-100/50 text-amber-900 px-4 py-2.5 rounded-xl border border-amber-200/40 font-medium">
                 Total: <span class="font-bold">{{ $products->count() }}</span> Produk
             </div>
+
+            @if(auth()->check() && auth()->user()->role === 'admin')
             <a href="{{ route('products.create') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-medium text-sm rounded-xl shadow-md transition-all duration-300 hover:-translate-y-0.5">
                 <i class="fa-solid fa-plus mr-2 text-xs"></i> Tambah Produk
             </a>
+            @endif
         </div>
     </div>
 
@@ -33,10 +36,13 @@
             <i class="fa-solid fa-box-open text-3xl"></i>
         </div>
         <h3 class="text-lg font-bold text-amber-950 mb-2">Belum ada produk</h3>
-        <p class="text-amber-700/70 text-sm mb-6">Etalase masih kosong. Silakan tambah produk baru.</p>
+        <p class="text-amber-700/70 text-sm mb-6">Etalase masih kosong.</p>
+        
+        @if(auth()->check() && auth()->user()->role === 'admin')
         <a href="{{ route('products.create') }}" class="inline-flex items-center px-6 py-3 bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium rounded-xl transition-colors shadow-md">
             Tambah Produk Pertama
         </a>
+        @endif
     </div>
     @else
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -72,15 +78,9 @@
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Stok</span>
-                        @if($product->stock > 0)
-                            <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md">
-                                {{ $product->stock }} Pcs
-                            </span>
-                        @else
-                            <span class="inline-flex items-center text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-1 rounded-md">
-                                Habis
-                            </span>
-                        @endif
+                        <span class="inline-flex items-center text-xs font-semibold {{ $product->stock > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50' }} px-2 py-1 rounded-md">
+                            {{ $product->stock > 0 ? $product->stock . ' Pcs' : 'Habis' }}
+                        </span>
                     </div>
                 </div>
 
@@ -94,6 +94,7 @@
                         </button>
                     </form>
                     
+                    @if(auth()->check() && auth()->user()->role === 'admin')
                     <form action="{{ route('products.destroy', $product->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
@@ -101,8 +102,8 @@
                             <i class="fa-regular fa-trash-can text-sm"></i>
                         </button>
                     </form>
+                    @endif
                 </div>
-
             </div>
         </div>
         @endforeach

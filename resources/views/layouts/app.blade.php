@@ -78,13 +78,13 @@
             <a href="/about" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Tentang</a>
             <a href="/contact" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Kontak</a>
             <a href="/cart" class="relative text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
-    <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
-    @if(($cartCount ?? 0) > 0)
-        <span class="absolute -top-2 -right-3 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-amber-700 text-white text-[10px] font-bold rounded-full leading-none">
-            {{ $cartCount }}
-        </span>
-    @endif
-</a>
+                <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
+                @if(($cartCount ?? 0) > 0)
+                    <span class="absolute -top-2 -right-3 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-amber-700 text-white text-[10px] font-bold rounded-full leading-none">
+                        {{ $cartCount }}
+                    </span>
+                @endif
+            </a>
 
             @if(auth()->check() && auth()->user()->role === 'admin')
                 <hr class="my-2 border-amber-100">
@@ -110,6 +110,43 @@
     <main class="flex-grow w-full">
         @yield('content')
     </main>
+
+    {{-- FOOTER --}}
+    <footer class="bg-amber-950 text-amber-300 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div>
+                <h4 class="text-white font-bold mb-3 text-sm uppercase tracking-wide">TepiKopi.</h4>
+                <p class="text-xs leading-relaxed text-amber-400/80">
+                    Menyajikan kopi terbaik langsung dari petani lokal, diproses dengan hati.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-3 text-sm">Navigasi</h4>
+                <ul class="space-y-1.5 text-sm">
+                    <li><a href="/" class="hover:text-white transition">Beranda</a></li>
+                    <li><a href="/katalog" class="hover:text-white transition">Katalog</a></li>
+                    <li><a href="/about" class="hover:text-white transition">Tentang</a></li>
+                    <li><a href="/contact" class="hover:text-white transition">Kontak</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-3 text-sm">Kategori</h4>
+                <ul class="space-y-1.5 text-sm">
+                    <li><a href="/katalog?kategori=1" class="hover:text-white transition">Biji Kopi</a></li>
+                    <li><a href="/katalog?kategori=2" class="hover:text-white transition">Alat Kopi</a></li>
+                    <li><a href="/katalog?kategori=3" class="hover:text-white transition">Aksesoris</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-3 text-sm">Kontak</h4>
+                <p class="text-sm">📍 Bandung, Indonesia</p>
+                <p class="text-sm mt-1">✉️ halo@tepikopi.com</p>
+            </div>
+        </div>
+        <div class="border-t border-amber-800 mt-8 pt-6 pb-4 text-center text-xs text-amber-600">
+            &copy; {{ date('Y') }} TepiKopi. All rights reserved.
+        </div>
+    </footer>
 
 </body>
 </html>

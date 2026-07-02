@@ -20,17 +20,12 @@
 
     <div class="grid md:grid-cols-2 gap-8 lg:gap-16">
 
-        {{-- Gambar Produk dengan Galeri (Menggunakan Alpine.js) --}}
-        @php
-            $mainImage = $product->image ? asset('storage/' . $product->image) : '';
-        @endphp
-        
-        <div class="md:sticky md:top-24 md:self-start" x-data="{ activeImage: '{{ $mainImage }}' }">
-            {{-- Gambar Utama --}}
+        {{-- Gambar Utama --}}
+        <div class="md:sticky md:top-24 md:self-start">
             <div class="relative aspect-square w-full bg-amber-50/50 rounded-2xl sm:rounded-3xl overflow-hidden border border-amber-100">
                 @if($product->image)
-                    <img :src="activeImage" alt="{{ $product->name }}"
-                         class="w-full h-full object-cover transition-all duration-300">
+                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                         class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full flex flex-col items-center justify-center text-amber-300">
                         <i class="fa-solid fa-mug-hot text-5xl sm:text-6xl mb-3"></i>
@@ -52,59 +47,6 @@
                 </span>
                 @endif
             </div>
-
-            {{-- Thumbnail Galeri --}}
-            @if($product->image)
-            <div class="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-                {{-- Thumbnail Gambar Utama --}}
-                <button type="button" 
-                        @click="activeImage = '{{ asset('storage/' . $product->image) }}'"
-                        class="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors"
-                        :class="activeImage === '{{ asset('storage/' . $product->image) }}' ? 'border-amber-800' : 'border-transparent opacity-70 hover:opacity-100'">
-                    <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover">
-                </button>
-
-                {{-- Thumbnail Gambar Tambahan (Asumsi relasi bernama 'images' atau 'galleries') --}}
-                {{-- Ubah $product->images sesuai dengan nama relasi di Model Anda --}}
-                @if(isset($product->images) && $product->images->count() > 0)
-                    @foreach($product->images as $img)
-                        <button type="button" 
-                                @click="activeImage = '{{ asset('storage/' . $img->path) }}'"
-                                class="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors"
-                                :class="activeImage === '{{ asset('storage/' . $img->path) }}' ? 'border-amber-800' : 'border-transparent opacity-70 hover:opacity-100'">
-                            <img src="{{ asset('storage/' . $img->path) }}" class="w-full h-full object-cover">
-                        </button>
-                    @endforeach
-                @endif
-            </div>
-            @endif
-
-            {{-- Spesifikasi ringkas (desktop di bawah gambar) --}}
-            @if($product->weight || $product->roast_level || $product->origin)
-            <div class="hidden md:grid grid-cols-3 gap-3 mt-6">
-                @if($product->weight)
-                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 text-center">
-                    <i class="fa-solid fa-weight-hanging text-amber-700 mb-1"></i>
-                    <p class="text-[11px] uppercase tracking-wide text-amber-800/60 font-semibold">Berat</p>
-                    <p class="text-sm font-bold text-amber-950">{{ $product->weight }}</p>
-                </div>
-                @endif
-                @if($product->roast_level)
-                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 text-center">
-                    <i class="fa-solid fa-fire text-amber-700 mb-1"></i>
-                    <p class="text-[11px] uppercase tracking-wide text-amber-800/60 font-semibold">Roast</p>
-                    <p class="text-sm font-bold text-amber-950">{{ $product->roast_level }}</p>
-                </div>
-                @endif
-                @if($product->origin)
-                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 text-center">
-                    <i class="fa-solid fa-earth-asia text-amber-700 mb-1"></i>
-                    <p class="text-[11px] uppercase tracking-wide text-amber-800/60 font-semibold">Asal</p>
-                    <p class="text-sm font-bold text-amber-950">{{ $product->origin }}</p>
-                </div>
-                @endif
-            </div>
-            @endif
         </div>
 
         {{-- Info Produk --}}
@@ -112,25 +54,6 @@
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-amber-950 mb-2 leading-tight">
                 {{ $product->name }}
             </h1>
-
-            {{-- Rating Sistem --}}
-            @php
-                $rating = $product->rating ?? 0;
-                $reviewsCount = $product->reviews_count ?? 0;
-            @endphp
-            <div class="flex items-center gap-2 mb-4">
-                <div class="flex text-amber-500 text-sm">
-                    @for($i = 1; $i <= 5; $i++)
-                        <i class="fa-{{ $i <= round($rating) ? 'solid' : 'regular' }} fa-star"></i>
-                    @endfor
-                </div>
-                <span class="text-xs sm:text-sm font-medium text-amber-800/60">
-                    {{ $rating > 0 ? number_format($rating, 1) : 'Belum ada rating' }}
-                    @if($reviewsCount > 0) 
-                        <span class="mx-1">&bull;</span> ({{ $reviewsCount }} ulasan) 
-                    @endif
-                </span>
-            </div>
 
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="text-xl sm:text-2xl font-extrabold text-amber-800">
@@ -146,29 +69,34 @@
                 {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
             </p>
 
-            {{-- Spesifikasi ringkas (mobile, sebagai daftar) --}}
-            @if($product->weight || $product->roast_level || $product->origin)
-            <dl class="md:hidden grid grid-cols-1 gap-y-2 mb-6 text-sm border-y border-amber-100 py-4">
-                @if($product->weight)
-                <div class="flex justify-between">
-                    <dt class="text-amber-800/60 font-medium">Berat</dt>
-                    <dd class="text-amber-950 font-semibold">{{ $product->weight }}</dd>
+            {{-- Spesifikasi ringkas --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-weight-hanging text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">250g</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Berat</p>
                 </div>
-                @endif
-                @if($product->roast_level)
-                <div class="flex justify-between">
-                    <dt class="text-amber-800/60 font-medium">Tingkat Roast</dt>
-                    <dd class="text-amber-950 font-semibold">{{ $product->roast_level }}</dd>
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-fire text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">Medium</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Roast</p>
                 </div>
-                @endif
-                @if($product->origin)
-                <div class="flex justify-between">
-                    <dt class="text-amber-800/60 font-medium">Asal Biji</dt>
-                    <dd class="text-amber-950 font-semibold">{{ $product->origin }}</dd>
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-earth-asia text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">Gayo, Aceh</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Asal</p>
                 </div>
-                @endif
-            </dl>
-            @endif
+            </div>
+
+            {{-- Cerita Produk --}}
+            <div class="bg-amber-50/60 border border-amber-100 rounded-2xl p-5 mb-6">
+                <h3 class="font-bold text-amber-950 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-seedling"></i> Cerita Kopi Ini
+                </h3>
+                <p class="text-sm text-amber-900/80 mt-2 leading-relaxed">
+                    Dipetik langsung dari petani di dataran tinggi, diproses secara alami, dan disangrai dalam batch kecil untuk menjaga kesegaran.
+                </p>
+            </div>
 
             @if(session('success'))
             <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
@@ -198,9 +126,6 @@
                         <button type="button" @click="qty = Math.min({{ max($product->stock, 1) }}, qty + 1)"
                                 class="w-10 h-10 flex items-center justify-center text-amber-800 hover:bg-amber-50 active:bg-amber-100 transition-colors">+</button>
                     </div>
-                    <span class="text-xs text-amber-800/50" x-show="qty >= {{ max($product->stock, 1) }}" style="display: none;">
-                        Maks. stok tercapai
-                    </span>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -210,42 +135,65 @@
                         <i class="fa-solid fa-cart-plus"></i>
                         {{ $product->stock < 1 ? 'Stok Habis' : 'Tambah ke Keranjang' }}
                     </button>
-
-                    <button type="button"
-                            onclick="navigator.share ? navigator.share({title: '{{ $product->name }}', url: window.location.href}) : navigator.clipboard.writeText(window.location.href)"
-                            class="w-full sm:w-auto px-6 py-4 border border-amber-200 hover:bg-amber-50 text-amber-800 font-bold rounded-xl uppercase tracking-widest text-sm transition-colors flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-share-nodes"></i>
-                        <span class="sm:hidden">Bagikan</span>
-                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Produk Lain --}}
+    {{-- You May Also Like (Carousel) --}}
     @if($related->isNotEmpty())
-    <div class="mt-16 sm:mt-20 pt-10 sm:pt-12 border-t border-amber-100">
-        <h2 class="text-xl sm:text-2xl font-black text-amber-950 mb-6 sm:mb-8">Produk Lainnya</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+    <section class="mt-16 sm:mt-20 pt-10 sm:pt-12 border-t border-amber-100">
+        <h2 class="text-xl sm:text-2xl font-black text-amber-950 mb-6">You May Also Like</h2>
+
+        <div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide
+                    lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0 lg:snap-none">
             @foreach($related as $item)
-                <a href="/katalog/{{ $item->id }}" class="group bg-white rounded-xl sm:rounded-2xl border border-amber-100 overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="aspect-square bg-amber-50/50 overflow-hidden">
-                        @if($item->image)
-                            <img src="{{ asset('storage/' . $item->image) }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" alt="{{ $item->name }}">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center text-amber-300">
-                                <i class="fa-solid fa-mug-hot text-2xl sm:text-3xl"></i>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="p-3 sm:p-4">
-                        <p class="font-bold text-amber-950 text-xs sm:text-sm line-clamp-1">{{ $item->name }}</p>
-                        <p class="text-amber-700 font-extrabold text-xs sm:text-sm mt-1">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                    </div>
-                </a>
+            <a href="/katalog/{{ $item->id }}"
+               class="group flex-shrink-0 w-[70vw] sm:w-[45vw] lg:w-auto snap-start
+                      bg-white rounded-2xl border border-amber-100 overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="aspect-[4/3] bg-amber-50 overflow-hidden">
+                    @if($item->image)
+                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
+                             class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-amber-300">
+                            <i class="fa-solid fa-mug-hot text-3xl"></i>
+                        </div>
+                    @endif
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-amber-950 text-sm line-clamp-1">{{ $item->name }}</h3>
+                    <p class="text-amber-700 font-extrabold text-sm mt-1">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                    <span class="text-xs text-amber-800/70 font-medium mt-2 inline-block">
+                        {{ $item->category->name ?? 'Kopi' }} · 250g
+                    </span>
+                </div>
+            </a>
             @endforeach
         </div>
-    </div>
+    </section>
     @endif
+
+    {{-- Sticky Add to Cart (Mobile) --}}
+    <div x-data="{ show: false }" x-intersect:leave="show = true" x-intersect:enter="show = false"
+         class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-amber-200 p-4 shadow-2xl md:hidden transition-transform duration-300"
+         :class="show ? 'translate-y-0' : 'translate-y-full'">
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <p class="text-sm font-bold text-amber-950 truncate">{{ $product->name }}</p>
+                <p class="text-lg font-extrabold text-amber-800">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+            </div>
+            <button type="submit" onclick="document.querySelector('#add-to-cart-form').submit()"
+                    class="px-6 py-3 bg-amber-800 text-white rounded-full font-bold text-sm">
+                <i class="fa-solid fa-cart-plus mr-2"></i> Keranjang
+            </button>
+        </div>
+    </div>
 </div>
 @endsection
+
+{{-- CSS untuk menyembunyikan scrollbar --}}
+<style>
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

@@ -22,7 +22,8 @@ Route::get('/katalog', [ProductController::class, 'index']);
 
 // 3. Route untuk Admin (Kelola Produk) - Dilindungi Middleware Admin
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::resource('products', ProductController::class);
+    Route::get('/products', [ProductController::class, 'manage'])->name('products.index');
+    Route::resource('products', ProductController::class)->except(['index']);
     Route::get('/admin', [AdminController::class, 'index']);
 });
 

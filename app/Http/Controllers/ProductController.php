@@ -12,11 +12,21 @@ class ProductController extends Controller
      * PUBLIC — /katalog
      * Halaman belanja untuk semua pengunjung, tanpa kontrol admin.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->latest()->get();
+        $categories = Category::all();
 
-        return view('katalog', compact('products'));
+        $products = Product::with('category')
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->kategori, function ($query) use ($request) {
+                $query->where('category_id', $request->kategori);
+            })
+            ->latest()
+            ->get();
+
+        return view('katalog', compact('products', 'categories'));
     }
 
     /**

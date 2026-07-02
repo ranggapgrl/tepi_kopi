@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    /**
+     * Status pesanan yang tersedia, dipakai di form update & badge tampilan.
+     */
+    public const STATUSES = [
+        'Menunggu Pembayaran',
+        'Diproses',
+        'Dikirim',
+        'Selesai',
+        'Dibatalkan',
+    ];
+
     public function checkout(Request $request)
     {
         $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
@@ -50,5 +61,49 @@ class OrderController extends Controller
         $cart->items()->delete();
 
         return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
+    }
+
+    /**
+     * ADMIN ONLY — /orders
+     */
+    public function index(Request $request)
+    {
+        $orders = Order::with('user')
+            ->withCount('items')
+            ->when($request->status, function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->latest()
+            ->get();
+
+        $statuses = self::STATUSES;
+
+        return view('orders.index', compact('orders', 'statuses'));
+    }
+
+    /**
+     * ADMIN ONLY — /orders/{order}
+     */
+    public function show(Order $order)
+    {
+        $order->load('user', 'items.product');
+
+        $statuses = self::STATUSES;
+
+        return view('orders.show', compact('order', 'statuses'));
+    }
+
+    /**
+     * ADMIN ONLY — PUT /orders/{order}
+     */
+    public function update(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:' . implode(',', self::STATUSES),
+        ]);
+
+        $order->update($validated);
+
+        return redirect()->route('orders.show', $order)->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }

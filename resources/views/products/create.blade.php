@@ -1,143 +1,113 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Produk Baru')
+@section('title', 'Tambah Produk - Admin')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-    
-    <div class="mb-6">
-        <a href="/products" class="inline-flex items-center text-sm font-medium text-amber-800 hover:text-amber-600 transition-colors">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Katalog
-        </a>
-    </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
 
-    <div class="bg-white border border-amber-100 rounded-3xl shadow-sm overflow-hidden">
-        
-        <div class="px-8 py-6 bg-gradient-to-r from-amber-900 to-amber-950 text-white relative overflow-hidden">
-            <div class="relative z-10">
-                <h1 class="text-xl font-bold mb-1">Tambah Produk Baru</h1>
-                <p class="text-amber-200/80 text-xs font-light">Lengkapi informasi di bawah ini untuk menambah etalase Tepi Kopi.</p>
-            </div>
-            <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-10 text-6xl pointer-events-none">
-                <i class="fa-solid fa-leaf"></i>
+    @include('admin.partials.sidebar')
+
+    <div class="flex-grow space-y-6">
+
+        <div class="flex items-center gap-3">
+            <a href="{{ route('products.index') }}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-amber-100 text-amber-700 hover:bg-amber-50 transition-colors">
+                <i class="fa-solid fa-arrow-left text-xs"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-amber-950">Tambah Produk</h1>
+                <p class="text-amber-700/80 text-sm">Isi detail produk yang akan tampil di katalog.</p>
             </div>
         </div>
 
-        @if ($errors->any())
-        <div class="mx-8 mt-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+        <div class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6 sm:p-8 max-w-3xl">
+            <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ preview: null }">
+                @csrf
 
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-6" x-data="{ imageUrl: null }">
-            @csrf
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Nama --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Nama Produk</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none text-sm">
-                            <i class="fa-solid fa-tag"></i>
-                        </span>
-                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Kopi Susu Aren" 
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 transition-all outline-none text-sm placeholder:text-gray-400">
+                    <label for="name" class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Nama Produk</label>
+                    <input type="text" name="name" id="name" value="{{ old('name') }}"
+                           placeholder="Contoh: Kopi Susu Gula Aren"
+                           class="w-full px-4 py-3 rounded-xl border {{ $errors->has('name') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
+                    @error('name')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Kategori --}}
+                <div>
+                    <label for="category_id" class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Kategori</label>
+                    <select name="category_id" id="category_id"
+                            class="w-full px-4 py-3 rounded-xl border {{ $errors->has('category_id') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Deskripsi --}}
+                <div>
+                    <label for="description" class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Deskripsi</label>
+                    <textarea name="description" id="description" rows="4"
+                              placeholder="Deskripsi singkat produk (opsional)"
+                              class="w-full px-4 py-3 rounded-xl border {{ $errors->has('description') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all resize-none">{{ old('description') }}</textarea>
+                    @error('description')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Harga & Stok --}}
+                <div class="grid sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="price" class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Harga (Rp)</label>
+                        <input type="number" name="price" id="price" value="{{ old('price') }}" min="0" step="100"
+                               placeholder="25000"
+                               class="w-full px-4 py-3 rounded-xl border {{ $errors->has('price') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
+                        @error('price')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="stock" class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Stok</label>
+                        <input type="number" name="stock" id="stock" value="{{ old('stock') }}" min="0"
+                               placeholder="20"
+                               class="w-full px-4 py-3 rounded-xl border {{ $errors->has('stock') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
+                        @error('stock')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
                     </div>
                 </div>
 
+                {{-- Gambar --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Kategori Menu</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none text-sm">
-                            <i class="fa-solid fa-layer-group"></i>
-                        </span>
-                        <select name="category_id" required 
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 transition-all outline-none text-sm appearance-none cursor-pointer">
-                            <option value="" disabled selected>Pilih Kategori...</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 pointer-events-none text-xs">
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Gambar Produk</label>
 
-            <div>
-                <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Deskripsi Produk</label>
-                <textarea name="description" rows="3" placeholder="Jelaskan rasa, asal biji kopi, atau cara penyajian..." 
-                    class="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 transition-all outline-none text-sm placeholder:text-gray-400 resize-none">{{ old('description') }}</textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Harga Jual (Rp)</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-900 font-extrabold text-xs pointer-events-none">
-                            Rp
-                        </span>
-                        <input type="number" name="price" value="{{ old('price') }}" required placeholder="0" min="0" 
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 transition-all outline-none text-sm font-semibold">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Jumlah Stok</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none text-sm">
-                            <i class="fa-solid fa-cubes"></i>
-                        </span>
-                        <input type="number" name="stock" value="{{ old('stock') }}" required placeholder="0" min="0" 
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-600/20 focus:border-amber-700 transition-all outline-none text-sm font-semibold">
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold tracking-wide text-amber-900 uppercase mb-2">Foto Produk</label>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                    
-                    <div class="sm:col-span-2 relative group border-2 border-dashed border-gray-200 hover:border-amber-600 rounded-2xl bg-gray-50/30 hover:bg-amber-50/10 p-6 text-center transition-all duration-300 flex flex-col items-center justify-center cursor-pointer min-h-[140px]">
-                        <input type="file" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            @change="const file = $event.target.files[0]; if (file) { imageUrl = URL.createObjectURL(file) }">
-                        <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-amber-950 mb-0.5">Pilih Gambar atau Seret ke Sini</span>
-                        <span class="text-[10px] text-gray-400">Format PNG/JPG (Maks. 2MB)</span>
-                    </div>
-
-                    <div class="w-full aspect-square sm:h-[140px] sm:w-[140px] rounded-2xl border border-amber-100 bg-amber-50/40 flex items-center justify-center overflow-hidden mx-auto relative">
-                        <template x-if="imageUrl">
-                            <img :src="imageUrl" class="w-full h-full object-cover">
-                        </template>
-                        <template x-if="!imageUrl">
-                            <div class="text-center text-amber-300">
-                                <i class="fa-regular fa-image text-3xl mb-1 block"></i>
-                                <span class="text-[9px] tracking-wider uppercase font-medium">Preview</span>
+                    <label for="image"
+                           class="flex flex-col items-center justify-center gap-2 border-2 border-dashed {{ $errors->has('image') ? 'border-rose-300' : 'border-amber-200' }} rounded-xl py-8 px-4 cursor-pointer hover:bg-amber-50/40 transition-colors overflow-hidden relative">
+                        <template x-if="!preview">
+                            <div class="flex flex-col items-center gap-2 text-amber-500">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                                <span class="text-xs font-semibold text-amber-700">Klik untuk unggah gambar</span>
+                                <span class="text-[11px] text-amber-400">PNG, JPG, maks 2MB</span>
                             </div>
                         </template>
-                    </div>
-
+                        <template x-if="preview">
+                            <img :src="preview" class="w-32 h-32 object-cover rounded-lg border border-amber-100">
+                        </template>
+                        <input type="file" name="image" id="image" accept="image/*" class="hidden"
+                               @change="preview = $event.target.files.length ? URL.createObjectURL($event.target.files[0]) : null">
+                    </label>
+                    @error('image')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
                 </div>
-            </div>
 
-            <div class="pt-6 border-t border-amber-50 flex flex-col-reverse sm:flex-row items-center sm:justify-end gap-3 mt-4">
-                <a href="/products" class="w-full sm:w-auto px-6 py-3 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors text-center">
-                    Batal
-                </a>
-                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold text-sm shadow-md transition-all hover:-translate-y-0.5">
-                    <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Produk
-                </button>
-            </div>
-        </form>
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button type="submit"
+                            class="flex-1 sm:flex-none px-8 py-3 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl text-sm shadow-md transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> Simpan Produk
+                    </button>
+                    <a href="{{ route('products.index') }}"
+                       class="flex-1 sm:flex-none px-8 py-3 border border-amber-200 text-amber-800 hover:bg-amber-50 font-bold rounded-xl text-sm transition-colors text-center">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

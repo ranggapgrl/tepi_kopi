@@ -108,7 +108,7 @@
                 $kategori = [
                     ['nama' => 'Biji Kopi', 'img' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=500&q=80', 'link' => 'biji'],
                     ['nama' => 'Alat Kopi', 'img' => 'https://i.pinimg.com/736x/bd/ec/53/bdec533fd391ae00622fd6de2e9559b5.jpg', 'link' => 'alat'],
-                    ['nama' => 'Aksesoris', 'img' => 'https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=500&q=80', 'link' => 'aksesori']
+                    ['nama' => 'Aksesoris', 'img' => 'https://i.pinimg.com/1200x/e0/cd/20/e0cd20f36782f5833c9e08c077551c1a.jpg', 'link' => 'aksesori']
                 ];
             @endphp
 

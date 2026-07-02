@@ -32,7 +32,6 @@
 
                 @if(auth()->check() && auth()->user()->role === 'admin')
                     <div class="h-6 w-[1px] bg-amber-200"></div>
-                    <a href="/products" class="text-sm font-bold text-rose-800 hover:text-rose-600 transition-colors">Kelola Produk</a>
                     <a href="/admin" class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
                         Dashboard Admin
                     </a>
@@ -51,7 +50,9 @@
                         <div x-show="userMenuOpen" x-transition x-cloak
                              class="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-amber-100 py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Profil Saya</a>
-                            <a href="/orders" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                            @if(auth()->user()->role !== 'admin')
+                                <a href="/orders" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                            @endif
                             <form method="POST" action="/logout">
                                 @csrf
                                 <button type="submit" class="w-full text-left px-4 py-2 text-sm text-rose-700 hover:bg-rose-50">Keluar</button>
@@ -80,14 +81,15 @@
 
             @if(auth()->check() && auth()->user()->role === 'admin')
                 <hr class="my-2 border-amber-100">
-                <a href="/products" class="block px-3 py-2 rounded-md text-base font-bold text-rose-800 hover:bg-rose-50">Kelola Produk</a>
                 <a href="/admin" class="block px-3 py-2 bg-amber-800 text-white rounded-md text-base font-bold text-center">Dashboard Admin</a>
             @endif
 
             <hr class="my-2 border-amber-100">
             @auth
                 <a href="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Profil Saya</a>
-                <a href="/orders" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                @if(auth()->user()->role !== 'admin')
+                    <a href="/orders" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                @endif
                 <form method="POST" action="/logout">
                     @csrf
                     <button type="submit" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-rose-700 hover:bg-rose-50">Keluar</button>

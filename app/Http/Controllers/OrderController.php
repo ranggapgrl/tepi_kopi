@@ -63,6 +63,33 @@ class OrderController extends Controller
         return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
     }
 
+/**
+     * CUSTOMER — /my-orders
+     * Riwayat pesanan milik user yang sedang login.
+     */
+    public function myOrders()
+    {
+        $orders = Order::withCount('items')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return view('orders.my-index', compact('orders'));
+    }
+
+    /**
+     * CUSTOMER — /my-orders/{order}
+     * Detail satu pesanan, hanya bisa diakses oleh pemiliknya.
+     */
+    public function myOrderShow(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        $order->load('items.product');
+
+        return view('orders.my-show', compact('order'));
+    }
+
     /**
      * ADMIN ONLY — /orders
      */

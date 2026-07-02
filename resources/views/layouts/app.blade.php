@@ -51,7 +51,7 @@
                              class="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-amber-100 py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Profil Saya</a>
                             @if(auth()->user()->role !== 'admin')
-                                <a href="/orders" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                                <a href="{{ route('orders.my') }}" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
                             @endif
                             <form method="POST" action="/logout">
                                 @csrf
@@ -77,7 +77,14 @@
             <a href="/katalog" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Katalog</a>
             <a href="/about" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Tentang</a>
             <a href="/contact" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Kontak</a>
-            <a href="/cart" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Keranjang</a>
+            <a href="/cart" class="relative text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
+    <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
+    @if(($cartCount ?? 0) > 0)
+        <span class="absolute -top-2 -right-3 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-amber-700 text-white text-[10px] font-bold rounded-full leading-none">
+            {{ $cartCount }}
+        </span>
+    @endif
+</a>
 
             @if(auth()->check() && auth()->user()->role === 'admin')
                 <hr class="my-2 border-amber-100">
@@ -88,7 +95,7 @@
             @auth
                 <a href="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Profil Saya</a>
                 @if(auth()->user()->role !== 'admin')
-                    <a href="/orders" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                    <a href="{{ route('orders.my') }}" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
                 @endif
                 <form method="POST" action="/logout">
                     @csrf

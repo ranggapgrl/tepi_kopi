@@ -139,7 +139,8 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @forelse($products ?? [] as $product)
+            {{-- Perhatikan penambahan collect(...)->take(4) di bawah ini --}}
+            @forelse(collect($products ?? [])->take(4) as $product)
                 <div class="group bg-amber-50 rounded-2xl overflow-hidden border border-amber-100 hover:shadow-xl transition-shadow">
                     <a href="/katalog/{{ $product->slug ?? $product->id }}" class="block relative h-56 overflow-hidden">
                         <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"

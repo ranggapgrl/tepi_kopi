@@ -20,12 +20,17 @@
 
     <div class="grid md:grid-cols-2 gap-8 lg:gap-16">
 
-        {{-- Gambar --}}
-        <div class="md:sticky md:top-24 md:self-start">
+        {{-- Gambar Produk dengan Galeri (Menggunakan Alpine.js) --}}
+        @php
+            $mainImage = $product->image ? asset('storage/' . $product->image) : '';
+        @endphp
+        
+        <div class="md:sticky md:top-24 md:self-start" x-data="{ activeImage: '{{ $mainImage }}' }">
+            {{-- Gambar Utama --}}
             <div class="relative aspect-square w-full bg-amber-50/50 rounded-2xl sm:rounded-3xl overflow-hidden border border-amber-100">
                 @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                         class="w-full h-full object-cover">
+                    <img :src="activeImage" alt="{{ $product->name }}"
+                         class="w-full h-full object-cover transition-all duration-300">
                 @else
                     <div class="w-full h-full flex flex-col items-center justify-center text-amber-300">
                         <i class="fa-solid fa-mug-hot text-5xl sm:text-6xl mb-3"></i>
@@ -47,6 +52,32 @@
                 </span>
                 @endif
             </div>
+
+            {{-- Thumbnail Galeri --}}
+            @if($product->image)
+            <div class="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+                {{-- Thumbnail Gambar Utama --}}
+                <button type="button" 
+                        @click="activeImage = '{{ asset('storage/' . $product->image) }}'"
+                        class="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors"
+                        :class="activeImage === '{{ asset('storage/' . $product->image) }}' ? 'border-amber-800' : 'border-transparent opacity-70 hover:opacity-100'">
+                    <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover">
+                </button>
+
+                {{-- Thumbnail Gambar Tambahan (Asumsi relasi bernama 'images' atau 'galleries') --}}
+                {{-- Ubah $product->images sesuai dengan nama relasi di Model Anda --}}
+                @if(isset($product->images) && $product->images->count() > 0)
+                    @foreach($product->images as $img)
+                        <button type="button" 
+                                @click="activeImage = '{{ asset('storage/' . $img->path) }}'"
+                                class="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors"
+                                :class="activeImage === '{{ asset('storage/' . $img->path) }}' ? 'border-amber-800' : 'border-transparent opacity-70 hover:opacity-100'">
+                            <img src="{{ asset('storage/' . $img->path) }}" class="w-full h-full object-cover">
+                        </button>
+                    @endforeach
+                @endif
+            </div>
+            @endif
 
             {{-- Spesifikasi ringkas (desktop di bawah gambar) --}}
             @if($product->weight || $product->roast_level || $product->origin)
@@ -76,26 +107,30 @@
             @endif
         </div>
 
-        {{-- Info --}}
+        {{-- Info Produk --}}
         <div class="flex flex-col">
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-amber-950 mb-2 leading-tight">
                 {{ $product->name }}
             </h1>
 
-            {{-- Rating (opsional, tampil jika ada data) --}}
-            @if(isset($product->rating) && $product->rating)
+            {{-- Rating Sistem --}}
+            @php
+                $rating = $product->rating ?? 0;
+                $reviewsCount = $product->reviews_count ?? 0;
+            @endphp
             <div class="flex items-center gap-2 mb-4">
                 <div class="flex text-amber-500 text-sm">
                     @for($i = 1; $i <= 5; $i++)
-                        <i class="fa-{{ $i <= round($product->rating) ? 'solid' : 'regular' }} fa-star"></i>
+                        <i class="fa-{{ $i <= round($rating) ? 'solid' : 'regular' }} fa-star"></i>
                     @endfor
                 </div>
-                <span class="text-xs text-amber-800/60">
-                    {{ number_format($product->rating, 1) }}
-                    @if(isset($product->reviews_count)) ({{ $product->reviews_count }} ulasan) @endif
+                <span class="text-xs sm:text-sm font-medium text-amber-800/60">
+                    {{ $rating > 0 ? number_format($rating, 1) : 'Belum ada rating' }}
+                    @if($reviewsCount > 0) 
+                        <span class="mx-1">&bull;</span> ({{ $reviewsCount }} ulasan) 
+                    @endif
                 </span>
             </div>
-            @endif
 
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="text-xl sm:text-2xl font-extrabold text-amber-800">
@@ -113,7 +148,7 @@
 
             {{-- Spesifikasi ringkas (mobile, sebagai daftar) --}}
             @if($product->weight || $product->roast_level || $product->origin)
-            <dl class="md:hidden grid grid-cols-1 gap-y-2 mb-6 text-sm border-t border-b border-amber-100 py-4">
+            <dl class="md:hidden grid grid-cols-1 gap-y-2 mb-6 text-sm border-y border-amber-100 py-4">
                 @if($product->weight)
                 <div class="flex justify-between">
                     <dt class="text-amber-800/60 font-medium">Berat</dt>
@@ -163,7 +198,7 @@
                         <button type="button" @click="qty = Math.min({{ max($product->stock, 1) }}, qty + 1)"
                                 class="w-10 h-10 flex items-center justify-center text-amber-800 hover:bg-amber-50 active:bg-amber-100 transition-colors">+</button>
                     </div>
-                    <span class="text-xs text-amber-800/50" x-show="qty >= {{ max($product->stock, 1) }}">
+                    <span class="text-xs text-amber-800/50" x-show="qty >= {{ max($product->stock, 1) }}" style="display: none;">
                         Maks. stok tercapai
                     </span>
                 </div>

@@ -85,53 +85,55 @@
     </div>
     @else
     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-        @foreach($products as $product)
-        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 flex flex-col group">
-            <a href="/katalog/{{ $product->id }}" class="relative aspect-square w-full bg-gray-100 overflow-hidden border-b border-gray-100 block">
-                @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                @else
-                    <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                        <i class="fa-solid fa-mug-hot text-4xl sm:text-5xl mb-2"></i>
-                        <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider">No Image</span>
-                    </div>
-                @endif
-                <span class="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm text-gray-900 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase px-2 sm:px-3 py-1 sm:py-1.5 rounded-md shadow-sm border border-gray-200">
-                    {{ $product->category->name ?? 'Kopi' }}
-                </span>
-            </a>
-            <div class="p-3.5 sm:p-5 flex flex-col flex-grow">
-                <a href="/katalog/{{ $product->id }}">
-                    <h3 class="text-sm sm:text-base font-bold text-gray-900 line-clamp-1 mb-1 group-hover:text-amber-700 transition-colors">
-                        {{ $product->name }}
-                    </h3>
-                </a>
-                <p class="text-[11px] sm:text-xs text-gray-500 mb-3 sm:mb-4 line-clamp-2 min-h-[28px] sm:min-h-[32px]">
-                    {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
-                </p>
-                <div class="mt-auto pt-3 sm:pt-4 border-t border-gray-100 flex items-center justify-between mb-4 sm:mb-5 gap-2">
-                    <div class="min-w-0">
-                        <span class="text-[9px] sm:text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Harga</span>
-                        <span class="text-sm sm:text-base font-extrabold text-amber-700 truncate block">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <span class="text-[9px] sm:text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Stok</span>
-                        <span class="inline-flex items-center text-[10px] sm:text-xs font-semibold {{ $product->stock > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50' }} px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
-                            {{ $product->stock > 0 ? $product->stock . ' Pcs' : 'Habis' }}
-                        </span>
-                    </div>
+    @foreach($products as $product)
+    <div class="group relative rounded-2xl overflow-hidden aspect-square shadow-sm hover:shadow-xl transition-all duration-300">
+
+        {{-- Gambar Produk --}}
+        <a href="/katalog/{{ $product->id }}" class="block w-full h-full">
+            @if($product->image)
+                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+            @else
+                <div class="absolute inset-0 w-full h-full bg-gray-100 flex flex-col items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-mug-hot text-4xl sm:text-5xl mb-2"></i>
+                    <span class="text-[10px] sm:text-xs font-medium uppercase tracking-wider">No Image</span>
                 </div>
-                <form action="/cart/add" method="POST">
-                    @csrf
-                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="w-full py-2 sm:py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none" {{ $product->stock < 1 ? 'disabled' : '' }}>
-                        <i class="fa-solid fa-cart-plus"></i> Beli
-                    </button>
-                </form>
+            @endif
+
+            {{-- Badge Kategori --}}
+            <span class="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm text-gray-900 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase px-2 sm:px-3 py-1 sm:py-1.5 rounded-md shadow-sm border border-gray-200 z-10">
+                {{ $product->category->name ?? 'Kopi' }}
+            </span>
+
+            {{-- Badge Stok Habis --}}
+            @if($product->stock <= 0)
+                <span class="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 bg-red-600 text-white text-[9px] sm:text-[10px] font-bold px-3 py-1 rounded-full z-10 shadow">
+                    Habis
+                </span>
+            @endif
+
+            {{-- Overlay Gelap + Info Produk --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 sm:p-5 flex flex-col justify-end">
+                <h3 class="text-base sm:text-lg font-bold text-white leading-tight line-clamp-1">{{ $product->name }}</h3>
+                <p class="text-amber-300 font-extrabold text-sm sm:text-base mt-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+
+                {{-- Tombol Beli (muncul saat hover) --}}
+                <div class="mt-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out">
+                    <form action="/cart/add" method="POST" onclick="event.stopPropagation()">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit"
+                                class="w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white text-sm font-bold rounded-lg shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                {{ $product->stock < 1 ? 'disabled' : '' }}>
+                            <i class="fa-solid fa-cart-plus mr-2"></i> Beli
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-        @endforeach
+        </a>
+    </div>
+    @endforeach
     </div>
     <div class="mt-10 sm:mt-12 bg-white border border-gray-200 rounded-2xl shadow-sm px-4 sm:px-6 py-4">
         {{ $products->links('pagination.tepikopi') }}

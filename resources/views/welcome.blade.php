@@ -131,39 +131,38 @@
             <a href="/katalog" class="hidden sm:inline-flex items-center gap-2 text-amber-700 font-semibold hover:text-amber-800">Lihat Semua <i class="fa-solid fa-arrow-right text-xs"></i></a>
         </div>
 
+        @if(!empty($products) && count($products) > 0)
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @forelse(collect($products ?? [])->take(4) as $product)
-                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
-                    <a href="/katalog/{{ $product->id }}" class="block relative h-56 overflow-hidden">
-                        <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $product->name }}">
-                        @if($product->stock <= 0)
-                            <span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">Habis</span>
-                        @endif
-                    </a>
-                    <div class="p-5">
-                        <h3 class="font-bold text-gray-900 truncate">{{ $product->name }}</h3>
-                        <p class="text-amber-800 font-extrabold mt-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                        <a href="/katalog/{{ $product->id }}" class="mt-4 inline-flex items-center justify-center w-full py-2.5 border border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 font-semibold rounded-lg text-sm transition">
-                            Detail Produk
-                        </a>
+            @foreach(collect($products)->take(4) as $product)
+                <a href="/katalog/{{ $product->id }}" 
+                   class="group relative rounded-2xl overflow-hidden h-80 shadow-sm hover:shadow-xl transition-all duration-300">
+                    <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"
+                         class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                         alt="{{ $product->name }}">
+                    @if($product->stock <= 0)
+                        <span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow">Stok Habis</span>
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                        <h3 class="text-xl font-bold text-white leading-tight">{{ $product->name }}</h3>
+                        <p class="text-amber-300 font-extrabold mt-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                        <div class="mt-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out">
+                            <span class="inline-block px-5 py-2.5 bg-amber-700 hover:bg-amber-600 text-white text-sm font-bold rounded-lg shadow-md transition-colors">
+                                Detail Produk <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                            </span>
+                        </div>
                     </div>
-                </div>
-            @empty
-                @foreach([['name' => 'Arabika Gayo', 'price' => 85000], ['name' => 'Robusta Lampung', 'price' => 65000], ['name' => 'V60 Dripper', 'price' => 150000], ['name' => 'French Press', 'price' => 220000]] as $item)
-                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="h-56 bg-gray-100 flex items-center justify-center text-gray-400">No Image</div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-gray-900 truncate">{{ $item['name'] }}</h3>
-                        <p class="text-amber-800 font-extrabold mt-1">Rp {{ number_format($item['price'], 0, ',', '.') }}</p>
-                        <a href="/katalog" class="mt-4 inline-flex items-center justify-center w-full py-2.5 border border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 font-semibold rounded-lg text-sm transition">
-                            Lihat Produk
-                        </a>
-                    </div>
-                </div>
-                @endforeach
-            @endforelse
+                </a>
+            @endforeach
         </div>
+        @else
+        <div class="text-center py-12 text-gray-500">
+            <i class="fa-solid fa-coffee text-4xl mb-3 opacity-30"></i>
+            <p>Belum ada produk pilihan saat ini.</p>
+            <a href="/katalog" class="mt-3 inline-block text-amber-700 hover:text-amber-800 font-medium text-sm">
+                Lihat katalog kami →
+            </a>
+        </div>
+        @endif
     </div>
 </section>
 

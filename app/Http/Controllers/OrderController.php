@@ -24,16 +24,17 @@ class OrderController extends Controller
     public function checkout(Request $request)
     {
         $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
-        $cartItems = $cart ? $cart->items : [];
+        $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
 
         if (count($cartItems) == 0) {
             return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
         }
 
-        // Hitung total
+        // Hitung total — pakai harga varian kalau item punya varian, kalau tidak pakai harga produk
         $totalPrice = 0;
         foreach ($cartItems as $item) {
-            $totalPrice += ($item->product->price * $item->quantity);
+            $price = $item->variant ? $item->variant->price : $item->product->price;
+            $totalPrice += ($price * $item->quantity);
         }
         $totalPrice = $totalPrice + ($totalPrice * 0.11); // Plus pajak
 
@@ -46,15 +47,22 @@ class OrderController extends Controller
 
         // Pindahkan cart items ke order items
         foreach ($cartItems as $item) {
+            $price = $item->variant ? $item->variant->price : $item->product->price;
+
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item->product_id,
+                'variant_id' => $item->variant_id,
                 'quantity' => $item->quantity,
-                'price' => $item->product->price
+                'price' => $price
             ]);
 
-            // Kurangi stok
-            $item->product->decrement('stock', $item->quantity);
+            // Kurangi stok — stok varian kalau ada, kalau tidak stok produk
+            if ($item->variant) {
+                $item->variant->decrement('stock', $item->quantity);
+            } else {
+                $item->product->decrement('stock', $item->quantity);
+            }
         }
 
         // Kosongkan keranjang
@@ -63,7 +71,7 @@ class OrderController extends Controller
         return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
     }
 
-/**
+    /**
      * CUSTOMER — /my-orders
      * Riwayat pesanan milik user yang sedang login.
      */
@@ -85,7 +93,7 @@ class OrderController extends Controller
     {
         abort_unless($order->user_id === Auth::id(), 403);
 
-        $order->load('items.product');
+        $order->load('items.product', 'items.variant');
 
         return view('orders.my-show', compact('order'));
     }
@@ -113,7 +121,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load('user', 'items.product');
+        $order->load('user', 'items.product', 'items.variant');
 
         $statuses = self::STATUSES;
 

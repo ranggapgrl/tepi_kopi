@@ -11,6 +11,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -23,6 +24,7 @@ Route::post('/contact', [ContactController::class, 'store']);
 // Katalog
 Route::get('/katalog', [ProductController::class, 'index'])->name('katalog.index');
 Route::get('/katalog/{product}', [ProductController::class, 'show'])->name('katalog.show');
+Route::post('/katalog/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
 
 // Keranjang & Checkout
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -50,11 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-
-    // Riwayat pesanan customer (bukan admin)
-    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
-    Route::get('/my-orders/{order}', [OrderController::class, 'myOrderShow'])->name('orders.myShow');
 });
+
 // Admin
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -64,6 +63,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Route GET /products diarahkan manual ke manage().
     Route::get('/products', [ProductController::class, 'manage'])->name('products.index');
     Route::resource('products', ProductController::class)->except(['index']);
+    Route::delete('/products/{product}/images/{image}', [ProductController::class, 'destroyImage'])->name('products.images.destroy');
 
     Route::resource('categories', CategoryController::class);
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update']);

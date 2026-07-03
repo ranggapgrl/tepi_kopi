@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
     /**
      * PUBLIC — /katalog
-     * Halaman belanja untuk semua pengunjung, tanpa kontrol admin.
      */
     public function index(Request $request)
     {
@@ -31,23 +33,51 @@ class ProductController extends Controller
 
     /**
      * PUBLIC — /katalog/{product}
-     * Halaman detail satu produk.
      */
     public function show(Product $product)
     {
+        $product->load(['category', 'images', 'variants', 'reviews.user']);
+
         $related = Product::where('id', '!=', $product->id)
             ->when($product->category_id, fn ($q) => $q->where('category_id', $product->category_id))
             ->latest()
             ->take(4)
             ->get();
 
-        return view('product-detail', compact('product', 'related'));
+        // Galeri: foto utama + foto tambahan, sudah jadi URL siap pakai
+        $galleryImages = collect();
+        if ($product->image) {
+            $galleryImages->push(asset('storage/' . $product->image));
+        }
+        foreach ($product->images as $img) {
+            $galleryImages->push(asset('storage/' . $img->image));
+        }
+        $galleryImages = $galleryImages->values();
+
+        $averageRating = round($product->reviews->avg('rating') ?? 0, 1);
+        $reviewsCount = $product->reviews->count();
+
+        // Cek apakah user boleh kasih ulasan: sudah beli & pesanan selesai, belum pernah review
+        $canReview = false;
+        if (Auth::check()) {
+            $hasPurchased = OrderItem::where('product_id', $product->id)
+                ->whereHas('order', function ($query) {
+                    $query->where('user_id', Auth::id())->where('status', 'Selesai');
+                })
+                ->exists();
+
+            $alreadyReviewed = $product->reviews->contains('user_id', Auth::id());
+
+            $canReview = $hasPurchased && ! $alreadyReviewed;
+        }
+
+        return view('product-detail', compact(
+            'product', 'related', 'galleryImages', 'averageRating', 'reviewsCount', 'canReview'
+        ));
     }
 
     /**
      * ADMIN ONLY — /products
-     * Tabel kelola produk (tambah/edit/hapus). Route ini dilindungi
-     * middleware ['auth', 'admin'] di routes/web.php.
      */
     public function manage()
     {
@@ -78,13 +108,49 @@ class ProductController extends Controller
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'image'       => 'nullable|image|max:2048',
+            'images.*'    => 'nullable|image|max:2048',
+            'variants.*.name'  => 'nullable|string|max:100',
+            'variants.*.price' => 'nullable|numeric|min:0',
+            'variants.*.stock' => 'nullable|integer|min:0',
         ]);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($validated);
+        $product = Product::create([
+            'name'        => $validated['name'],
+            'category_id' => $validated['category_id'],
+            'description' => $validated['description'] ?? null,
+            'price'       => $validated['price'],
+            'stock'       => $validated['stock'],
+            'image'       => $validated['image'] ?? null,
+        ]);
+
+        // Simpan foto tambahan
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'      => $file->store('products', 'public'),
+                    'sort_order' => $index,
+                ]);
+            }
+        }
+
+        // Simpan varian (baris yang namanya diisi saja)
+        if ($request->has('variants')) {
+            foreach ($request->variants as $index => $variant) {
+                if (empty($variant['name'])) continue;
+
+                $product->variants()->create([
+                    'name'       => $variant['name'],
+                    'price'      => $variant['price'] ?? $product->price,
+                    'stock'      => $variant['stock'] ?? 0,
+                    'sort_order' => $index,
+                ]);
+            }
+        }
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -95,6 +161,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::all();
+        $product->load('images', 'variants');
 
         return view('products.edit', compact('product', 'categories'));
     }
@@ -111,15 +178,70 @@ class ProductController extends Controller
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'image'       => 'nullable|image|max:2048',
+            'images.*'    => 'nullable|image|max:2048',
+            'variants.*.id'    => 'nullable|exists:product_variants,id',
+            'variants.*.name'  => 'nullable|string|max:100',
+            'variants.*.price' => 'nullable|numeric|min:0',
+            'variants.*.stock' => 'nullable|integer|min:0',
         ]);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        $product->update($validated);
+        $product->update([
+            'name'        => $validated['name'],
+            'category_id' => $validated['category_id'],
+            'description' => $validated['description'] ?? null,
+            'price'       => $validated['price'],
+            'stock'       => $validated['stock'],
+            'image'       => $validated['image'] ?? $product->image,
+        ]);
+
+        // Tambah foto baru (foto lama tidak dihapus otomatis)
+        if ($request->hasFile('images')) {
+            $startOrder = $product->images()->max('sort_order') + 1;
+            foreach ($request->file('images') as $index => $file) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'      => $file->store('products', 'public'),
+                    'sort_order' => $startOrder + $index,
+                ]);
+            }
+        }
+
+        // Update / tambah varian
+        if ($request->has('variants')) {
+            foreach ($request->variants as $index => $variant) {
+                if (empty($variant['name'])) continue;
+
+                $product->variants()->updateOrCreate(
+                    ['id' => $variant['id'] ?? null],
+                    [
+                        'name'       => $variant['name'],
+                        'price'      => $variant['price'] ?? $product->price,
+                        'stock'      => $variant['stock'] ?? 0,
+                        'sort_order' => $index,
+                    ]
+                );
+            }
+        }
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
+    }
+
+    /**
+     * ADMIN ONLY — /products/{product}/images/{image}
+     */
+    public function destroyImage(Product $product, ProductImage $image)
+    {
+        if ($image->product_id !== $product->id) {
+            abort(403);
+        }
+
+        $image->delete();
+
+        return back()->with('success', 'Foto berhasil dihapus.');
     }
 
     /**

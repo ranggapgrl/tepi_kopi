@@ -112,8 +112,8 @@
                             <i class="fa-solid fa-check-double"></i>
                         </div>
                         <input type="password" name="password_confirmation" id="password_confirmation" 
-                               class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
-                               placeholder="Ulangi kata sandi" required>
+                            class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
+                            placeholder="Ulangi kata sandi" required>
                     </div>
                 </div>
 

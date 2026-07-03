@@ -13,11 +13,13 @@ class CartController extends Controller
     public function index()
     {
         $cart = Cart::firstOrCreate(['user_id' => Auth::id() ?? 1]);
-        $cartItems = CartItem::with('product')->where('cart_id', $cart->id)->get();
+        $cartItems = CartItem::with(['product', 'variant'])->where('cart_id', $cart->id)->get();
 
         $subtotal = 0;
         foreach ($cartItems as $item) {
-            $subtotal += $item->product->price * $item->quantity;
+            // Kalau item punya varian, pakai harga varian. Kalau tidak, pakai harga produk.
+            $price = $item->variant ? $item->variant->price : $item->product->price;
+            $subtotal += $price * $item->quantity;
         }
 
         $tax = $subtotal * 0.11;
@@ -30,8 +32,11 @@ class CartController extends Controller
     {
         $cart = Cart::firstOrCreate(['user_id' => Auth::id() ?? 1]);
 
+        $variantId = $request->variant_id ?: null;
+
         $existingItem = CartItem::where('cart_id', $cart->id)
             ->where('product_id', $request->product_id)
+            ->where('variant_id', $variantId)
             ->first();
 
         if ($existingItem) {
@@ -40,10 +45,11 @@ class CartController extends Controller
             CartItem::create([
                 'cart_id' => $cart->id,
                 'product_id' => $request->product_id,
+                'variant_id' => $variantId,
                 'quantity' => $request->quantity ?? 1
             ]);
         }
 
-        return redirect('/cart')->with('success', 'Kopi berhasil ditambahkan ke keranjang!');
+        return back()->with('success', 'Kopi berhasil ditambahkan ke keranjang!');
     }
 }

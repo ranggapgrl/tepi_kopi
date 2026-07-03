@@ -39,26 +39,17 @@
                 </a>
 
                 @auth
-<<<<<<< HEAD
-                    <div class="relative" x-data="{ userMenuOpen: false }">
-                        <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false"
-                            class="flex items-center gap-2 text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
-                            
-                            {{-- BAGIAN YANG DIUBAH: Pengecekan Avatar --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-sm font-medium text-gray-600 hover:text-amber-700 flex items-center gap-2">
+                            {{-- BAGIAN YANG DIUBAH: Cek dan Tampilkan Avatar --}}
                             @if(auth()->user()->avatar)
-                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-amber-200">
+                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar" class="w-7 h-7 rounded-full object-cover">
                             @else
-                                <i class="fa-solid fa-circle-user text-lg"></i>
+                                <i class="fa-solid fa-circle-user"></i>
                             @endif
                             {{-- END BAGIAN YANG DIUBAH --}}
-
+                            
                             {{ explode(' ', auth()->user()->name)[0] }}
-                            <i class="fa-solid fa-chevron-down text-xs" :class="userMenuOpen ? 'rotate-180' : ''"></i>
-=======
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="text-sm font-medium text-gray-600 hover:text-amber-700 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-user"></i> {{ explode(' ', auth()->user()->name)[0] }}
->>>>>>> 754c6b7f6bd66e0377b8b5b5abcd921600370f43
                         </button>
                         <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-50">Profil</a>
@@ -67,14 +58,7 @@
                         </div>
                     </div>
                 @else
-<<<<<<< HEAD
-                    <a href="/login"
-                        class="px-5 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
-                        Login
-                    </a>
-=======
                     <a href="/login" class="px-5 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition">Login</a>
->>>>>>> 754c6b7f6bd66e0377b8b5b5abcd921600370f43
                 @endauth
             </div>
 

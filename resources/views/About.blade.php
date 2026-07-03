@@ -74,7 +74,7 @@
 {{-- =========================================================================
     CTA
 ========================================================================== --}}
-<section class="py-16 sm:py-20 bg-gray-900">
+<section class="py-16 sm:py-20 bg-amber-950">
     <div class="max-w-4xl mx-auto px-5 text-center">
         <h2 class="text-2xl sm:text-3xl font-black text-white mb-4">Siap mencicipi kopi pilihan kami?</h2>
         <p class="text-amber-200/70 mb-8">Jelajahi katalog dan temukan kopi favoritmu hari ini.</p>

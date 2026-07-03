@@ -50,5 +50,7 @@ class DatabaseSeeder extends Seeder
             'price' => 150000,
             'stock' => 20,
         ]);
+
+        $this->call(ReviewSeeder::class);
     }
 }

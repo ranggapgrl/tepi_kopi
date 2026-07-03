@@ -7,8 +7,8 @@
 
     <div class="mb-6 sm:mb-10 text-center sm:text-left flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-amber-100/60 pb-6 sm:pb-8">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-950 tracking-tight mb-2">Katalog Kopi Terbaik</h1>
-            <p class="text-amber-700/80 text-xs sm:text-sm">Pilih dan nikmati varian kopi pilihan langsung dari etalase kami.</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-950 tracking-tight mb-2">Katalog E-Commerce Coffe Terbaik</h1>
+            <p class="text-amber-700/80 text-xs sm:text-sm">Pilih dan nikmati varian berbagai kebutuhan <span style="color:#451A03">coffe</span> langsung dari etalase kami.</p>
         </div>
         <div class="text-sm bg-amber-100/50 text-amber-900 px-4 py-2.5 rounded-xl border border-amber-200/40 font-medium self-center sm:self-auto">
             Total: <span class="font-bold">{{ $products->count() }}</span> Produk
@@ -25,7 +25,7 @@
                     type="text"
                     name="search"
                     value="{{ request('search') }}"
-                    placeholder="Cari nama kopi..."
+                    placeholder="Cari produk disini..."
                     class="w-full pl-11 pr-4 py-3 rounded-xl border border-amber-100 bg-amber-50/40 text-sm text-amber-950 placeholder-amber-400 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
                 >
             </div>

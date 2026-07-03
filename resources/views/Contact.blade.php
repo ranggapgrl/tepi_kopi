@@ -139,30 +139,4 @@
     </div>
 </section>
 
-{{-- =========================================================================
-    FOOTER
-========================================================================== --}}
-<footer class="bg-amber-950 text-amber-500 py-14">
-    <div class="max-w-7xl mx-auto px-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        <div>
-            <h3 class="text-white text-xl font-bold mb-4">TepiKopi.</h3>
-            <p class="text-sm">Menyajikan kualitas kopi terbaik dari petani lokal.</p>
-        </div>
-        <div>
-            <h4 class="text-white font-bold mb-4">Navigasi</h4>
-            <a href="/" class="block mb-2 hover:text-white">Beranda</a>
-            <a href="/katalog" class="hover:text-white">Produk</a>
-        </div>
-        <div>
-            <h4 class="text-white font-bold mb-4">Kategori</h4>
-            <a href="/katalog?kategori=biji" class="block mb-2 hover:text-white">Biji Kopi</a>
-            <a href="/katalog?kategori=alat" class="hover:text-white">Alat Seduh</a>
-        </div>
-        <div>
-            <h4 class="text-white font-bold mb-4">Kontak</h4>
-            <p class="text-white">Bandung, Indonesia</p>
-        </div>
-    </div>
-</footer>
-
 @endsection

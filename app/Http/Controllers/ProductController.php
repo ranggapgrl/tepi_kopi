@@ -116,6 +116,10 @@ class ProductController extends Controller
             'variants.*.name'  => 'nullable|string|max:100',
             'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'nullable|integer|min:0',
+            'roast_level' => 'nullable|string|max:100',
+            'origin'      => 'nullable|string|max:255',
+            'weight'      => 'nullable|string|max:50',
+            'story'       => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
@@ -130,6 +134,10 @@ class ProductController extends Controller
             'stock'       => $validated['stock'],
             'image'       => $validated['image'] ?? null,
             'is_featured' => $request->boolean('is_featured'),
+            'roast_level' => $validated['roast_level'] ?? null,
+            'origin'      => $validated['origin'] ?? null,
+            'weight'      => $validated['weight'] ?? null,
+            'story'       => $validated['story'] ?? null,
         ]);
 
         // Simpan foto tambahan
@@ -188,6 +196,10 @@ class ProductController extends Controller
             'variants.*.name'  => 'nullable|string|max:100',
             'variants.*.price' => 'nullable|numeric|min:0',
             'variants.*.stock' => 'nullable|integer|min:0',
+            'roast_level' => 'nullable|string|max:100',
+            'origin'      => 'nullable|string|max:255',
+            'weight'      => 'nullable|string|max:50',
+            'story'       => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
@@ -202,6 +214,10 @@ class ProductController extends Controller
             'stock'       => $validated['stock'],
             'image'       => $validated['image'] ?? $product->image,
             'is_featured' => $request->boolean('is_featured'),
+            'roast_level' => $validated['roast_level'] ?? $product->roast_level,
+            'origin'      => $validated['origin'] ?? $product->origin,
+            'weight'      => $validated['weight'] ?? $product->weight,
+            'story'       => $validated['story'] ?? $product->story,
         ]);
 
         // Tambah foto baru (foto lama tidak dihapus otomatis)

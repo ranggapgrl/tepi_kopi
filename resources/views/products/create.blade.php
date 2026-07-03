@@ -66,6 +66,48 @@
                     @error('description')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
                 </div>
 
+                {{-- 🔥 Detail Kopi (Roast, Origin, Weight, Story) --}}
+                <div class="border-t border-amber-100 pt-5">
+                    <h3 class="text-sm font-bold text-amber-950 mb-3 uppercase tracking-wide">Detail Kopi</h3>
+                    
+                    <div class="grid sm:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="roast_level" class="block text-xs font-bold text-amber-900 uppercase mb-2">Level Sangrai</label>
+                            <select name="roast_level" id="roast_level"
+                                    class="w-full px-4 py-3 rounded-xl border {{ $errors->has('roast_level') ? 'border-rose-300' : 'border-amber-100' }} bg-amber-50/40 text-sm text-amber-950 outline-none">
+                                <option value="">-- Pilih --</option>
+                                @foreach(['Light', 'Medium', 'Dark'] as $level)
+                                    <option value="{{ $level }}" {{ old('roast_level') == $level ? 'selected' : '' }}>
+                                        {{ $level }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('roast_level')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="origin" class="block text-xs font-bold text-amber-900 uppercase mb-2">Asal Biji Kopi</label>
+                            <input type="text" name="origin" id="origin" value="{{ old('origin') }}" 
+                                   placeholder="Contoh: Gayo, Aceh"
+                                   class="w-full px-4 py-3 rounded-xl border {{ $errors->has('origin') ? 'border-rose-300' : 'border-amber-100' }} bg-amber-50/40 text-sm text-amber-950 outline-none">
+                            @error('origin')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="weight" class="block text-xs font-bold text-amber-900 uppercase mb-2">Berat</label>
+                            <input type="text" name="weight" id="weight" value="{{ old('weight') }}" 
+                                   placeholder="Contoh: 200g"
+                                   class="w-full px-4 py-3 rounded-xl border {{ $errors->has('weight') ? 'border-rose-300' : 'border-amber-100' }} bg-amber-50/40 text-sm text-amber-950 outline-none">
+                            @error('weight')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                    <div>
+                        <label for="story" class="block text-xs font-bold text-amber-900 uppercase mb-2">Cerita Kopi</label>
+                        <textarea name="story" id="story" rows="3" 
+                                  placeholder="Ceritakan asal-usul, proses, atau keunikan kopi ini..."
+                                  class="w-full px-4 py-3 rounded-xl border {{ $errors->has('story') ? 'border-rose-300' : 'border-amber-100' }} bg-amber-50/40 text-sm text-amber-950 outline-none resize-none">{{ old('story') }}</textarea>
+                        @error('story')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
                 {{-- Harga & Stok default --}}
                 <div class="grid sm:grid-cols-2 gap-5">
                     <div>

@@ -3,7 +3,7 @@
 @section('title', 'Keranjang Belanja')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[60vh]">
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 class="text-2xl font-extrabold text-amber-950 tracking-tight">Keranjang Belanja Anda</h1>
         <a href="/katalog" class="text-sm font-medium text-amber-800 hover:text-amber-600 transition-colors flex items-center">

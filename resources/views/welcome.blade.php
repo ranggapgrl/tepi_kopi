@@ -121,7 +121,7 @@
 {{-- =========================================================================
     PRODUK PILIHAN
 ========================================================================== --}}
-<section class="py-16 sm:py-24 bg-gray-50">
+<section class="py-16 sm:py-24">
     <div class="max-w-7xl mx-auto px-5">
         <div class="flex items-end justify-between mb-12">
             <div>
@@ -191,13 +191,14 @@
 {{-- =========================================================================
     CTA
 ========================================================================== --}}
-<section class="py-16 sm:py-20 bg-gray-900">
-    <div class="max-w-4xl mx-auto px-5 text-center text-white">
+<section class="py-16 sm:py-20" style="background-color: #e1dcc9;">
+    <div class="max-w-4xl mx-auto px-5 text-center" style="color: #412D15;">
         <h2 class="text-3xl font-extrabold">Siap Menikmati Kopi Terbaik?</h2>
-        <p class="text-amber-200/70 mt-4">Jelajahi katalog kami dan dapatkan pengalaman kopi yang berbeda.</p>
+        <p class="mt-4" style="color: rgba(65, 45, 21, 0.8);">Jelajahi katalog kami dan dapatkan pengalaman kopi yang berbeda.</p>
         <a href="/katalog" class="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-full transition">
             Mulai Belanja <i class="fa-solid fa-arrow-right"></i>
         </a>
     </div>
 </section>
+
 @endsection

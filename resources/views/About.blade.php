@@ -66,10 +66,10 @@
 </section>
 
 {{-- CTA --}}
-<section class="py-16 sm:py-20 bg-gray-900">
-    <div class="max-w-4xl mx-auto px-5 text-center">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-4">Siap mencicipi kopi pilihan kami?</h2>
-        <p class="text-amber-200/70 mb-8">Jelajahi katalog dan temukan kopi favoritmu hari ini.</p>
+<section class="py-16 sm:py-20" style="background-color: #e1dcc9;">
+    <div class="max-w-4xl mx-auto px-5 text-center" style="color: #412D15;">
+        <h2 class="text-2xl sm:text-3xl font-extrabold mb-4">Siap mencicipi kopi pilihan kami?</h2>
+        <p class="mb-8" style="color: rgba(65, 45, 21, 0.8);">Jelajahi katalog dan temukan kopi favoritmu hari ini.</p>
         <a href="/katalog" class="inline-flex items-center gap-2 px-8 py-4 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-full transition">
             Lihat Katalog <i class="fa-solid fa-arrow-right"></i>
         </a>

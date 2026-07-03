@@ -53,7 +53,7 @@
                         </button>
                         <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-50">Profil</a>
-                            <a href="/orders" class="block px-4 py-2 text-sm hover:bg-gray-50">Pesanan</a>
+                            <a href="{{ route('orders.my') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Pesanan</a>
                             <form method="POST" action="/logout">@csrf<button class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Keluar</button></form>
                         </div>
                     </div>

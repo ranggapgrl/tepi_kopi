@@ -50,6 +50,24 @@ class CartController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Kopi berhasil ditambahkan ke keranjang!');
+        // Total item (dijumlahkan quantity) yang sekarang ada di keranjang
+        $totalItems = CartItem::where('cart_id', $cart->id)->sum('quantity');
+
+        return back()->with(
+            'success',
+            "Kopi berhasil ditambahkan ke keranjang! Sekarang ada {$totalItems} item di keranjang."
+        );
+    }
+
+    public function destroy(CartItem $cartItem)
+    {
+        $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+
+        // Pastikan item ini benar-benar milik keranjang user yang sedang login
+        abort_unless($cart && $cartItem->cart_id === $cart->id, 403);
+
+        $cartItem->delete();
+
+        return back()->with('success', 'Produk berhasil dihapus dari keranjang.');
     }
 }

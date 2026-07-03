@@ -44,7 +44,19 @@
                 // Kalau item punya varian, pakai harga & nama varian. Kalau tidak, pakai punya produk.
                 $itemPrice = $item->variant ? $item->variant->price : $item->product->price;
             @endphp
-            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex flex-col sm:flex-row items-center gap-4 transition-all hover:shadow-md">
+            <div class="relative bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex flex-col sm:flex-row items-center gap-4 transition-all hover:shadow-md">
+
+                <form action="{{ route('cart.destroy', $item->id) }}" method="POST"
+                      onsubmit="return confirm('Hapus {{ $item->product->name }} dari keranjang?')"
+                      class="absolute top-3 right-3">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            title="Hapus dari keranjang"
+                            class="w-8 h-8 flex items-center justify-center rounded-full text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </form>
 
                 <div class="w-24 h-24 bg-amber-50 rounded-xl flex-shrink-0 overflow-hidden border border-amber-50">
                     @if($item->product->image)
@@ -58,7 +70,7 @@
 
                 <div class="flex-grow text-center sm:text-left w-full sm:w-auto">
                     <span class="text-[10px] font-bold tracking-widest text-amber-600 uppercase">{{ $item->product->category->name ?? 'Kopi' }}</span>
-                    <h3 class="text-lg font-bold text-amber-950 line-clamp-1">
+                    <h3 class="text-lg font-bold text-amber-950 line-clamp-1 pr-8 sm:pr-0">
                         {{ $item->product->name }}
                         @if($item->variant)
                             <span class="text-amber-700/70 font-medium text-sm">— {{ $item->variant->name }}</span>

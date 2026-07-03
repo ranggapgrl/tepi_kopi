@@ -69,6 +69,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::resource('categories', CategoryController::class);
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update']);
+
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
 
 // Redirect dashboard default

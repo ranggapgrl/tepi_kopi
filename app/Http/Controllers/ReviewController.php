@@ -13,6 +13,41 @@ class ReviewController extends Controller
     /**
      * POST /katalog/{product}/reviews
      */
+    /**
+ * ADMIN ONLY — GET /reviews
+ */
+public function index(Request $request)
+{
+    $query = Review::with(['product', 'user'])->latest();
+
+    if ($request->filled('rating')) {
+        $query->where('rating', $request->rating);
+    }
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('comment', 'like', "%{$search}%")
+                ->orWhereHas('product', fn ($p) => $p->where('name', 'like', "%{$search}%"))
+                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+        });
+    }
+
+    $reviews = $query->paginate(10)->withQueryString();
+    $totalReviews  = Review::count();
+    $averageRating = round(Review::avg('rating') ?? 0, 1);
+
+    return view('admin.reviews.index', compact('reviews', 'totalReviews', 'averageRating'));
+}
+
+/**
+ * ADMIN ONLY — DELETE /reviews/{review}
+ */
+public function destroy(Review $review)
+{
+    $review->delete();
+    return back()->with('success', 'Ulasan berhasil dihapus.');
+}
     public function store(Request $request, Product $product)
     {
         $userId = Auth::id();

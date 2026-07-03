@@ -41,7 +41,15 @@
                     <div class="relative" x-data="{ userMenuOpen: false }">
                         <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false"
                             class="flex items-center gap-2 text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
-                            <i class="fa-solid fa-circle-user text-lg"></i>
+                            
+                            {{-- BAGIAN YANG DIUBAH: Pengecekan Avatar --}}
+                            @if(auth()->user()->avatar)
+                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-amber-200">
+                            @else
+                                <i class="fa-solid fa-circle-user text-lg"></i>
+                            @endif
+                            {{-- END BAGIAN YANG DIUBAH --}}
+
                             {{ explode(' ', auth()->user()->name)[0] }}
                             <i class="fa-solid fa-chevron-down text-xs" :class="userMenuOpen ? 'rotate-180' : ''"></i>
                         </button>
@@ -59,7 +67,7 @@
                     </div>
                 @else
                     <a href="/login"
-                       class="px-5 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
+                        class="px-5 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
                         Login
                     </a>
                 @endauth

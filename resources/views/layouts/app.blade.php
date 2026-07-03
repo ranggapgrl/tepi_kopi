@@ -26,18 +26,14 @@
                 <a href="/katalog" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Katalog</a>
                 <a href="/about" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Tentang</a>
                 <a href="/contact" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">Kontak</a>
-                @auth
-                <a href="/cart" class="text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
+                <a href="/cart" class="relative text-sm font-medium text-amber-900 hover:text-amber-600 transition-colors">
                     <i class="fa-solid fa-cart-shopping mr-1"></i> Keranjang
+                    @if(($cartCount ?? 0) > 0)
+                        <span class="absolute -top-2 -right-3 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-amber-700 text-white text-[10px] font-bold rounded-full leading-none">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
                 </a>
-                @endauth
-
-                @if(auth()->check() && auth()->user()->role === 'admin')
-                    <div class="h-6 w-[1px] bg-amber-200"></div>
-                    <a href="/admin" class="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
-                        Dashboard Admin
-                    </a>
-                @endif
 
                 <div class="h-6 w-[1px] bg-amber-200"></div>
 
@@ -103,6 +99,31 @@
             @endauth
         </div>
     </nav>
+
+    {{-- FLASH MESSAGES --}}
+    @if(session('success'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
+             class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium rounded-lg px-4 py-3 flex items-center justify-between shadow-sm">
+                <span><i class="fa-solid fa-circle-check mr-2"></i>{{ session('success') }}</span>
+                <button @click="show = false" class="text-emerald-600 hover:text-emerald-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
+             class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            <div class="bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium rounded-lg px-4 py-3 flex items-center justify-between shadow-sm">
+                <span><i class="fa-solid fa-circle-exclamation mr-2"></i>{{ session('error') }}</span>
+                <button @click="show = false" class="text-rose-600 hover:text-rose-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    @endif
 
     <main class="flex-grow w-full">
         @yield('content')

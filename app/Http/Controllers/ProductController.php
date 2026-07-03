@@ -26,7 +26,8 @@ class ProductController extends Controller
                 $query->where('category_id', $request->kategori);
             })
             ->latest()
-            ->get();
+            ->paginate(12)
+            ->withQueryString();
 
         return view('katalog', compact('products', 'categories'));
     }
@@ -79,11 +80,14 @@ class ProductController extends Controller
     /**
      * ADMIN ONLY — /products
      */
-    public function manage()
+    public function manage(Request $request)
     {
-        $products = Product::with('category')->latest()->get();
+        $products = Product::with(['category', 'variants'])->latest()->paginate(10)->withQueryString();
 
-        return view('products.index', compact('products'));
+        $inStockCount = Product::where('stock', '>', 0)->count();
+        $outOfStockCount = Product::where('stock', '<=', 0)->count();
+
+        return view('products.index', compact('products', 'inStockCount', 'outOfStockCount'));
     }
 
     /**

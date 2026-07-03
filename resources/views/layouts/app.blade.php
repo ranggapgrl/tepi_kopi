@@ -40,8 +40,16 @@
 
                 @auth
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="text-sm font-medium text-gray-600 hover:text-amber-700 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-user"></i> {{ explode(' ', auth()->user()->name)[0] }}
+                        <button @click="open = !open" class="text-sm font-medium text-gray-600 hover:text-amber-700 flex items-center gap-2">
+                            {{-- BAGIAN YANG DIUBAH: Cek dan Tampilkan Avatar --}}
+                            @if(auth()->user()->avatar)
+                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar" class="w-7 h-7 rounded-full object-cover">
+                            @else
+                                <i class="fa-solid fa-circle-user"></i>
+                            @endif
+                            {{-- END BAGIAN YANG DIUBAH --}}
+                            
+                            {{ explode(' ', auth()->user()->name)[0] }}
                         </button>
                         <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-50">Profil</a>

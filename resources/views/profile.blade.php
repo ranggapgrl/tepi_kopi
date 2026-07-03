@@ -27,6 +27,10 @@
                 @csrf
                 @method('PUT')
 
+                {{-- TAMBAHAN: Field hidden agar validasi Controller tidak gagal saat ganti avatar --}}
+                <input type="hidden" name="name" value="{{ $user->name }}">
+                <input type="hidden" name="email" value="{{ $user->email }}">
+
                 <div class="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6">
                     {{-- Avatar --}}
                     <div class="relative flex-shrink-0">

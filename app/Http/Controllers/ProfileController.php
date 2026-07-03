@@ -22,7 +22,7 @@ class ProfileController extends Controller
     /**
      * PUT /profile — Update nama, email, dan foto profil.
      */
-    public function update(Request $request)
+public function update(Request $request)
     {
         $user = Auth::user();
 
@@ -32,13 +32,17 @@ class ProfileController extends Controller
             'avatar' => 'nullable|image|max:2048',
         ]);
 
+        // Ambil instance fresh dari database untuk memastikan update berhasil
+        $freshUser = \App\Models\User::find($user->id);
+
         if ($request->hasFile('avatar')) {
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         } else {
             unset($validated['avatar']);
         }
 
-        $user->update($validated);
+        // Lakukan update pada instance yang fresh
+        $freshUser->update($validated);
 
         return redirect()->route('profile.index')->with('success', 'Profil berhasil diperbarui.');
     }

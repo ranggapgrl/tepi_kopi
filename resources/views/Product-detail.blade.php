@@ -114,6 +114,45 @@
                 {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
             </p>
 
+            {{-- Spesifikasi Dinamis (berat, roast, asal) --}}
+            @if($product->weight || $product->roast_level || $product->origin)
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                @if($product->weight)
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-weight-hanging text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">{{ $product->weight }}</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Berat</p>
+                </div>
+                @endif
+                @if($product->roast_level)
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-fire text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">{{ $product->roast_level }}</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Roast</p>
+                </div>
+                @endif
+                @if($product->origin)
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-center">
+                    <i class="fa-solid fa-earth-asia text-amber-700 mb-1"></i>
+                    <p class="text-xs font-semibold text-amber-950">{{ $product->origin }}</p>
+                    <p class="text-[10px] uppercase tracking-wide text-amber-800/60">Asal</p>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Cerita Kopi (dinamis) --}}
+            @if($product->story)
+            <div class="bg-amber-50/60 border border-amber-100 rounded-2xl p-5 mb-6">
+                <h3 class="font-bold text-amber-950 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-seedling"></i> Cerita Kopi Ini
+                </h3>
+                <p class="text-sm text-amber-900/80 mt-2 leading-relaxed">
+                    {{ $product->story }}
+                </p>
+            </div>
+            @endif
+            
             {{-- Pemilihan Varian --}}
             @if($product->variants->isNotEmpty())
             <div class="mb-6" x-show="variants.length">

@@ -66,13 +66,16 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <a href="#" class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
                     <i class="fa-brands fa-instagram"></i>
                 </a>
-                <a href="#" class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
+                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
                     <i class="fa-brands fa-whatsapp"></i>
                 </a>
-                <a href="#" class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
+                <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 hover:bg-amber-800 hover:text-white transition">
                     <i class="fa-brands fa-tiktok"></i>
                 </a>
             </div>

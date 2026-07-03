@@ -12,7 +12,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-white text-gray-900 antialiased" x-data="{ mobileMenuOpen: false }">
+<body class="bg-white text-gray-900 antialiased min-h-screen flex flex-col" x-data="{ mobileMenuOpen: false }">
 
     {{-- NAVBAR --}}
     <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">

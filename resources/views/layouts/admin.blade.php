@@ -27,8 +27,6 @@
             <div class="flex items-center gap-4">
                 <a href="/katalog" target="_blank"
                    class="hidden sm:flex items-center gap-2 text-xs font-medium text-amber-100/80 hover:text-white transition-colors">
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
-                    Lihat Toko
                 </a>
 
                 <div class="h-6 w-[1px] bg-white/10 hidden sm:block"></div>

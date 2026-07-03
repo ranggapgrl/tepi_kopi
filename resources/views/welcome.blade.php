@@ -193,7 +193,7 @@
     <div class="max-w-7xl mx-auto px-5 text-center">
         <h2 class="text-3xl sm:text-4xl font-black mb-12">Apa Kata Penikmat Kopi?</h2>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach(['Budi', 'Siti', 'Rangga'] as $nama)
+            @foreach(['Travis', 'John', 'Jonathan'] as $nama)
                 <div class="p-8 rounded-2xl bg-amber-50 border border-amber-100">
                     <p class="italic">"Kualitas kopi di TepiKopi benar-benar premium!"</p>
                     <h4 class="mt-6 font-bold text-amber-900">- {{ $nama }}</h4>

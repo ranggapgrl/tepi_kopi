@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Kategori Menu - Admin')
+@section('title', 'Kategori Produk - Admin')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
@@ -11,7 +11,7 @@
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-amber-950">Kategori Menu</h1>
+                <h1 class="text-2xl font-bold text-amber-950">Kategori Produk</h1>
                 <p class="text-amber-700/80 text-sm">Kelola kategori untuk mengelompokkan produk di katalog.</p>
             </div>
             <a href="{{ route('categories.create') }}"

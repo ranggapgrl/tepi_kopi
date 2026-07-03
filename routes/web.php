@@ -27,10 +27,11 @@ Route::get('/katalog/{product}', [ProductController::class, 'show'])->name('kata
 Route::post('/katalog/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
 
 // Keranjang & Checkout
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
-Route::delete('/cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
-Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+});
 
 // === AUTH ===
 Route::middleware('guest')->group(function () {
@@ -53,12 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-});
-
-// Pesanan Saya (customer, untuk semua user yang login)
-Route::middleware('auth')->group(function () {
-    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
-    Route::get('/my-orders/{order}', [OrderController::class, 'myOrderShow'])->name('orders.my.show');
 });
 
 // Admin

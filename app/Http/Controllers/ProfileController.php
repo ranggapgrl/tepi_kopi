@@ -20,16 +20,23 @@ class ProfileController extends Controller
     }
 
     /**
-     * PUT /profile — Update nama & email.
+     * PUT /profile — Update nama, email, dan foto profil.
      */
     public function update(Request $request)
     {
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'name'   => 'required|string|max:255',
+            'email'  => 'required|email|max:255|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        } else {
+            unset($validated['avatar']);
+        }
 
         $user->update($validated);
 

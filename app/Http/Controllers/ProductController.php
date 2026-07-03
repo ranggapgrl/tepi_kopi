@@ -129,6 +129,7 @@ class ProductController extends Controller
             'price'       => $validated['price'],
             'stock'       => $validated['stock'],
             'image'       => $validated['image'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
         ]);
 
         // Simpan foto tambahan
@@ -200,6 +201,7 @@ class ProductController extends Controller
             'price'       => $validated['price'],
             'stock'       => $validated['stock'],
             'image'       => $validated['image'] ?? $product->image,
+            'is_featured' => $request->boolean('is_featured'),
         ]);
 
         // Tambah foto baru (foto lama tidak dihapus otomatis)

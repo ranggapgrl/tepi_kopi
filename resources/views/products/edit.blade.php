@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Edit Produk - Admin')
 
@@ -202,6 +202,16 @@
                     <p class="text-[11px] text-amber-500 mt-2">
                         <i class="fa-solid fa-circle-info"></i> Varian yang dihapus dari daftar ini di sini <strong>tidak otomatis terhapus</strong> dari database saat disimpan — fitur hapus varian individual belum tersedia, hubungi developer kalau perlu.
                     </p>
+                </div>
+
+                {{-- Tampilkan di Beranda --}}
+                <div class="flex items-start gap-3 bg-amber-50/60 border border-amber-100 rounded-xl p-4">
+                    <input type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}
+                           class="mt-0.5 w-4 h-4 rounded border-amber-300 text-amber-700 focus:ring-amber-400">
+                    <label for="is_featured" class="text-sm">
+                        <span class="font-semibold text-amber-950 block">Tampilkan di "Produk Pilihan" (Beranda)</span>
+                        <span class="text-xs text-gray-500">Produk akan tetap muncul di beranda sampai kamu matikan sendiri — tidak otomatis berubah saat ada produk baru.</span>
+                    </label>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">

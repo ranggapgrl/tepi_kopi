@@ -14,7 +14,7 @@
 
         <a href="/categories"
            class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('categories*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
-            <i class="fa-solid fa-tags w-5"></i> Kategori Menu
+            <i class="fa-solid fa-tags w-5"></i> Kategori Produk
         </a>
 
         <a href="/orders"

@@ -12,20 +12,22 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin
-        User::create([
+        $admin = User::create([
             'name' => 'Admin Roastery',
             'email' => 'admin@roastery.com',
             'password' => bcrypt('password'),
-            'role' => 'admin',
         ]);
+        $admin->role = 'admin';
+        $admin->save();
 
         // Customer
-        User::create([
+        $customer = User::create([
             'name' => 'Budi Santoso',
             'email' => 'customer@demo.com',
             'password' => bcrypt('password'),
-            'role' => 'customer',
         ]);
+        $customer->role = 'customer';
+        $customer->save();
 
         // Kategori
         $biji = Category::create(['name' => 'Biji Kopi']);

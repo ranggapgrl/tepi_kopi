@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -203,6 +204,10 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            // Hapus file gambar lama dari storage supaya tidak numpuk jadi sampah
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
@@ -261,6 +266,7 @@ class ProductController extends Controller
             abort(403);
         }
 
+        Storage::disk('public')->delete($image->image);
         $image->delete();
 
         return back()->with('success', 'Foto berhasil dihapus.');
@@ -271,6 +277,16 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        // Hapus file gambar utama
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        // Hapus semua file foto tambahan
+        foreach ($product->images as $img) {
+            Storage::disk('public')->delete($img->image);
+        }
+
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');

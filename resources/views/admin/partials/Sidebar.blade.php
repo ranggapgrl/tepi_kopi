@@ -22,6 +22,11 @@
             <i class="fa-solid fa-receipt w-5"></i> Pesanan Masuk
         </a>
 
+        <a href="{{ route('reports.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('laporan*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <i class="fa-solid fa-chart-line w-5"></i> Laporan Penjualan
+        </a>
+
         <a href="/reviews"
            class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('reviews*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
             <i class="fa-solid fa-star w-5"></i> Ulasan Pelanggan

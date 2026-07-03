@@ -27,8 +27,12 @@ class RegisterController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'customer',
         ]);
+
+        // Role di-set langsung (bukan mass assignment) supaya request luar
+        // tidak pernah bisa mengubah role saat registrasi.
+        $user->role = 'customer';
+        $user->save();
 
         Auth::login($user);
         return redirect()->route('home');

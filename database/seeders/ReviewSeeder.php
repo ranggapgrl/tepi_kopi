@@ -25,7 +25,9 @@ class ReviewSeeder extends Seeder
                 [
                     'name' => $data['name'],
                     'password' => bcrypt('password'),
-                    'role' => 'customer',
+                    // 'role' sengaja tidak diisi di sini — kolom 'role' punya
+                    // default 'customer' di database, dan sudah tidak lagi
+                    // mass-assignable demi keamanan (lihat App\Models\User).
                 ]
             );
         });

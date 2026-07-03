@@ -49,7 +49,7 @@
                              class="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-amber-100 py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Profil Saya</a>
                             @if(auth()->user()->role !== 'admin')
-                                <a href="/orders" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                                <a href="{{ route('orders.my') }}" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
                             @endif
                             <form method="POST" action="/logout">
                                 @csrf
@@ -88,7 +88,7 @@
             @auth
                 <a href="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Profil Saya</a>
                 @if(auth()->user()->role !== 'admin')
-                    <a href="/orders" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
+                    <a href="{{ route('orders.my') }}" class="block px-3 py-2 rounded-md text-base font-medium text-amber-900 hover:bg-amber-50">Pesanan Saya</a>
                 @endif
                 <form method="POST" action="/logout">
                     @csrf

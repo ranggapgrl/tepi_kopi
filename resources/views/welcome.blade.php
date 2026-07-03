@@ -61,9 +61,9 @@
                 <div class="relative">
                     <div class="absolute inset-0 bg-amber-700/20 rounded-3xl rotate-3"></div>
                     <img :src="slide.img"
-                         class="relative z-10 w-full h-[280px] sm:h-[400px] md:h-[500px] object-cover rounded-3xl shadow-2xl scale-100 transition-transform duration-[6000ms] ease-out"
-                         :class="activeSlide === index ? 'scale-110' : 'scale-100'"
-                         alt="Coffee Slide">
+                        class="relative z-10 w-full h-[280px] sm:h-[400px] md:h-[500px] object-cover rounded-3xl shadow-2xl scale-100 transition-transform duration-[6000ms] ease-out"
+                        :class="activeSlide === index ? 'scale-110' : 'scale-100'"
+                        alt="Coffee Slide">
                 </div>
             </div>
         </div>
@@ -144,8 +144,8 @@
                 <div class="group bg-amber-50 rounded-2xl overflow-hidden border border-amber-100 hover:shadow-xl transition-shadow">
                     <a href="/katalog/{{ $product->slug ?? $product->id }}" class="block relative h-56 overflow-hidden">
                         <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"
-                             class="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-                             alt="{{ $product->name }}">
+                            class="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+                            alt="{{ $product->name }}">
                         @if(isset($product->stock) && $product->stock <= 0)
                             <span class="absolute top-3 left-3 bg-rose-700 text-white text-xs font-bold px-3 py-1 rounded-full">Stok Habis</span>
                         @endif
@@ -154,7 +154,7 @@
                         <h3 class="font-bold text-amber-950 truncate">{{ $product->name }}</h3>
                         <p class="text-amber-700 font-black mt-1">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
                         <a href="/katalog/{{ $product->slug ?? $product->id }}"
-                           class="mt-4 block text-center px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition">
+                        class="mt-4 block text-center px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg transition">
                             Lihat Produk
                         </a>
                     </div>

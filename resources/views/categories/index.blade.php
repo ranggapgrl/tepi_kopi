@@ -15,7 +15,7 @@
                 <p class="text-amber-700/80 text-sm">Kelola kategori untuk mengelompokkan produk di katalog.</p>
             </div>
             <a href="{{ route('categories.create') }}"
-               class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl text-sm shadow-md transition-colors whitespace-nowrap">
+            class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl text-sm shadow-md transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-plus"></i> Tambah Kategori
             </a>
         </div>
@@ -80,12 +80,12 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('categories.edit', $category) }}"
-                                           class="w-9 h-9 flex items-center justify-center rounded-lg border border-amber-100 text-amber-700 hover:bg-amber-50 transition-colors"
-                                           title="Edit">
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg border border-amber-100 text-amber-700 hover:bg-amber-50 transition-colors"
+                                        title="Edit">
                                             <i class="fa-solid fa-pen text-xs"></i>
                                         </a>
                                         <form action="{{ route('categories.destroy', $category) }}" method="POST"
-                                              onsubmit="return confirm('Hapus kategori &quot;{{ $category->name }}&quot;?')">
+                                            onsubmit="return confirm('Hapus kategori &quot;{{ $category->name }}&quot;?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"

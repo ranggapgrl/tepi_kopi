@@ -28,8 +28,8 @@
                         Nama Kategori
                     </label>
                     <input type="text" name="name" id="name" value="{{ old('name') }}"
-                           placeholder="Contoh: Kopi Susu, Manual Brew, Non-Kopi"
-                           class="w-full px-4 py-3 rounded-xl border {{ $errors->has('name') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
+                        placeholder="Contoh: Kopi Susu, Manual Brew, Non-Kopi"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('name') ? 'border-rose-300 focus:ring-rose-200' : 'border-amber-100 focus:ring-amber-300' }} bg-amber-50/40 text-sm text-amber-950 outline-none focus:ring-2 focus:border-amber-300 transition-all">
                     @error('name')
                         <p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>
                     @enderror
@@ -41,7 +41,7 @@
                         <i class="fa-solid fa-check"></i> Simpan Kategori
                     </button>
                     <a href="{{ route('categories.index') }}"
-                       class="flex-1 sm:flex-none px-8 py-3 border border-amber-200 text-amber-800 hover:bg-amber-50 font-bold rounded-xl text-sm transition-colors text-center">
+                    class="flex-1 sm:flex-none px-8 py-3 border border-amber-200 text-amber-800 hover:bg-amber-50 font-bold rounded-xl text-sm transition-colors text-center">
                         Batal
                     </a>
                 </div>

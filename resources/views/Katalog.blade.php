@@ -15,26 +15,16 @@
         </div>
     </div>
 
-    {{-- Filter --}}
     <form action="/katalog" method="GET" class="mb-8 sm:mb-10">
         <div class="flex flex-col sm:flex-row gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm">
             <div class="relative flex-1">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input
-                    type="text"
-                    name="search"
-                    value="{{ request('search') }}"
-                    placeholder="Cari produk..."
-                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
-                >
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk..."
+                       class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all">
             </div>
-
             <div class="flex gap-3">
-                <select
-                    name="kategori"
-                    class="flex-1 sm:flex-none sm:w-48 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all appearance-none bg-no-repeat bg-[right_1rem_center]"
-                    style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path fill=%22%234B5563%22 d=%22M1 1l5 5 5-5%22 stroke=%22%234B5563%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');"
-                >
+                <select name="kategori"
+                        class="flex-1 sm:flex-none sm:w-48 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all">
                     <option value="">Semua Kategori</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ (string) request('kategori') === (string) $category->id ? 'selected' : '' }}>
@@ -42,7 +32,6 @@
                         </option>
                     @endforeach
                 </select>
-
                 <button type="submit"
                         class="px-5 sm:px-6 py-3 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-bold transition-colors shadow-md flex items-center justify-center gap-2 whitespace-nowrap">
                     <i class="fa-solid fa-filter"></i>
@@ -54,25 +43,18 @@
         @if(request('search') || request('kategori'))
         <div class="flex flex-wrap items-center gap-2 mt-4">
             <span class="text-xs text-gray-600 font-medium">Filter aktif:</span>
-
             @if(request('search'))
             <span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-full">
                 "{{ request('search') }}"
-                <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-rose-600">
-                    <i class="fa-solid fa-xmark"></i>
-                </a>
+                <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
             </span>
             @endif
-
             @if(request('kategori'))
             <span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-full">
                 {{ optional($categories->firstWhere('id', request('kategori')))->name ?? 'Kategori' }}
-                <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="hover:text-rose-600">
-                    <i class="fa-solid fa-xmark"></i>
-                </a>
+                <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
             </span>
             @endif
-
             <a href="/katalog" class="text-xs text-amber-700 underline hover:text-amber-900 ml-1">Reset semua</a>
         </div>
         @endif
@@ -105,7 +87,6 @@
     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         @foreach($products as $product)
         <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 flex flex-col group">
-
             <a href="/katalog/{{ $product->id }}" class="relative aspect-square w-full bg-gray-100 overflow-hidden border-b border-gray-100 block">
                 @if($product->image)
                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
@@ -119,7 +100,6 @@
                     {{ $product->category->name ?? 'Kopi' }}
                 </span>
             </a>
-
             <div class="p-3.5 sm:p-5 flex flex-col flex-grow">
                 <a href="/katalog/{{ $product->id }}">
                     <h3 class="text-sm sm:text-base font-bold text-gray-900 line-clamp-1 mb-1 group-hover:text-amber-700 transition-colors">
@@ -129,7 +109,6 @@
                 <p class="text-[11px] sm:text-xs text-gray-500 mb-3 sm:mb-4 line-clamp-2 min-h-[28px] sm:min-h-[32px]">
                     {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
                 </p>
-
                 <div class="mt-auto pt-3 sm:pt-4 border-t border-gray-100 flex items-center justify-between mb-4 sm:mb-5 gap-2">
                     <div class="min-w-0">
                         <span class="text-[9px] sm:text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Harga</span>
@@ -142,7 +121,6 @@
                         </span>
                     </div>
                 </div>
-
                 <form action="/cart/add" method="POST">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -155,7 +133,9 @@
         </div>
         @endforeach
     </div>
-
+    <div class="mt-10 sm:mt-12 bg-white border border-gray-200 rounded-2xl shadow-sm px-4 sm:px-6 py-4">
+        {{ $products->links('pagination.tepikopi') }}
+    </div>
     @endif
 </div>
 @endsection

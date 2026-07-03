@@ -131,41 +131,40 @@
 
     @include('partials.toast')
     {{-- FOOTER --}}
-    <footer class="bg-amber-950 text-amber-300 mt-16">
+    <footer class="bg-white border-t border-amber-100 mt-0 pt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-                <h4 class="text-white font-bold mb-3 text-sm uppercase tracking-wide">TepiKopi.</h4>
-                <p class="text-xs leading-relaxed text-amber-400/80">
+                <h4 class="text-amber-900 font-bold mb-3 text-sm uppercase tracking-wide">TepiKopi.</h4>
+                <p class="text-sm leading-relaxed text-amber-800">
                     Menyajikan kopi terbaik langsung dari petani lokal, diproses dengan hati.
                 </p>
             </div>
             <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Navigasi</h4>
+                <h4 class="text-amber-900 font-semibold mb-3 text-sm">Navigasi</h4>
                 <ul class="space-y-1.5 text-sm">
-                    <li><a href="/" class="hover:text-white transition">Beranda</a></li>
-                    <li><a href="/katalog" class="hover:text-white transition">Katalog</a></li>
-                    <li><a href="/about" class="hover:text-white transition">Tentang</a></li>
-                    <li><a href="/contact" class="hover:text-white transition">Kontak</a></li>
+                    <li><a href="/" class="text-amber-800 hover:text-amber-950 hover:underline transition">Beranda</a></li>
+                    <li><a href="/katalog" class="text-amber-800 hover:text-amber-950 hover:underline transition">Katalog</a></li>
+                    <li><a href="/about" class="text-amber-800 hover:text-amber-950 hover:underline transition">Tentang</a></li>
+                    <li><a href="/contact" class="text-amber-800 hover:text-amber-950 hover:underline transition">Kontak</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Kategori</h4>
+                <h4 class="text-amber-900 font-semibold mb-3 text-sm">Kategori</h4>
                 <ul class="space-y-1.5 text-sm">
-                    <li><a href="/katalog?kategori=1" class="hover:text-white transition">Biji Kopi</a></li>
-                    <li><a href="/katalog?kategori=2" class="hover:text-white transition">Alat Kopi</a></li>
-                    <li><a href="/katalog?kategori=3" class="hover:text-white transition">Aksesoris</a></li>
+                    <li><a href="/katalog?kategori=1" class="text-amber-800 hover:text-amber-950 hover:underline transition">Biji Kopi</a></li>
+                    <li><a href="/katalog?kategori=2" class="text-amber-800 hover:text-amber-950 hover:underline transition">Alat Kopi</a></li>
+                    <li><a href="/katalog?kategori=3" class="text-amber-800 hover:text-amber-950 hover:underline transition">Aksesoris</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Kontak</h4>
-                <p class="text-sm">📍 Bandung, Indonesia</p>
-                <p class="text-sm mt-1">✉️ halo@tepikopi.com</p>
+                <h4 class="text-amber-900 font-semibold mb-3 text-sm">Kontak</h4>
+                <p class="text-sm text-amber-800">📍 Bandung, Indonesia</p>
+                <p class="text-sm mt-1 text-amber-800">✉️ halo@tepikopi.com</p>
             </div>
         </div>
-        <div class="border-t border-amber-800 mt-8 pt-6 pb-4 text-center text-xs text-amber-600">
+        <div class="border-t border-amber-100 mt-8 pt-6 pb-8 text-center text-sm text-amber-700">
             &copy; {{ date('Y') }} TepiKopi. All rights reserved.
         </div>
     </footer>
-
 </body>
 </html>

@@ -35,7 +35,7 @@
         </a>
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-950 tracking-tight">
-                Pesanan #ORD-{{ str_pad($order->id, 3, '0', STR_PAD_LEFT) }}
+                Pesanan #{{ $order->order_code }}
             </h1>
             <p class="text-amber-700/80 text-sm">Dibuat {{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
         </div>
@@ -123,6 +123,32 @@
                     <p class="text-xs text-gray-500 mt-4 leading-relaxed">
                         Kami akan memperbarui status pesanan ini seiring prosesnya. Terima kasih sudah berbelanja di Tepi Kopi!
                     </p>
+                @endif
+            </div>
+
+            <div class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">
+                <h3 class="font-bold text-amber-950 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-amber-700"></i> Alamat Pengiriman
+                </h3>
+                @if($order->shipping_address)
+                    <dl class="space-y-3 text-sm">
+                        <div>
+                            <dt class="text-gray-400 mb-1">Alamat</dt>
+                            <dd class="font-semibold text-amber-950">{{ $order->shipping_address }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-400 mb-1">No. HP</dt>
+                            <dd class="font-semibold text-amber-950">{{ $order->shipping_phone }}</dd>
+                        </div>
+                        @if($order->shipping_notes)
+                        <div>
+                            <dt class="text-gray-400 mb-1">Catatan</dt>
+                            <dd class="font-semibold text-amber-950">{{ $order->shipping_notes }}</dd>
+                        </div>
+                        @endif
+                    </dl>
+                @else
+                    <p class="text-xs text-gray-400 italic">Pesanan ini dibuat sebelum fitur alamat pengiriman ada.</p>
                 @endif
             </div>
         </div>

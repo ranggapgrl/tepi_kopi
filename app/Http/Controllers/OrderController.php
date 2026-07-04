@@ -24,8 +24,51 @@ class OrderController extends Controller
         'Dibatalkan',
     ];
 
+    /**
+     * CUSTOMER — GET /checkout
+     * Halaman konfirmasi sebelum order dibuat: ringkasan keranjang + form
+     * alamat pengiriman & no HP. Form ini diprefill dari alamat yang
+     * dipakai di pesanan terakhir customer, biar gak perlu ngetik ulang tiap kali.
+     */
+    public function showCheckout()
+    {
+        $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+        $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
+
+        if ($cartItems->isEmpty()) {
+            return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
+        }
+
+        $subtotal = 0;
+        foreach ($cartItems as $item) {
+            $price = $item->variant ? $item->variant->price : $item->product->price;
+            $subtotal += $price * $item->quantity;
+        }
+        $tax = $subtotal * 0.11;
+        $total = $subtotal + $tax;
+
+        $lastOrder = Order::where('user_id', Auth::id())
+            ->whereNotNull('shipping_address')
+            ->latest()
+            ->first();
+
+        return view('checkout.index', compact('cartItems', 'subtotal', 'tax', 'total', 'lastOrder'));
+    }
+
+    /**
+     * CUSTOMER — POST /checkout
+     */
     public function checkout(Request $request)
     {
+        $validated = $request->validate([
+            'shipping_address' => 'required|string|max:500',
+            'shipping_phone'   => 'required|string|max:20',
+            'shipping_notes'   => 'nullable|string|max:255',
+        ], [
+            'shipping_address.required' => 'Alamat pengiriman wajib diisi.',
+            'shipping_phone.required'   => 'Nomor HP wajib diisi.',
+        ]);
+
         $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
         $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
 
@@ -33,7 +76,7 @@ class OrderController extends Controller
             return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
         }
 
-        return DB::transaction(function () use ($cartItems, $cart) {
+        return DB::transaction(function () use ($cartItems, $cart, $validated) {
             // Kunci baris produk/varian yang mau dibeli, lalu cek ulang stok
             // TERKINI di dalam transaksi. Ini mencegah race condition kalau ada
             // 2 orang checkout barang stok terakhir secara bersamaan — transaksi
@@ -92,7 +135,10 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => Auth::id() ?? 1,
                 'total_price' => $totalPrice,
-                'status' => 'Menunggu Pembayaran'
+                'status' => 'Menunggu Pembayaran',
+                'shipping_address' => $validated['shipping_address'],
+                'shipping_phone' => $validated['shipping_phone'],
+                'shipping_notes' => $validated['shipping_notes'] ?? null,
             ]);
 
             // Pindahkan cart items ke order items & kurangi stok yang sudah dikunci
@@ -117,7 +163,7 @@ class OrderController extends Controller
             // Kosongkan keranjang
             $cart->items()->delete();
 
-            return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
+            return redirect()->route('orders.myShow', $order)->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
         });
     }
 

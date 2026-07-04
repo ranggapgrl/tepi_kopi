@@ -125,12 +125,9 @@
                     <span class="text-xl font-extrabold text-amber-700">Rp {{ number_format($total, 0, ',', '.') }}</span>
                 </div>
 
-                <form action="/checkout" method="POST">
-                    @csrf
-                    <button type="submit" class="w-full py-3.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
-                        Checkout Sekarang <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </form>
+                <a href="{{ route('checkout.show') }}" class="w-full py-3.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
+                    Checkout Sekarang <i class="fa-solid fa-arrow-right"></i>
+                </a>
             </div>
         </div>
     </div>

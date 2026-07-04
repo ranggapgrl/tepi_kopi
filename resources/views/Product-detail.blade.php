@@ -24,15 +24,20 @@
             variants: {{ Js::from($product->variants->map(fn($v) => ['id' => $v->id, 'name' => $v->name, 'price' => (float) $v->price, 'stock' => $v->stock])) }},
             selectedVariant: null,
             qty: 1,
+            lightboxOpen: false,
             init() { if (this.variants.length) { this.selectedVariant = this.variants[0]; } },
             get currentPrice() { return this.selectedVariant ? this.selectedVariant.price : {{ (float) $product->price }}; },
-            get currentStock() { return this.selectedVariant ? this.selectedVariant.stock : {{ (int) $product->stock }}; }
+            get currentStock() { return this.selectedVariant ? this.selectedVariant.stock : {{ (int) $product->stock }}; },
+            nextImage() { let i = this.images.indexOf(this.activeImage); this.activeImage = this.images[(i + 1) % this.images.length]; },
+            prevImage() { let i = this.images.indexOf(this.activeImage); this.activeImage = this.images[(i - 1 + this.images.length) % this.images.length]; }
          }">
 
         <div class="md:sticky md:top-24 md:self-start">
-            <div class="relative aspect-square w-full bg-gray-50 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200">
+            <div class="relative aspect-square w-full bg-gray-50 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200 group">
                 <template x-if="activeImage">
-                    <img :src="activeImage" :alt="'{{ $product->name }}'" class="w-full h-full object-cover">
+                    <img :src="activeImage" :alt="'{{ $product->name }}'"
+                         @click="lightboxOpen = true"
+                         class="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover:scale-[1.02]">
                 </template>
                 <template x-if="!activeImage">
                     <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
@@ -40,6 +45,15 @@
                         <span class="text-xs sm:text-sm font-medium uppercase tracking-wider">No Image</span>
                     </div>
                 </template>
+
+                {{-- Ikon kaca pembesar, tanda gambar bisa diklik --}}
+                <template x-if="activeImage">
+                    <button type="button" @click="lightboxOpen = true"
+                            class="absolute bottom-4 right-4 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 shadow-sm border border-gray-200 hover:bg-white transition-colors">
+                        <i class="fa-solid fa-magnifying-glass-plus text-xs"></i>
+                    </button>
+                </template>
+
                 <span class="absolute top-4 left-4 sm:top-5 sm:left-5 bg-white/90 backdrop-blur-sm text-gray-900 text-[11px] sm:text-xs font-bold tracking-widest uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md shadow-sm border border-gray-200">
                     {{ $product->category->name ?? 'Kopi' }}
                 </span>
@@ -174,6 +188,54 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        {{-- ================= LIGHTBOX / ZOOM GAMBAR ================= --}}
+        <div x-show="lightboxOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.window.escape="lightboxOpen = false"
+             @keydown.window.arrow-right="lightboxOpen && nextImage()"
+             @keydown.window.arrow-left="lightboxOpen && prevImage()"
+             class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8">
+
+            <div class="absolute inset-0" @click="lightboxOpen = false"></div>
+
+            <button type="button" @click="lightboxOpen = false"
+                    class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center z-10 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <template x-if="images.length > 1">
+                <button type="button" @click.stop="prevImage()"
+                        class="hidden sm:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full items-center justify-center z-10 transition-colors">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+            </template>
+            <template x-if="images.length > 1">
+                <button type="button" @click.stop="nextImage()"
+                        class="hidden sm:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full items-center justify-center z-10 transition-colors">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </template>
+
+            <img :src="activeImage" @click.stop
+                 class="relative z-0 max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+
+            <template x-if="images.length > 1">
+                <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    <template x-for="(img, idx) in images" :key="idx">
+                        <button type="button" @click.stop="activeImage = img"
+                                class="h-1.5 rounded-full transition-all"
+                                :class="activeImage === img ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60'">
+                        </button>
+                    </template>
+                </div>
+            </template>
         </div>
     </div>
 

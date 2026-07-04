@@ -3,12 +3,35 @@
 @section('title', 'Checkout')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[60vh]">
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Checkout</h1>
-        <a href="{{ route('cart.index') }}" class="text-sm font-medium text-amber-700 hover:text-amber-800 transition-colors flex items-center">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Keranjang
-        </a>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 min-h-[60vh]">
+
+    {{-- Header + step indicator — step 2 active, consistent with cart page --}}
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h1 class="font-display text-2xl sm:text-3xl font-semibold text-[#1F150C]">Checkout</h1>
+            <a href="{{ route('cart.index') }}" class="text-sm font-bold transition-colors flex items-center" style="color:#412D15;">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Keranjang
+            </a>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
+            <div class="flex items-center gap-2 text-[#1F150C]/40">
+                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[11px]" style="background:#412D15;">
+                    <i class="fa-solid fa-check text-[9px]"></i>
+                </span>
+                <span>Keranjang</span>
+            </div>
+            <div class="flex-1 h-px max-w-16 sm:max-w-24" style="background:#412D15;"></div>
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[11px]" style="background:#412D15;">2</span>
+                <span class="text-[#1F150C]">Checkout</span>
+            </div>
+            <div class="flex-1 h-px bg-black/10 max-w-16 sm:max-w-24"></div>
+            <div class="flex items-center gap-2 text-[#1F150C]/35">
+                <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-black/10 flex items-center justify-center text-[11px]">3</span>
+                <span>Selesai</span>
+            </div>
+        </div>
     </div>
 
     @if($errors->any())
@@ -24,95 +47,121 @@
 
     <form action="{{ route('checkout') }}" method="POST">
         @csrf
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div class="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
 
-            {{-- Form alamat pengiriman --}}
-            <div class="w-full lg:w-2/3 space-y-4">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-location-dot text-amber-700"></i> Alamat Pengiriman
-                    </h3>
+            {{-- ============ LEFT: shipping form only — items moved into the summary panel ============ --}}
+            <div class="bg-white p-6 sm:p-7 rounded-2xl border border-black/10 shadow-sm">
+                <h3 class="font-display text-lg font-semibold text-[#1F150C] mb-6 flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm" style="background:#412D15;">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </span>
+                    Alamat Pengiriman
+                </h3>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label for="shipping_address" class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                Alamat Lengkap
-                            </label>
-                            <textarea name="shipping_address" id="shipping_address" rows="3"
-                                placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota, kode pos"
-                                class="w-full px-4 py-3 rounded-xl border {{ $errors->has('shipping_address') ? 'border-rose-300' : 'border-gray-200' }} bg-gray-50 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all">{{ old('shipping_address', $lastOrder->shipping_address ?? '') }}</textarea>
-                        </div>
+                <div class="space-y-5">
+                    <div>
+                        <label for="shipping_address" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                            Alamat Lengkap
+                        </label>
+                        <textarea name="shipping_address" id="shipping_address" rows="3"
+                            placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan, kota, kode pos"
+                            class="w-full px-4 py-3 rounded-xl border {{ $errors->has('shipping_address') ? 'border-rose-300' : 'border-black/10' }} bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 transition-all">{{ old('shipping_address', $lastOrder->shipping_address ?? '') }}</textarea>
+                    </div>
 
-                        <div>
-                            <label for="shipping_phone" class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                Nomor HP Aktif
-                            </label>
+                    <div>
+                        <label for="shipping_phone" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                            Nomor HP Aktif
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#1F150C]/30">
+                                <i class="fa-solid fa-phone text-xs"></i>
+                            </div>
                             <input type="text" name="shipping_phone" id="shipping_phone"
                                 value="{{ old('shipping_phone', $lastOrder->shipping_phone ?? '') }}"
                                 placeholder="Contoh: 081234567890"
-                                class="w-full px-4 py-3 rounded-xl border {{ $errors->has('shipping_phone') ? 'border-rose-300' : 'border-gray-200' }} bg-gray-50 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all">
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border {{ $errors->has('shipping_phone') ? 'border-rose-300' : 'border-black/10' }} bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 transition-all">
                         </div>
+                    </div>
 
-                        <div>
-                            <label for="shipping_notes" class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                Catatan Pengiriman <span class="text-gray-400 font-normal normal-case">(opsional)</span>
-                            </label>
+                    <div>
+                        <label for="shipping_notes" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                            Catatan Pengiriman <span class="text-[#1F150C]/35 font-normal normal-case">(opsional)</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#1F150C]/30">
+                                <i class="fa-solid fa-note-sticky text-xs"></i>
+                            </div>
                             <input type="text" name="shipping_notes" id="shipping_notes"
                                 value="{{ old('shipping_notes') }}"
                                 placeholder="Contoh: Rumah cat hijau, sebelah warung"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all">
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 transition-all">
                         </div>
-                    </div>
-                </div>
-
-                {{-- Ringkasan item --}}
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Item Pesanan</h3>
-                    <div class="space-y-3">
-                        @foreach($cartItems as $item)
-                        @php $itemPrice = $item->variant ? $item->variant->price : $item->product->price; @endphp
-                        <div class="flex items-center justify-between text-sm border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                            <div>
-                                <p class="font-semibold text-gray-900">
-                                    {{ $item->product->name }}
-                                    @if($item->variant)
-                                        <span class="text-gray-500 font-normal">— {{ $item->variant->name }}</span>
-                                    @endif
-                                </p>
-                                <p class="text-gray-400 text-xs">{{ $item->quantity }} x Rp {{ number_format($itemPrice, 0, ',', '.') }}</p>
-                            </div>
-                            <p class="font-bold text-gray-900">Rp {{ number_format($itemPrice * $item->quantity, 0, ',', '.') }}</p>
-                        </div>
-                        @endforeach
                     </div>
                 </div>
             </div>
 
-            {{-- Ringkasan total & tombol bayar --}}
-            <div class="w-full lg:w-1/3">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm lg:sticky lg:top-24">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-4">Ringkasan Pembayaran</h3>
+            {{-- ============ RIGHT: order summary panel, items collapsible ============ --}}
+            <div class="bg-white rounded-2xl border border-black/10 shadow-sm lg:sticky lg:top-24 overflow-hidden" x-data="{ open: true }">
 
-                    <div class="space-y-3 mb-6 text-sm">
-                        <div class="flex justify-between text-gray-600">
+                {{-- Collapsible item list --}}
+                <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-3 p-6 text-left">
+                    <span class="font-display text-lg font-semibold text-[#1F150C]">Ringkasan Pesanan</span>
+                    <span class="flex items-center gap-2 text-xs font-bold" style="color:#412D15;">
+                        {{ $cartItems->sum('quantity') }} Barang
+                        <i class="fa-solid fa-chevron-down transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                    </span>
+                </button>
+
+                <div x-show="open" x-transition class="px-6 pb-2 space-y-3">
+                    @foreach($cartItems as $item)
+                    @php $itemPrice = $item->variant ? $item->variant->price : $item->product->price; @endphp
+                    <div class="flex items-center gap-3 pb-3 border-b border-black/5 last:border-0">
+                        <div class="w-12 h-12 shrink-0 rounded-lg overflow-hidden border border-black/10" style="background:#E1DCC9;">
+                            @if($item->product->image)
+                                <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center" style="color:#412D15;"><i class="fa-solid fa-mug-hot text-sm opacity-50"></i></div>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-[#1F150C] text-sm truncate">
+                                {{ $item->product->name }}
+                                @if($item->variant)
+                                    <span class="text-[#1F150C]/40 font-normal">— {{ $item->variant->name }}</span>
+                                @endif
+                            </p>
+                            <p class="text-[#1F150C]/40 text-xs">{{ $item->quantity }} x Rp {{ number_format($itemPrice, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="font-bold text-[#1F150C] text-sm shrink-0">Rp {{ number_format($itemPrice * $item->quantity, 0, ',', '.') }}</p>
+                    </div>
+                    @endforeach
+                </div>
+
+                <div class="border-t border-dashed border-black/15 mx-6 mt-2"></div>
+
+                <div class="p-6">
+                    <div class="space-y-3 mb-5 text-sm">
+                        <div class="flex justify-between text-[#1F150C]/60">
                             <span>Subtotal ({{ $cartItems->sum('quantity') }} Barang)</span>
-                            <span class="font-semibold text-gray-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                            <span class="font-semibold text-[#1F150C]">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between text-gray-600">
+                        <div class="flex justify-between text-[#1F150C]/60">
                             <span>Pajak (11%)</span>
-                            <span class="font-semibold text-gray-900">Rp {{ number_format($tax, 0, ',', '.') }}</span>
+                            <span class="font-semibold text-[#1F150C]">Rp {{ number_format($tax, 0, ',', '.') }}</span>
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center mb-6 pt-4 border-t border-gray-100">
-                        <span class="font-bold text-gray-900">Total Akhir</span>
-                        <span class="text-xl font-extrabold text-amber-700">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    <div class="flex justify-between items-center mb-6 pt-4 border-t border-black/5">
+                        <span class="font-bold text-[#1F150C]">Total Akhir</span>
+                        <span class="font-display text-2xl font-semibold" style="color:#412D15;">Rp {{ number_format($total, 0, ',', '.') }}</span>
                     </div>
 
-                    <button type="submit" class="w-full py-3.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
+                    <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
                         Buat Pesanan <i class="fa-solid fa-check"></i>
                     </button>
-                    <p class="text-xs text-gray-400 text-center mt-3">Stok akan divalidasi ulang saat pesanan dibuat.</p>
+                    <p class="flex items-center justify-center gap-1.5 text-[10px] text-[#1F150C]/35 uppercase tracking-wider mt-4">
+                        <i class="fa-solid fa-shield-halved"></i> Stok akan divalidasi ulang saat pesanan dibuat
+                    </p>
                 </div>
             </div>
         </div>

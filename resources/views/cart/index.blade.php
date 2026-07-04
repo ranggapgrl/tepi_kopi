@@ -164,7 +164,7 @@
                     <span class="font-display text-2xl font-semibold" style="color:#412D15;">Rp {{ number_format($total, 0, ',', '.') }}</span>
                 </div>
 
-                <form action="/checkout" method="POST">
+                <form action="{{ route('checkout.show') }}" method="GET">
                     @csrf
                     <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
                         Checkout Sekarang <i class="fa-solid fa-arrow-right"></i>

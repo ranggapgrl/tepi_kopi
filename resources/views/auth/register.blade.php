@@ -5,54 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar - Tepi Kopi</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('assets/icon.svg') }}">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome untuk Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <style>
+        body{ font-family:'Plus Jakarta Sans', sans-serif; }
+        .font-display{ font-family:'Fraunces', serif; }
+        .btn-primary{ background:#412D15; transition:background-color .25s ease; }
+        .btn-primary:hover{ background:#1F150C; }
+    </style>
 </head>
-<body class="bg-amber-50 font-sans antialiased text-amber-950 min-h-screen flex lg:flex-row-reverse">
+<body class="min-h-screen flex lg:flex-row-reverse" style="background:#E1DCC9; color:#1F150C;">
 
-    <!-- Bagian Kanan: Gambar Background (Sembunyi di Mobile, Muncul di Desktop) -->
-    <div class="hidden lg:flex w-1/2 bg-amber-950 relative items-center justify-center overflow-hidden">
-        <!-- Overlay Gelap -->
-        <div class="absolute inset-0 bg-black/60 z-10"></div>
-        <!-- Gambar Kopi (Berbeda dengan halaman login) -->
-        <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1000&q=80" 
-             alt="Coffee Beans Background" 
-             class="absolute inset-0 w-full h-full object-cover z-0">
-        
-        <!-- Teks Sapaan -->
-        <div class="relative z-20 text-center px-12">
-            <h2 class="text-4xl xl:text-5xl font-black text-white mb-4 tracking-tight leading-tight">
-                Bergabunglah <br> Bersama Kami!
+    {{-- Bagian Kanan: Panel manfaat member, bukan sekadar gambar+overlay --}}
+    <div class="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden" style="background:#1F150C;">
+        <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1000&q=80"
+             alt="Coffee Beans Background"
+             class="absolute inset-0 w-full h-full object-cover opacity-30">
+        <div class="absolute inset-0" style="background:linear-gradient(to top, #1F150C, rgba(31,21,12,0.55) 55%, rgba(31,21,12,0.8));"></div>
+
+        <div class="relative z-20 px-12 xl:px-16 w-full max-w-lg">
+            <a href="/" class="inline-flex items-center gap-2 text-white font-display text-xl font-semibold mb-14">
+                <i class="fa-solid fa-mug-hot" style="color:#E1DCC9;"></i> TepiKopi.
+            </a>
+
+            <h2 class="font-display text-4xl xl:text-5xl font-semibold text-white mb-5 leading-tight">
+                Bergabunglah<br>bersama kami.
             </h2>
-            <p class="text-amber-100/90 text-lg">
-                Jadilah bagian dari komunitas pecinta kopi dan dapatkan akses ke koleksi biji kopi premium kami.
+            <p class="text-white/60 text-base mb-10 max-w-sm">
+                Jadilah bagian dari komunitas pecinta kopi dan dapatkan akses ke koleksi premium kami.
             </p>
+
+            {{-- Manfaat member sebagai checklist, bukan paragraf --}}
+            <div class="space-y-4">
+                @foreach([
+                    ['icon' => 'fa-truck-fast', 'text' => 'Gratis ongkir untuk pembelian pertama'],
+                    ['icon' => 'fa-tags', 'text' => 'Akses promo & harga khusus member'],
+                    ['icon' => 'fa-receipt', 'text' => 'Lacak riwayat pesanan kapan saja'],
+                ] as $benefit)
+                <div class="flex items-center gap-3.5">
+                    <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center" style="background:rgba(225,220,201,0.15); color:#E1DCC9;">
+                        <i class="fa-solid {{ $benefit['icon'] }} text-xs"></i>
+                    </div>
+                    <p class="text-white/75 text-sm font-medium">{{ $benefit['text'] }}</p>
+                </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
-    <!-- Bagian Kiri: Form Register -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white lg:rounded-r-3xl shadow-[10px_0_30px_rgba(0,0,0,0.05)] z-20 overflow-y-auto">
+    {{-- Bagian Kiri: Form Register --}}
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white overflow-y-auto">
         <div class="w-full max-w-md py-8">
-            
-            <!-- Header Bar (Logo & Tombol Kembali) -->
-            <div class="flex justify-between items-center mb-10">
-                <a href="/" class="text-2xl font-black text-amber-900 flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <i class="fa-solid fa-mug-hot text-amber-700"></i> TepiKopi.
+
+            <div class="flex justify-between items-center mb-8">
+                <a href="/" class="font-display text-xl font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-mug-hot" style="color:#412D15;"></i> TepiKopi.
                 </a>
-                <a href="/" class="text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1.5 transition-colors bg-amber-50 px-3 py-1.5 rounded-full">
-                    <i class="fa-solid fa-arrow-left"></i> Beranda
+                <a href="/" class="text-xs font-bold px-3 py-1.5 rounded-full transition-colors" style="background:#E1DCC9; color:#412D15;">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Beranda
                 </a>
             </div>
 
-            <!-- Judul Form -->
-            <h1 class="text-3xl font-extrabold text-amber-950 mb-2">Buat Akun Baru</h1>
-            <p class="text-amber-800/70 mb-8 font-medium">Lengkapi data di bawah ini untuk mendaftar.</p>
+            <h1 class="font-display text-3xl font-semibold mb-2">Buat Akun Baru</h1>
+            <p class="text-[#1F150C]/55 mb-8">Lengkapi data di bawah ini untuk mendaftar.</p>
 
-            <!-- Alert Error Umum -->
             @if($errors->any())
-                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-bold flex items-start gap-3 animate-pulse">
+                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-bold flex items-start gap-3">
                     <i class="fa-solid fa-circle-exclamation text-lg mt-0.5"></i>
                     <ul class="list-disc list-inside">
                         @foreach ($errors->all() as $error)
@@ -62,78 +82,102 @@
                 </div>
             @endif
 
-            <!-- Form -->
-            <form method="POST" action="/register" class="space-y-4">
+            <form method="POST" action="/register" class="space-y-4"
+                  x-data="{
+                    showPassword: false,
+                    showConfirm: false,
+                    password: '',
+                    get hasLength() { return this.password.length >= 8; },
+                    get hasNumber() { return /[0-9]/.test(this.password); },
+                    get hasUpper() { return /[A-Z]/.test(this.password); }
+                  }">
                 @csrf
-                
-                <!-- Input Nama Lengkap -->
+
                 <div>
-                    <label for="name" class="block text-sm font-bold text-amber-950 mb-1.5">Nama Lengkap</label>
+                    <label for="name" class="block text-sm font-bold mb-1.5">Nama Lengkap</label>
                     <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-800/40 group-focus-within:text-amber-700 transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#1F150C]/35 group-focus-within:text-[#412D15] transition-colors">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <input type="text" name="name" id="name" 
-                               class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
+                        <input type="text" name="name" id="name"
+                               class="w-full pl-10 pr-4 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
                                placeholder="Nama lengkap Anda" value="{{ old('name') }}" required autofocus>
                     </div>
                 </div>
 
-                <!-- Input Email -->
                 <div>
-                    <label for="email" class="block text-sm font-bold text-amber-950 mb-1.5">Email</label>
+                    <label for="email" class="block text-sm font-bold mb-1.5">Email</label>
                     <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-800/40 group-focus-within:text-amber-700 transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#1F150C]/35 group-focus-within:text-[#412D15] transition-colors">
                             <i class="fa-solid fa-envelope"></i>
                         </div>
-                        <input type="email" name="email" id="email" 
-                               class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
+                        <input type="email" name="email" id="email"
+                               class="w-full pl-10 pr-4 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
                                placeholder="nama@email.com" value="{{ old('email') }}" required>
                     </div>
                 </div>
 
-                <!-- Input Password -->
                 <div>
-                    <label for="password" class="block text-sm font-bold text-amber-950 mb-1.5">Kata Sandi</label>
+                    <label for="password" class="block text-sm font-bold mb-1.5">Kata Sandi</label>
                     <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-800/40 group-focus-within:text-amber-700 transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#1F150C]/35 group-focus-within:text-[#412D15] transition-colors">
                             <i class="fa-solid fa-lock"></i>
                         </div>
-                        <input type="password" name="password" id="password" 
-                               class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
+                        <input :type="showPassword ? 'text' : 'password'" name="password" id="password" x-model="password"
+                               class="w-full pl-10 pr-11 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
                                placeholder="Minimal 8 karakter" required>
+                        <button type="button" @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#1F150C]/35 hover:text-[#412D15] transition-colors">
+                            <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+
+                    {{-- Checklist kekuatan sandi live — fitur baru yang benar-benar fungsional --}}
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-xs" x-show="password.length > 0" x-cloak x-transition>
+                        <span class="flex items-center gap-1.5" :class="hasLength ? 'text-emerald-600' : 'text-[#1F150C]/35'">
+                            <i class="fa-solid" :class="hasLength ? 'fa-circle-check' : 'fa-circle'"></i> 8+ karakter
+                        </span>
+                        <span class="flex items-center gap-1.5" :class="hasUpper ? 'text-emerald-600' : 'text-[#1F150C]/35'">
+                            <i class="fa-solid" :class="hasUpper ? 'fa-circle-check' : 'fa-circle'"></i> Huruf besar
+                        </span>
+                        <span class="flex items-center gap-1.5" :class="hasNumber ? 'text-emerald-600' : 'text-[#1F150C]/35'">
+                            <i class="fa-solid" :class="hasNumber ? 'fa-circle-check' : 'fa-circle'"></i> Angka
+                        </span>
                     </div>
                 </div>
 
-                <!-- Input Konfirmasi Password -->
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-bold text-amber-950 mb-1.5">Konfirmasi Kata Sandi</label>
+                    <label for="password_confirmation" class="block text-sm font-bold mb-1.5">Konfirmasi Kata Sandi</label>
                     <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-800/40 group-focus-within:text-amber-700 transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#1F150C]/35 group-focus-within:text-[#412D15] transition-colors">
                             <i class="fa-solid fa-check-double"></i>
                         </div>
-                        <input type="password" name="password_confirmation" id="password_confirmation" 
-                            class="w-full pl-10 pr-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-amber-800/40 text-amber-950 font-medium shadow-sm" 
+                        <input :type="showConfirm ? 'text' : 'password'" name="password_confirmation" id="password_confirmation"
+                            class="w-full pl-10 pr-11 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
                             placeholder="Ulangi kata sandi" required>
+                        <button type="button" @click="showConfirm = !showConfirm"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#1F150C]/35 hover:text-[#412D15] transition-colors">
+                            <i class="fa-solid" :class="showConfirm ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Tombol Submit -->
-                <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-6">
+                <button type="submit" class="w-full text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-6 btn-primary">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>Daftar Sekarang</span>
                 </button>
             </form>
 
-            <!-- Link Login -->
-            <p class="text-center mt-8 text-sm text-amber-900 font-medium">
-                Sudah memiliki akun? 
-                <a href="/login" class="text-amber-700 font-bold hover:text-amber-950 transition-colors ml-1 border-b border-transparent hover:border-amber-950 pb-0.5">
+            <p class="text-center mt-8 text-sm font-medium text-[#1F150C]/70">
+                Sudah memiliki akun?
+                <a href="/login" class="font-bold ml-1 border-b border-transparent transition-colors hover:border-current" style="color:#412D15;">
                     Masuk di sini
                 </a>
             </p>
-            
+
         </div>
     </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

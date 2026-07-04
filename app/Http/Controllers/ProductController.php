@@ -88,7 +88,7 @@ class ProductController extends Controller
         $inStockCount = Product::where('stock', '>', 0)->count();
         $outOfStockCount = Product::where('stock', '<=', 0)->count();
 
-        return view('products.index', compact('products', 'inStockCount', 'outOfStockCount'));
+        return view('admin.products.index', compact('products', 'inStockCount', 'outOfStockCount'));
     }
 
     /**
@@ -98,7 +98,7 @@ class ProductController extends Controller
     {
         $categories = Category::all();
 
-        return view('products.create', compact('categories'));
+        return view('admin.products.create', compact('categories'));
     }
 
     /**
@@ -177,7 +177,7 @@ class ProductController extends Controller
         $categories = Category::all();
         $product->load('images', 'variants');
 
-        return view('products.edit', compact('product', 'categories'));
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     /**

@@ -10,6 +10,6 @@ class HomeController extends Controller
     public function index()
     {
         $products = Product::where('is_featured', true)->latest()->take(4)->get();
-        return view('welcome', compact('products'));
+        return view('homepage', compact('products'));
     }
 }

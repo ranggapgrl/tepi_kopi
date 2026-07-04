@@ -18,8 +18,15 @@
         </a>
 
         <a href="/orders"
-           class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('orders*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
-            <i class="fa-solid fa-receipt w-5"></i> Pesanan Masuk
+           class="flex items-center justify-between gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('orders*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <span class="flex items-center gap-3">
+                <i class="fa-solid fa-receipt w-5"></i> Pesanan Masuk
+            </span>
+            @if(($pendingOrdersCount ?? 0) > 0)
+                <span class="bg-rose-600 text-white text-[10px] font-bold min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center">
+                    {{ $pendingOrdersCount > 99 ? '99+' : $pendingOrdersCount }}
+                </span>
+            @endif
         </a>
 
         <a href="{{ route('reports.index') }}"
@@ -30,6 +37,11 @@
         <a href="/reviews"
            class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('reviews*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
             <i class="fa-solid fa-star w-5"></i> Ulasan Pelanggan
+        </a>
+
+        <a href="{{ route('users.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('users*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <i class="fa-solid fa-users w-5"></i> Manajemen User
         </a>
     </div>
 </aside>

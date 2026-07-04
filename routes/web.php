@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -91,6 +92,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+
+    Route::resource('users', UserController::class)->except(['show']);
 });
 
 // Redirect dashboard default

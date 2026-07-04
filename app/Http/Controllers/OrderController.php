@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -30,45 +33,92 @@ class OrderController extends Controller
             return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
         }
 
-        // Hitung total — pakai harga varian kalau item punya varian, kalau tidak pakai harga produk
-        $totalPrice = 0;
-        foreach ($cartItems as $item) {
-            $price = $item->variant ? $item->variant->price : $item->product->price;
-            $totalPrice += ($price * $item->quantity);
-        }
-        $totalPrice = $totalPrice + ($totalPrice * 0.11); // Plus pajak
+        return DB::transaction(function () use ($cartItems, $cart) {
+            // Kunci baris produk/varian yang mau dibeli, lalu cek ulang stok
+            // TERKINI di dalam transaksi. Ini mencegah race condition kalau ada
+            // 2 orang checkout barang stok terakhir secara bersamaan — transaksi
+            // kedua akan menunggu transaksi pertama selesai, baru baca stok yang
+            // sudah ter-update.
+            $insufficient = [];
+            $lockedItems = [];
 
-        // Buat Order
-        $order = Order::create([
-            'user_id' => Auth::id() ?? 1,
-            'total_price' => $totalPrice,
-            'status' => 'Menunggu Pembayaran'
-        ]);
+            foreach ($cartItems as $item) {
+                if ($item->variant_id) {
+                    $variant = ProductVariant::whereKey($item->variant_id)->lockForUpdate()->first();
 
-        // Pindahkan cart items ke order items
-        foreach ($cartItems as $item) {
-            $price = $item->variant ? $item->variant->price : $item->product->price;
+                    if (! $variant) {
+                        $insufficient[] = ($item->product->name ?? 'Produk') . ' — varian sudah tidak tersedia';
+                        continue;
+                    }
 
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'variant_id' => $item->variant_id,
-                'quantity' => $item->quantity,
-                'price' => $price
+                    if ($variant->stock < $item->quantity) {
+                        $insufficient[] = "{$item->product->name} ({$variant->name}) — sisa stok {$variant->stock}, di keranjang {$item->quantity}";
+                        continue;
+                    }
+
+                    $lockedItems[] = ['item' => $item, 'variant' => $variant, 'product' => null, 'price' => $variant->price];
+                } else {
+                    $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
+
+                    if (! $product) {
+                        $insufficient[] = 'Produk sudah tidak tersedia';
+                        continue;
+                    }
+
+                    if ($product->stock < $item->quantity) {
+                        $insufficient[] = "{$product->name} — sisa stok {$product->stock}, di keranjang {$item->quantity}";
+                        continue;
+                    }
+
+                    $lockedItems[] = ['item' => $item, 'variant' => null, 'product' => $product, 'price' => $product->price];
+                }
+            }
+
+            if (! empty($insufficient)) {
+                return redirect('/cart')->with(
+                    'error',
+                    'Stok tidak cukup untuk: ' . implode('; ', $insufficient) . '. Silakan sesuaikan jumlahnya di keranjang.'
+                );
+            }
+
+            // Hitung total pakai harga yang baru saja dikunci (bukan dari cart items lama)
+            $totalPrice = 0;
+            foreach ($lockedItems as $entry) {
+                $totalPrice += $entry['price'] * $entry['item']->quantity;
+            }
+            $totalPrice = $totalPrice + ($totalPrice * 0.11); // Plus pajak
+
+            // Buat Order
+            $order = Order::create([
+                'user_id' => Auth::id() ?? 1,
+                'total_price' => $totalPrice,
+                'status' => 'Menunggu Pembayaran'
             ]);
 
-            // Kurangi stok — stok varian kalau ada, kalau tidak stok produk
-            if ($item->variant) {
-                $item->variant->decrement('stock', $item->quantity);
-            } else {
-                $item->product->decrement('stock', $item->quantity);
+            // Pindahkan cart items ke order items & kurangi stok yang sudah dikunci
+            foreach ($lockedItems as $entry) {
+                $item = $entry['item'];
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $entry['price']
+                ]);
+
+                if ($entry['variant']) {
+                    $entry['variant']->decrement('stock', $item->quantity);
+                } else {
+                    $entry['product']->decrement('stock', $item->quantity);
+                }
             }
-        }
 
-        // Kosongkan keranjang
-        $cart->items()->delete();
+            // Kosongkan keranjang
+            $cart->items()->delete();
 
-        return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
+            return redirect('/katalog')->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
+        });
     }
 
     /**

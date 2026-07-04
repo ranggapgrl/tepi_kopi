@@ -2,11 +2,9 @@
 
 Tepi Kopi adalah aplikasi web berbasis **Laravel** untuk mengelola operasional kedai kopi — mulai dari data produk/menu, transaksi, hingga laporan penjualan. Dibangun dengan Laravel (Blade) di sisi backend/view dan Vite untuk build asset frontend.
 
-> Catatan: Deskripsi fitur di bawah adalah gambaran umum berdasarkan struktur project. Silakan sesuaikan dengan fitur aktual yang sudah kamu implementasikan.
-
 ## ✨ Fitur
 
-- Manajemen data menu/produk kopi
+- Manajemen data menu/produk 
 - Pencatatan transaksi penjualan
 - Laporan penjualan
 - Autentikasi pengguna (login/register)

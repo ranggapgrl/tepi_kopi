@@ -79,10 +79,27 @@
                 </div>
 
                 <div class="flex items-center justify-center w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                    <div class="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty:</span>
-                        <span class="font-extrabold text-sm text-gray-900">{{ $item->quantity }}</span>
-                    </div>
+                    <form action="{{ route('cart.update', $item->id) }}" method="POST" class="flex items-center gap-3 bg-gray-50 px-2 py-1.5 rounded-xl border border-gray-200">
+                        @csrf
+                        @method('PATCH')
+
+                        <button type="submit"
+                                name="quantity"
+                                value="{{ max(1, $item->quantity - 1) }}"
+                                {{ $item->quantity <= 1 ? 'disabled' : '' }}
+                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-amber-50 hover:text-amber-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                            <i class="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+
+                        <span class="font-extrabold text-sm text-gray-900 w-6 text-center">{{ $item->quantity }}</span>
+
+                        <button type="submit"
+                                name="quantity"
+                                value="{{ $item->quantity + 1 }}"
+                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-amber-50 hover:text-amber-800 transition-colors">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
             @endforeach

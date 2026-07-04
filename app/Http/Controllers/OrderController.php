@@ -99,6 +99,33 @@ class OrderController extends Controller
     }
 
     /**
+     * CUSTOMER — PATCH /my-orders/{order}/cancel
+     * Customer membatalkan pesanan miliknya sendiri, selama masih "Menunggu Pembayaran".
+     */
+    public function cancel(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        if ($order->status !== 'Menunggu Pembayaran') {
+            return back()->with('error', 'Pesanan ini sudah diproses dan tidak bisa dibatalkan lagi.');
+        }
+
+        // Kembalikan stok yang tadi dikurangi saat checkout
+        $order->load('items');
+        foreach ($order->items as $item) {
+            if ($item->variant_id) {
+                $item->variant?->increment('stock', $item->quantity);
+            } else {
+                $item->product?->increment('stock', $item->quantity);
+            }
+        }
+
+        $order->update(['status' => 'Dibatalkan']);
+
+        return redirect()->route('orders.myShow', $order)->with('success', 'Pesanan berhasil dibatalkan.');
+    }
+
+    /**
      * ADMIN ONLY — /orders
      */
     public function index(Request $request)

@@ -16,6 +16,19 @@
         };
     @endphp
 
+    @if(session('success'))
+    <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ session('error') }}
+    </div>
+    @endif
+
     <div class="flex items-center gap-3 mb-8">
         <a href="{{ route('orders.my') }}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-amber-100 text-amber-700 hover:bg-amber-50 transition-colors">
             <i class="fa-solid fa-arrow-left text-xs"></i>
@@ -92,6 +105,16 @@
                     <p class="text-xs text-gray-500 mt-4 leading-relaxed">
                         Pesananmu sedang menunggu pembayaran. Segera lakukan pembayaran agar pesanan bisa diproses.
                     </p>
+
+                    <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                          onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')" class="mt-4">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                                class="w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-sm rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-xmark"></i> Batalkan Pesanan
+                        </button>
+                    </form>
                 @elseif($order->status === 'Dibatalkan')
                     <p class="text-xs text-gray-500 mt-4 leading-relaxed">
                         Pesanan ini telah dibatalkan.

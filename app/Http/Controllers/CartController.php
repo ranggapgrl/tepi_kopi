@@ -70,4 +70,24 @@ class CartController extends Controller
 
         return back()->with('success', 'Produk berhasil dihapus dari keranjang.');
     }
+
+    public function update(Request $request, CartItem $cartItem)
+{
+    $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+    abort_unless($cart && $cartItem->cart_id === $cart->id, 403);
+
+    $validated = $request->validate([
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    $availableStock = $cartItem->variant ? $cartItem->variant->stock : $cartItem->product->stock;
+
+    if ($validated['quantity'] > $availableStock) {
+        return back()->with('error', "Stok tidak cukup. Sisa stok: {$availableStock}.");
+    }
+
+    $cartItem->update(['quantity' => $validated['quantity']]);
+
+    return back()->with('success', 'Jumlah item berhasil diperbarui.');
+}
 }

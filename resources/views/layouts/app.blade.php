@@ -26,10 +26,10 @@
             </a>
 
             <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-sm font-medium text-gray-600 hover:text-amber-700 transition">Beranda</a>
-                <a href="/katalog" class="text-sm font-medium text-gray-600 hover:text-amber-700 transition">Katalog</a>
-                <a href="/about" class="text-sm font-medium text-gray-600 hover:text-amber-700 transition">Tentang</a>
-                <a href="/contact" class="text-sm font-medium text-gray-600 hover:text-amber-700 transition">Kontak</a>
+                <a href="/" class="text-sm font-medium transition {{ request()->routeIs('home') ? 'text-amber-700 font-bold' : 'text-gray-600 hover:text-amber-700' }}">Beranda</a>
+                <a href="/katalog" class="text-sm font-medium transition {{ request()->routeIs('katalog.*') ? 'text-amber-700 font-bold' : 'text-gray-600 hover:text-amber-700' }}">Katalog</a>
+                <a href="/about" class="text-sm font-medium transition {{ request()->routeIs('about') ? 'text-amber-700 font-bold' : 'text-gray-600 hover:text-amber-700' }}">Tentang</a>
+                <a href="/contact" class="text-sm font-medium transition {{ request()->routeIs('contact') ? 'text-amber-700 font-bold' : 'text-gray-600 hover:text-amber-700' }}">Kontak</a>
                 <a href="/cart" class="relative text-sm font-medium text-gray-600 hover:text-amber-700 transition">
                     <i class="fa-solid fa-cart-shopping"></i>
                     @if(($cartCount ?? 0) > 0)

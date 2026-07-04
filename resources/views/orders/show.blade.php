@@ -14,7 +14,7 @@
                 <i class="fa-solid fa-arrow-left text-xs"></i>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-amber-950">Pesanan #ORD-{{ str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</h1>
+                <h1 class="text-2xl font-bold text-amber-950">Pesanan #{{ $order->order_code }}</h1>
                 <p class="text-amber-700/80 text-sm">Dibuat {{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
             </div>
         </div>
@@ -92,6 +92,32 @@
                             <dd class="font-semibold text-amber-950">{{ $order->user->email ?? '-' }}</dd>
                         </div>
                     </dl>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">
+                    <h3 class="font-bold text-amber-950 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-amber-700"></i> Informasi Pengiriman
+                    </h3>
+                    @if($order->shipping_address)
+                        <dl class="space-y-3 text-sm">
+                            <div>
+                                <dt class="text-gray-400 mb-1">Alamat</dt>
+                                <dd class="font-semibold text-amber-950">{{ $order->shipping_address }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-gray-400">No. HP</dt>
+                                <dd class="font-semibold text-amber-950">{{ $order->shipping_phone }}</dd>
+                            </div>
+                            @if($order->shipping_notes)
+                            <div>
+                                <dt class="text-gray-400 mb-1">Catatan</dt>
+                                <dd class="font-semibold text-amber-950">{{ $order->shipping_notes }}</dd>
+                            </div>
+                            @endif
+                        </dl>
+                    @else
+                        <p class="text-sm text-gray-400 italic">Pesanan ini dibuat sebelum fitur alamat pengiriman ada, jadi datanya tidak tersedia. Hubungi customer secara manual.</p>
+                    @endif
                 </div>
 
                 <div class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">

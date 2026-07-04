@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lupa Sandi - Tepi Kopi</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/icon.svg') }}">
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome untuk Icon -->

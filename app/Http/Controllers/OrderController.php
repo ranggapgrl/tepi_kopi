@@ -53,7 +53,15 @@ class OrderController extends Controller
             ->latest()
             ->first();
 
-        return view('checkout.index', compact('cartItems', 'subtotal', 'tax', 'total', 'lastOrder'));
+        // Dibutuhkan di view agar Snap.js bisa dimuat langsung di halaman checkout,
+        // supaya popup pembayaran muncul di sini tanpa redirect ke halaman terpisah.
+        $midtransClientKey = config('services.midtrans.client_key');
+        $midtransIsProduction = (bool) config('services.midtrans.is_production');
+
+        return view('checkout.index', compact(
+            'cartItems', 'subtotal', 'tax', 'total', 'lastOrder',
+            'midtransClientKey', 'midtransIsProduction'
+        ));
     }
 
     public function checkout(Request $request)
@@ -71,10 +79,13 @@ class OrderController extends Controller
         $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
 
         if (count($cartItems) == 0) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Keranjang belanja kosong.'], 422);
+            }
             return redirect('/cart')->with('error', 'Keranjang belanja kosong.');
         }
 
-        return DB::transaction(function () use ($cartItems, $cart, $validated) {
+        $result = DB::transaction(function () use ($cartItems, $cart, $validated) {
             $insufficient = [];
             $lockedItems = [];
 
@@ -111,10 +122,9 @@ class OrderController extends Controller
             }
 
             if (! empty($insufficient)) {
-                return redirect('/cart')->with(
-                    'error',
-                    'Stok tidak cukup untuk: ' . implode('; ', $insufficient) . '. Silakan sesuaikan jumlahnya di keranjang.'
-                );
+                return [
+                    'error' => 'Stok tidak cukup untuk: ' . implode('; ', $insufficient) . '. Silakan sesuaikan jumlahnya di keranjang.',
+                ];
             }
 
             $totalPrice = 0;
@@ -184,13 +194,39 @@ class OrderController extends Controller
                 }
             }
 
-            return redirect()->route('orders.pay', $order);
+            return ['order' => $order];
         });
+
+        if (isset($result['error'])) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $result['error']], 422);
+            }
+            return redirect('/cart')->with('error', $result['error']);
+        }
+
+        $order = $result['order'];
+
+        // AJAX buat token Snap dan
+        // kembalikan sebagai JSON supaya popup pembayaran bisa langsung dibuka
+        // di halaman checkout, tanpa redirect ke halaman lain.
+        if ($request->wantsJson()) {
+            $snapToken = $this->generateSnapToken($order);
+
+            return response()->json([
+                'snap_token' => $snapToken,
+                'order_id' => $order->id,
+                'redirect_url' => route('orders.myShow', $order),
+            ]);
+        }
+
+        return redirect()->route('orders.pay', $order);
     }
 
     /**
      * CUSTOMER — /checkout/{order}/pay
      * Menampilkan halaman pembayaran Midtrans Snap.
+     * Dipakai sebagai fallback (mis. non-JS, atau kembali lewat link lama);
+     * alur utama sekarang membuka Snap langsung dari halaman checkout.
      */
     public function pay(Order $order)
     {
@@ -200,6 +236,18 @@ class OrderController extends Controller
             return redirect()->route('orders.myShow', $order)->with('error', 'Pesanan ini sudah tidak bisa dibayar.');
         }
 
+        $snapToken = $this->generateSnapToken($order);
+
+        return view('orders.pay', compact('order', 'snapToken'));
+    }
+
+    /**
+     * Bangun parameter transaksi Midtrans dan ambil Snap token untuk sebuah order.
+     * Dipakai oleh checkout() (AJAX, langsung di halaman checkout) dan
+     * pay() (halaman fallback terpisah).
+     */
+    private function generateSnapToken(Order $order): string
+    {
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production');
         Config::$isSanitized = true;
@@ -253,9 +301,7 @@ class OrderController extends Controller
             ],
         ];
 
-        $snapToken = Snap::getSnapToken($params);
-
-        return view('orders.pay', compact('order', 'snapToken'));
+        return Snap::getSnapToken($params);
     }
 
     /**

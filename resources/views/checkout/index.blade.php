@@ -3,6 +3,9 @@
 @section('title', 'Checkout')
 
 @section('content')
+<script src="{{ $midtransIsProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ $midtransClientKey }}"></script>
+
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 min-h-[60vh]">
 
     {{-- Header + step indicator — step 2 active, consistent with cart page --}}
@@ -34,6 +37,7 @@
         </div>
     </div>
 
+    {{-- Server-rendered errors fallback --}}
     @if($errors->any())
     <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl">
         <p class="text-sm font-bold mb-1">Cek lagi isian di bawah:</p>
@@ -45,11 +49,22 @@
     </div>
     @endif
 
-    <form action="{{ route('checkout') }}" method="POST">
+    <form action="{{ route('checkout') }}" method="POST" x-data="checkoutForm()" @submit.prevent="submit($event)">
         @csrf
+
+        {{-- Client-side errors --}}
+        <div x-show="errorList.length > 0" x-cloak x-transition class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl">
+            <p class="text-sm font-bold mb-1">Cek lagi isian di bawah:</p>
+            <ul class="text-sm list-disc list-inside space-y-0.5">
+                <template x-for="err in errorList" :key="err">
+                    <li x-text="err"></li>
+                </template>
+            </ul>
+        </div>
+
         <div class="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
 
-            {{-- ============ LEFT: shipping form only — items moved into the summary panel ============ --}}
+            {{-- ============ LEFT: shipping form only — items live in the summary panel ============ --}}
             <div class="bg-white p-6 sm:p-7 rounded-2xl border border-black/10 shadow-sm">
                 <h3 class="font-display text-lg font-semibold text-[#1F150C] mb-6 flex items-center gap-2.5">
                     <span class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm" style="background:#412D15;">
@@ -103,7 +118,6 @@
             {{-- ============ RIGHT: order summary panel, items collapsible ============ --}}
             <div class="bg-white rounded-2xl border border-black/10 shadow-sm lg:sticky lg:top-24 overflow-hidden" x-data="{ open: true }">
 
-                {{-- Collapsible item list --}}
                 <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-3 p-6 text-left">
                     <span class="font-display text-lg font-semibold text-[#1F150C]">Ringkasan Pesanan</span>
                     <span class="flex items-center gap-2 text-xs font-bold" style="color:#412D15;">
@@ -156,8 +170,11 @@
                         <span class="font-display text-2xl font-semibold" style="color:#412D15;">Rp {{ number_format($total, 0, ',', '.') }}</span>
                     </div>
 
-                    <button type="submit" class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
-                        Buat Pesanan <i class="fa-solid fa-check"></i>
+                    <button type="submit" :disabled="loading"
+                            class="w-full py-3.5 btn-primary text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none disabled:translate-y-0">
+                        <span x-show="!loading">Buat Pesanan</span>
+                        <span x-show="loading" x-cloak>Menyiapkan pembayaran…</span>
+                        <i class="fa-solid" :class="loading ? 'fa-circle-notch fa-spin' : 'fa-check'"></i>
                     </button>
                     <p class="flex items-center justify-center gap-1.5 text-[10px] text-[#1F150C]/35 uppercase tracking-wider mt-4">
                         <i class="fa-solid fa-shield-halved"></i> Stok akan divalidasi ulang saat pesanan dibuat
@@ -167,4 +184,58 @@
         </div>
     </form>
 </div>
+
+<script>
+    function checkoutForm() {
+        return {
+            loading: false,
+            errorList: [],
+            async submit(event) {
+                this.loading = true;
+                this.errorList = [];
+                const formEl = event.target;
+
+                try {
+                    const formData = new FormData(formEl);
+                    const response = await fetch(formEl.action, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        body: formData,
+                    });
+
+                    const data = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        this.loading = false;
+                        this.errorList = data.errors
+                            ? Object.values(data.errors).flat()
+                            : [data.message || 'Terjadi kesalahan, silakan coba lagi.'];
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
+
+                    if (data.snap_token && window.snap) {
+                        window.snap.pay(data.snap_token, {
+                            onSuccess: () => { window.location.href = data.redirect_url; },
+                            onPending: () => { window.location.href = data.redirect_url; },
+                            onError: () => {
+                                this.loading = false;
+                                this.errorList = ['Pembayaran gagal, silakan coba lagi.'];
+                            },
+                            onClose: () => {
+                                window.location.href = data.redirect_url;
+                            },
+                        });
+                    } else {
+                        this.loading = false;
+                        this.errorList = ['Gagal memuat metode pembayaran. Silakan coba lagi.'];
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    this.errorList = ['Terjadi kesalahan jaringan, silakan coba lagi.'];
+                }
+            },
+        };
+    }
+</script>
 @endsection

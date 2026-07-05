@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminNotificationController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -79,9 +80,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // 'index()' pada ProductController dipakai untuk /katalog (publik),
-    // jadi resource 'products' tidak boleh ikut generate route index bawaan.
-    // Route GET /products diarahkan manual ke manage().
     Route::get('/products', [ProductController::class, 'manage'])->name('products.index');
     Route::resource('products', ProductController::class)->except(['index']);
     Route::delete('/products/{product}/images/{image}', [ProductController::class, 'destroyImage'])->name('products.images.destroy');
@@ -95,6 +93,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
 
     Route::resource('users', UserController::class)->except(['show']);
+
+    // Notifikasi admin (pesanan baru)
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
 });
 
 // Redirect dashboard default

@@ -7,9 +7,12 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -24,12 +27,6 @@ class OrderController extends Controller
         'Dibatalkan',
     ];
 
-    /**
-     * CUSTOMER — GET /checkout
-     * Halaman konfirmasi sebelum order dibuat: ringkasan keranjang + form
-     * alamat pengiriman & no HP. Form ini diprefill dari alamat yang
-     * dipakai di pesanan terakhir customer, biar gak perlu ngetik ulang tiap kali.
-     */
     public function showCheckout()
     {
         $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
@@ -55,9 +52,6 @@ class OrderController extends Controller
         return view('checkout.index', compact('cartItems', 'subtotal', 'tax', 'total', 'lastOrder'));
     }
 
-    /**
-     * CUSTOMER — POST /checkout
-     */
     public function checkout(Request $request)
     {
         $validated = $request->validate([
@@ -77,11 +71,6 @@ class OrderController extends Controller
         }
 
         return DB::transaction(function () use ($cartItems, $cart, $validated) {
-            // Kunci baris produk/varian yang mau dibeli, lalu cek ulang stok
-            // TERKINI di dalam transaksi. Ini mencegah race condition kalau ada
-            // 2 orang checkout barang stok terakhir secara bersamaan — transaksi
-            // kedua akan menunggu transaksi pertama selesai, baru baca stok yang
-            // sudah ter-update.
             $insufficient = [];
             $lockedItems = [];
 
@@ -124,14 +113,12 @@ class OrderController extends Controller
                 );
             }
 
-            // Hitung total pakai harga yang baru saja dikunci (bukan dari cart items lama)
             $totalPrice = 0;
             foreach ($lockedItems as $entry) {
                 $totalPrice += $entry['price'] * $entry['item']->quantity;
             }
-            $totalPrice = $totalPrice + ($totalPrice * 0.11); // Plus pajak
+            $totalPrice = $totalPrice + ($totalPrice * 0.11);
 
-            // Buat Order
             $order = Order::create([
                 'user_id' => Auth::id() ?? 1,
                 'total_price' => $totalPrice,
@@ -141,7 +128,6 @@ class OrderController extends Controller
                 'shipping_notes' => $validated['shipping_notes'] ?? null,
             ]);
 
-            // Pindahkan cart items ke order items & kurangi stok yang sudah dikunci
             foreach ($lockedItems as $entry) {
                 $item = $entry['item'];
 
@@ -160,17 +146,19 @@ class OrderController extends Controller
                 }
             }
 
-            // Kosongkan keranjang
             $cart->items()->delete();
+
+            // Beri tahu semua admin: notifikasi in-app (bell icon) + email.
+            $order->load('user');
+            $admins = User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new NewOrderNotification($order));
+            }
 
             return redirect()->route('orders.myShow', $order)->with('success', 'Checkout berhasil! Silakan lakukan pembayaran.');
         });
     }
 
-    /**
-     * CUSTOMER — /my-orders
-     * Riwayat pesanan milik user yang sedang login.
-     */
     public function myOrders()
     {
         $orders = Order::withCount('items')
@@ -181,10 +169,6 @@ class OrderController extends Controller
         return view('orders.my-index', compact('orders'));
     }
 
-    /**
-     * CUSTOMER — /my-orders/{order}
-     * Detail satu pesanan, hanya bisa diakses oleh pemiliknya.
-     */
     public function myOrderShow(Order $order)
     {
         abort_unless($order->user_id === Auth::id(), 403);
@@ -194,10 +178,6 @@ class OrderController extends Controller
         return view('orders.my-show', compact('order'));
     }
 
-    /**
-     * CUSTOMER — PATCH /my-orders/{order}/cancel
-     * Customer membatalkan pesanan miliknya sendiri, selama masih "Menunggu Pembayaran".
-     */
     public function cancel(Order $order)
     {
         abort_unless($order->user_id === Auth::id(), 403);
@@ -206,7 +186,6 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini sudah diproses dan tidak bisa dibatalkan lagi.');
         }
 
-        // Kembalikan stok yang tadi dikurangi saat checkout
         $order->load('items');
         foreach ($order->items as $item) {
             if ($item->variant_id) {
@@ -221,9 +200,6 @@ class OrderController extends Controller
         return redirect()->route('orders.myShow', $order)->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
-    /**
-     * ADMIN ONLY — /orders
-     */
     public function index(Request $request)
     {
         $orders = Order::with('user')
@@ -239,9 +215,6 @@ class OrderController extends Controller
         return view('orders.index', compact('orders', 'statuses'));
     }
 
-    /**
-     * ADMIN ONLY — /orders/{order}
-     */
     public function show(Order $order)
     {
         $order->load('user', 'items.product', 'items.variant');
@@ -251,9 +224,6 @@ class OrderController extends Controller
         return view('orders.show', compact('order', 'statuses'));
     }
 
-    /**
-     * ADMIN ONLY — PUT /orders/{order}
-     */
     public function update(Request $request, Order $order)
     {
         $validated = $request->validate([

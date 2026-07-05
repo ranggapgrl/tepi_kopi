@@ -8,7 +8,9 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+
 
 class ProductController extends Controller
 {
@@ -211,6 +213,8 @@ class ProductController extends Controller
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
+        $stockBefore = $product->stock;
+
         $product->update([
             'name'        => $validated['name'],
             'category_id' => $validated['category_id'],
@@ -250,6 +254,19 @@ class ProductController extends Controller
                         'stock'      => $variant['stock'] ?? 0,
                         'sort_order' => $index,
                     ]
+                );
+            }
+        }
+
+        // Notifikasi stok menipis: hanya dikirim kalau stok BARU SAJA turun
+        // melewati batas gara-gara admin ubah stok manual di sini.
+        $lowStockThreshold = config('tepikopi.low_stock_threshold', 5);
+        if ($validated['stock'] <= $lowStockThreshold && $stockBefore > $lowStockThreshold) {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send(
+                    $admins,
+                    new \App\Notifications\LowStockNotification($product->name, $validated['stock'], $product->id)
                 );
             }
         }

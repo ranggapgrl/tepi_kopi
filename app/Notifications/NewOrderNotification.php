@@ -33,12 +33,13 @@ class NewOrderNotification extends Notification
     }
 
     public function toArray(object $notifiable): array
-    {
-        return [
-            'order_id'      => $this->order->id,
-            'order_code'    => $this->order->order_code,
-            'customer_name' => $this->order->user->name ?? 'Pelanggan',
-            'message'       => 'Pesanan baru ' . $this->order->order_code . ' dari ' . ($this->order->user->name ?? 'pelanggan') . '.',
-        ];
-    }
+{
+    return [
+        'type'          => 'order',   // ← tambahin ini
+        'order_id'      => $this->order->id,
+        'order_code'    => $this->order->order_code,
+        'customer_name' => $this->order->user->name ?? 'Pelanggan',
+        'message'       => 'Pesanan baru ' . $this->order->order_code . ' dari ' . ($this->order->user->name ?? 'pelanggan') . '.',
+    ];
+}
 }

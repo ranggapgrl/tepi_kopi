@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Notification;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification as MidtransNotification;
+use App\Notifications\LowStockNotification;
 
 class OrderController extends Controller
 {
@@ -131,6 +132,9 @@ class OrderController extends Controller
                 'shipping_notes' => $validated['shipping_notes'] ?? null,
             ]);
 
+            $lowStockThreshold = config('tepikopi.low_stock_threshold', 5);
+            $lowStockAlerts = [];
+
             foreach ($lockedItems as $entry) {
                 $item = $entry['item'];
 
@@ -143,9 +147,24 @@ class OrderController extends Controller
                 ]);
 
                 if ($entry['variant']) {
+                    $stockBefore = $entry['variant']->stock;
                     $entry['variant']->decrement('stock', $item->quantity);
+                    $stockAfter = $stockBefore - $item->quantity;
+                    $itemName = ($item->product->name ?? 'Produk') . ' — ' . $entry['variant']->name;
+                    $productId = $item->product_id;
                 } else {
+                    $stockBefore = $entry['product']->stock;
                     $entry['product']->decrement('stock', $item->quantity);
+                    $stockAfter = $stockBefore - $item->quantity;
+                    $itemName = $entry['product']->name;
+                    $productId = $entry['product']->id;
+                }
+
+                // Hanya catat begitu stok BARU SAJA turun melewati batas gara-gara
+                // pesanan ini, supaya admin tidak dibanjiri notifikasi berulang
+                // untuk produk yang memang sudah lama menipis.
+                if ($stockAfter <= $lowStockThreshold && $stockBefore > $lowStockThreshold) {
+                    $lowStockAlerts[] = ['name' => $itemName, 'stock' => $stockAfter, 'product_id' => $productId];
                 }
             }
 
@@ -156,6 +175,13 @@ class OrderController extends Controller
             $admins = User::where('role', 'admin')->get();
             if ($admins->isNotEmpty()) {
                 Notification::send($admins, new NewOrderNotification($order));
+
+                foreach ($lowStockAlerts as $alert) {
+                    Notification::send(
+                        $admins,
+                        new LowStockNotification($alert['name'], $alert['stock'], $alert['product_id'])
+                    );
+                }
             }
 
             return redirect()->route('orders.pay', $order);

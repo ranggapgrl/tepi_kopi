@@ -45,6 +45,53 @@
             </div>
         </div>
 
+        {{-- ⬇️ WIDGET BARU: STOK MENIPIS ⬇️ --}}
+        <div class="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-amber-50 bg-amber-950 text-white flex justify-between items-center">
+                <h3 class="font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    Stok Menipis
+                </h3>
+                <a href="{{ route('products.index') }}" class="text-xs text-amber-200 hover:text-white">Kelola Produk</a>
+            </div>
+
+            @if($lowStockItems->isEmpty())
+                <div class="p-10 text-center text-sm text-gray-400">
+                    Semua stok masih aman (di atas {{ $lowStockThreshold }}).
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-amber-50/50 text-amber-900 border-b border-amber-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold">Produk</th>
+                                <th class="px-6 py-3 font-semibold">Sisa Stok</th>
+                                <th class="px-6 py-3 font-semibold"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($lowStockItems as $item)
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium">{{ $item['name'] }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="{{ $item['stock'] <= 0 ? 'text-rose-700 bg-rose-100' : 'text-amber-700 bg-amber-100' }} px-2 py-1 rounded-md text-xs font-bold">
+                                        {{ $item['stock'] <= 0 ? 'Habis' : $item['stock'] . ' tersisa' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ $item['edit_url'] }}" class="text-xs font-semibold text-amber-700 hover:text-amber-900 hover:underline">
+                                        Restock <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        {{-- ⬆️ WIDGET BARU: STOK MENIPIS ⬆️ --}}
+
         <div class="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-amber-50 bg-amber-950 text-white flex justify-between items-center">
                 <h3 class="font-bold">Pesanan Terbaru</h3>

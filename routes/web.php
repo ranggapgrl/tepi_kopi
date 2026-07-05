@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
     Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout.show');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay'); // BARU
     Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
 });
 
@@ -106,3 +107,6 @@ Route::get('/dashboard', function () {
     }
     return redirect()->route('home');
 })->middleware('auth')->name('dashboard');
+
+// Webhook Midtrans — tanpa middleware auth, karena dipanggil server Midtrans, bukan browser user
+Route::post('/midtrans/callback', [OrderController::class, 'midtransCallback'])->name('midtrans.callback'); // BARU

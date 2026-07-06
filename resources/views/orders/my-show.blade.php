@@ -120,6 +120,10 @@
                     <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">
                         Pesananmu sedang menunggu pembayaran. Segera lakukan pembayaran agar pesanan bisa diproses.
                     </p>
+                    <a href="{{ route('orders.pay', $order) }}"
+                       class="w-full mt-4 py-2.5 btn-primary text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i> Lanjutkan Pembayaran
+                    </a>
                     <form action="{{ route('orders.cancel', $order) }}" method="POST"
                           onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')" class="mt-4">
                         @csrf

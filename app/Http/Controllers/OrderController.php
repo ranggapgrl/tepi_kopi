@@ -255,6 +255,10 @@ class OrderController extends Controller
 
         $order->load('items.product', 'items.variant', 'user');
 
+        // Reuse order_id Midtrans yang sudah pernah dibuat untuk order ini,
+        // supaya tidak tercipta transaksi baru tiap kali user buka ulang halaman bayar.
+        $midtransOrderId = $order->midtrans_order_id ?: 'TEPIKOPI-' . $order->id . '-' . now()->timestamp;
+
         $itemDetails = [];
         $subtotal = 0;
 
@@ -287,7 +291,7 @@ class OrderController extends Controller
 
         $params = [
             'transaction_details' => [
-                'order_id' => 'TEPIKOPI-' . $order->id . '-' . now()->timestamp,
+                'order_id' => $midtransOrderId,
                 'gross_amount' => (int) round($order->total_price),
             ],
             'item_details' => $itemDetails,
@@ -301,7 +305,13 @@ class OrderController extends Controller
             ],
         ];
 
-        return Snap::getSnapToken($params);
+        $snapToken = Snap::getSnapToken($params);
+
+        if (! $order->midtrans_order_id) {
+            $order->update(['midtrans_order_id' => $midtransOrderId]);
+        }
+
+        return $snapToken;
     }
 
     /**
@@ -319,19 +329,42 @@ class OrderController extends Controller
 
         $transactionStatus = $notif->transaction_status;
         $fraudStatus = $notif->fraud_status;
+        $midtransOrderId = $notif->order_id;
 
-        // order_id format: TEPIKOPI-{id}-{timestamp}
-        $parts = explode('-', $notif->order_id);
-        $orderId = $parts[1] ?? null;
+        \Log::info('Midtrans callback diterima', [
+            'midtrans_order_id' => $midtransOrderId,
+            'transaction_status' => $transactionStatus,
+            'fraud_status' => $fraudStatus,
+        ]);
 
-        $order = Order::find($orderId);
+        // Cari order berdasarkan midtrans_order_id (akurat), fallback ke cara lama
+        // (parsing dari string) untuk order lama sebelum kolom ini ada.
+        $order = Order::where('midtrans_order_id', $midtransOrderId)->first();
+
+        if (! $order) {
+            $parts = explode('-', $midtransOrderId);
+            $orderId = $parts[1] ?? null;
+            $order = Order::find($orderId);
+        }
 
         if (! $order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        // Idempotensi: kalau order sudah tidak lagi "Menunggu Pembayaran", abaikan
+        // notifikasi ini. Mencegah notifikasi telat/duplikat (mis. dari percobaan
+        // bayar lama yang akhirnya expire) merusak status yang sudah final, dan
+        // mencegah stok dikembalikan keliru.
+        if ($order->status !== 'Menunggu Pembayaran') {
+            return response()->json(['message' => 'OK - status sudah final']);
+        }
+
         if (($transactionStatus == 'capture' && $fraudStatus == 'accept') || $transactionStatus == 'settlement') {
-            $order->update(['status' => 'Diproses']);
+            $order->update([
+                'status' => 'Diproses',
+                'payment_type' => $notif->payment_type,
+                'paid_at' => now(),
+            ]);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $order->load('items');
             foreach ($order->items as $item) {

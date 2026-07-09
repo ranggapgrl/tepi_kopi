@@ -243,10 +243,12 @@ class ProductController extends Controller
 
         // Update / tambah varian
         if ($request->has('variants')) {
+            $submittedVariantIds = [];
+
             foreach ($request->variants as $index => $variant) {
                 if (empty($variant['name'])) continue;
 
-                $product->variants()->updateOrCreate(
+                $savedVariant = $product->variants()->updateOrCreate(
                     ['id' => $variant['id'] ?? null],
                     [
                         'name'       => $variant['name'],
@@ -255,7 +257,14 @@ class ProductController extends Controller
                         'sort_order' => $index,
                     ]
                 );
+
+                $submittedVariantIds[] = $savedVariant->id;
             }
+
+            // Varian lama yang sudah dibuang lewat tombol "Hapus" di form
+            // (tidak lagi ada di request) ikut dihapus dari database —
+            // sebelumnya cuma hilang dari tampilan tapi tetap ada di DB.
+            $product->variants()->whereNotIn('id', $submittedVariantIds)->delete();
         }
 
         // Notifikasi stok menipis: hanya dikirim kalau stok BARU SAJA turun

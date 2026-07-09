@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\ContactMessage;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -11,17 +12,11 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Bagikan $cartCount ke layout utama supaya badge keranjang
@@ -39,12 +34,16 @@ class AppServiceProvider extends ServiceProvider
             $view->with('cartCount', $cartCount);
         });
 
-        // Bagikan $pendingOrdersCount ke sidebar admin supaya badge notifikasi
-        // "Pesanan Masuk" selalu update di semua halaman admin.
+        // Bagikan $pendingOrdersCount & $unreadContactCount ke sidebar admin
+        // supaya badge-nya selalu update di semua halaman admin.
         View::composer('admin.partials.sidebar', function ($view) {
             $view->with(
                 'pendingOrdersCount',
                 Order::where('status', 'Menunggu Pembayaran')->count()
+            );
+            $view->with(
+                'unreadContactCount',
+                ContactMessage::whereNull('read_at')->count()
             );
         });
     }

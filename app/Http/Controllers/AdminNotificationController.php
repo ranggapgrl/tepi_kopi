@@ -11,8 +11,14 @@ class AdminNotificationController extends Controller
         $notification = Auth::user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
-        if (($notification->data['type'] ?? 'order') === 'low_stock') {
+        $type = $notification->data['type'] ?? 'order';
+
+        if ($type === 'low_stock') {
             return redirect()->route('products.index');
+        }
+
+        if ($type === 'contact') {
+            return redirect()->route('contact-messages.show', $notification->data['contact_message_id']);
         }
 
         return redirect()->route('orders.show', $notification->data['order_id']);

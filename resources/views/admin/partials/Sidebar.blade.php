@@ -39,6 +39,18 @@
             <i class="fa-solid fa-star w-5"></i> Ulasan Pelanggan
         </a>
 
+        <a href="{{ route('contact-messages.index') }}"
+           class="flex items-center justify-between gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('pesan-kontak*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <span class="flex items-center gap-3">
+                <i class="fa-solid fa-envelope w-5"></i> Pesan Kontak
+            </span>
+            @if(($unreadContactCount ?? 0) > 0)
+                <span class="bg-rose-600 text-white text-[10px] font-bold min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center">
+                    {{ $unreadContactCount > 99 ? '99+' : $unreadContactCount }}
+                </span>
+            @endif
+        </a>
+
         <a href="{{ route('users.index') }}"
            class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('users*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
             <i class="fa-solid fa-users w-5"></i> Manajemen User

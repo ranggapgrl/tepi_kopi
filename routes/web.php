@@ -17,6 +17,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminNotificationController;
+use App\Http\Controllers\ContactMessageController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -90,6 +91,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    Route::get('/pesan-kontak', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('/pesan-kontak/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::delete('/pesan-kontak/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
 

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactMessage;
+use App\Models\User;
+use App\Notifications\ContactMessageNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ContactController extends Controller
 {
@@ -13,17 +17,22 @@ class ContactController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'    => 'required|string|max:255',
             'email'   => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|max:2000',
         ]);
 
-        // Belum ada pengiriman email / penyimpanan ke database di sini.
-        // Kalau mau, ini tempat paling gampang buat nambahin salah satu dari:
-        //   Mail::to('halo@tepikopi.com')->send(new ContactMessageMail($request->all()));
-        // atau simpan ke tabel `contact_messages` lewat model.
+        // 1. Simpan ke database supaya pesan tidak hilang & bisa dilihat admin nanti.
+        $contactMessage = ContactMessage::create($validated);
+
+        // 2. Kirim notifikasi (in-app bell icon + email) ke semua admin,
+        // konsisten dengan alur NewOrderNotification & LowStockNotification.
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new ContactMessageNotification($contactMessage));
+        }
 
         return redirect('/contact')->with('success', 'Pesan kamu sudah terkirim. Terima kasih sudah menghubungi kami!');
     }

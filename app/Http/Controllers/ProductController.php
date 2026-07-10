@@ -247,27 +247,61 @@ class ProductController extends Controller
         // Update / tambah varian
         if ($request->has('variants')) {
             $submittedVariantIds = [];
+            $lowStockThreshold = config('tepikopi.low_stock_threshold', 5);
+            $lowStockVariantAlerts = [];
 
             foreach ($request->variants as $index => $variant) {
                 if (empty($variant['name'])) continue;
+
+                $existingVariant = !empty($variant['id'])
+                    ? $product->variants()->find($variant['id'])
+                    : null;
+                $variantStockBefore = $existingVariant ? $existingVariant->stock : null;
+
+                $newStock = $variant['stock'] ?? 0;
 
                 $savedVariant = $product->variants()->updateOrCreate(
                     ['id' => $variant['id'] ?? null],
                     [
                         'name'       => $variant['name'],
                         'price'      => $variant['price'] ?? $product->price,
-                        'stock'      => $variant['stock'] ?? 0,
+                        'stock'      => $newStock,
                         'sort_order' => $index,
                     ]
                 );
 
                 $submittedVariantIds[] = $savedVariant->id;
+
+                // Cuma catat kalau stok BARU SAJA turun melewati batas gara-gara
+                // admin ubah stok manual di sini (varian baru dilewatkan,
+                // karena belum ada "sebelum" untuk dibandingkan).
+                if ($variantStockBefore !== null
+                    && $newStock <= $lowStockThreshold
+                    && $variantStockBefore > $lowStockThreshold
+                ) {
+                    $lowStockVariantAlerts[] = [
+                        'name'  => $product->name . ' — ' . $variant['name'],
+                        'stock' => $newStock,
+                    ];
+                }
             }
 
             // Varian lama yang sudah dibuang lewat tombol "Hapus" di form
             // (tidak lagi ada di request) ikut dihapus dari database —
             // sebelumnya cuma hilang dari tampilan tapi tetap ada di DB.
             $product->variants()->whereNotIn('id', $submittedVariantIds)->delete();
+
+            if (!empty($lowStockVariantAlerts)) {
+                $admins = \App\Models\User::where('role', 'admin')->get();
+                if ($admins->isNotEmpty()) {
+                    foreach ($lowStockVariantAlerts as $alert) {
+                        Notification::send(
+                            $admins,
+                            new \App\Notifications\LowStockNotification($alert['name'], $alert['stock'], $product->id)
+                        );
+                    }
+                }
+            }
         }
 
         // Notifikasi stok menipis: hanya dikirim kalau stok BARU SAJA turun

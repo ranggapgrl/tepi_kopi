@@ -142,8 +142,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        $user->delete();
-
         \App\Models\ActivityLog::record('User', 'delete', 'Menghapus akun "' . $user->name . '".');
 
         return redirect()->route('users.index')->with('success', 'Akun berhasil dihapus.');

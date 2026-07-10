@@ -8,7 +8,7 @@ class ContactMessage extends Model
 {
     protected $fillable = [
         'name', 'email', 'subject', 'message',
-        'reply_message', 'replied_at', 'replied_by',
+        'read_at', 'reply_message', 'replied_at', 'replied_by',
     ];
 
     protected function casts(): array

@@ -106,6 +106,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/pesan-kontak/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/laporan/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
     Route::resource('users', UserController::class)->except(['show']);
 

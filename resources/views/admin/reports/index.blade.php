@@ -8,10 +8,16 @@
     @include('admin.partials.sidebar')
 
     <div class="flex-grow space-y-6 min-w-0">
-        <div>
-            <h1 class="text-2xl font-bold text-amber-950">Laporan Penjualan</h1>
-            <p class="text-amber-700/80 text-sm">Ringkasan performa penjualan Tepi Kopi berdasarkan rentang tanggal.</p>
-        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+        <h1 class="text-2xl font-bold text-amber-950">Laporan Penjualan</h1>
+        <p class="text-amber-700/80 text-sm">Ringkasan performa penjualan Tepi Kopi berdasarkan rentang tanggal.</p>
+    </div>
+    <a href="{{ route('reports.exportPdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-lg shadow-sm transition-colors shrink-0">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+    </a>
+</div>
 
         {{-- Filter Tanggal --}}
         <form method="GET" action="{{ route('reports.index') }}"

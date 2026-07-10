@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,53 @@ class ReportController extends Controller
      * Laporan penjualan dengan filter rentang tanggal.
      */
     public function index(Request $request)
+    {
+        $data = $this->buildReportData($request);
+
+        // Tabel pesanan untuk tampilan web tetap dipaginate biar ringan.
+        $data['orders'] = (clone $data['baseQuery'])
+            ->with('user')
+            ->withCount('items')
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        unset($data['baseQuery']);
+
+        return view('admin.reports.index', $data);
+    }
+
+    /**
+     * ADMIN ONLY — /laporan/export-pdf
+     * Unduh laporan penjualan (rentang tanggal yang sama dengan filter
+     * yang lagi aktif) dalam bentuk PDF siap cetak.
+     */
+    public function exportPdf(Request $request)
+    {
+        $data = $this->buildReportData($request);
+
+        // Untuk PDF, semua pesanan dalam rentang tanggal ditampilkan
+        // (tidak dipaginate) supaya laporannya lengkap.
+        $data['orders'] = (clone $data['baseQuery'])
+            ->with('user')
+            ->withCount('items')
+            ->latest()
+            ->get();
+
+        unset($data['baseQuery']);
+
+        $pdf = Pdf::loadView('admin.reports.pdf', $data)->setPaper('a4', 'portrait');
+
+        $filename = 'laporan-penjualan-tepikopi-' . $data['startDate'] . '-sampai-' . $data['endDate'] . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Logic laporan yang dipakai bareng oleh index() (tampilan web) dan
+     * exportPdf() (unduhan PDF), biar angka yang ditampilkan selalu konsisten.
+     */
+    private function buildReportData(Request $request): array
     {
         // Default: 30 hari terakhir kalau belum ada filter
         $startDate = $request->filled('start_date')
@@ -70,25 +118,17 @@ class ReportController extends Controller
             ->take(5)
             ->get();
 
-        // ==== Tabel Pesanan dalam rentang tanggal ====
-        $orders = (clone $baseQuery)
-            ->with('user')
-            ->withCount('items')
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('admin.reports.index', compact(
+        return compact(
             'startDate',
             'endDate',
+            'baseQuery',
             'totalRevenue',
             'totalOrders',
             'totalItemsSold',
             'averageOrderValue',
             'chartLabels',
             'chartData',
-            'topProducts',
-            'orders'
-        ));
+            'topProducts'
+        );
     }
 }

@@ -45,7 +45,12 @@ public function index(Request $request)
  */
 public function destroy(Review $review)
 {
+    $productName = $review->product->name ?? 'produk';
+    $reviewerName = $review->user->name ?? 'user';
     $review->delete();
+
+    \App\Models\ActivityLog::record('Ulasan', 'delete', 'Menghapus ulasan dari "' . $reviewerName . '" untuk produk "' . $productName . '".');
+
     return back()->with('success', 'Ulasan berhasil dihapus.');
 }
     public function store(Request $request, Product $product)

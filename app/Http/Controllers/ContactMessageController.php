@@ -68,6 +68,8 @@ class ContactMessageController extends Controller
         Notification::route('mail', $contactMessage->email)
             ->notify(new ContactMessageReplyNotification($contactMessage));
 
+        \App\Models\ActivityLog::record('Pesan Kontak', 'update', 'Membalas pesan dari "' . $contactMessage->name . '".');
+
         return back()->with('success', 'Balasan berhasil dikirim ke ' . $contactMessage->email . '.');
     }
 
@@ -76,7 +78,10 @@ class ContactMessageController extends Controller
      */
     public function destroy(ContactMessage $contactMessage)
     {
+        $senderName = $contactMessage->name;
         $contactMessage->delete();
+
+        \App\Models\ActivityLog::record('Pesan Kontak', 'delete', 'Menghapus pesan dari "' . $senderName . '".');
 
         return redirect()->route('contact-messages.index')->with('success', 'Pesan berhasil dihapus.');
     }

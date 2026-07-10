@@ -55,5 +55,10 @@
            class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('users*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
             <i class="fa-solid fa-users w-5"></i> Manajemen User
         </a>
+
+        <a href="{{ route('activity-logs.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('log-aktivitas*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <i class="fa-solid fa-clock-rotate-left w-5"></i> Log Aktivitas
+        </a>
     </div>
 </aside>

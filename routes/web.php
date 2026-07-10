@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\ActivityLogController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -109,6 +110,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/laporan/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
     Route::resource('users', UserController::class)->except(['show']);
+
+    Route::get('/log-aktivitas', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     // Notifikasi admin (pesanan baru)
     Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');

@@ -72,6 +72,8 @@ class UserController extends Controller
         $user->role = $validated['role'];
         $user->save();
 
+        \App\Models\ActivityLog::record('User', 'create', 'Menambahkan akun "' . $user->name . '" (' . $user->role . ').');
+
         return redirect()->route('users.index')->with('success', 'Akun berhasil ditambahkan.');
     }
 
@@ -114,7 +116,9 @@ class UserController extends Controller
             $user->password = Hash::make($validated['password']);
         }
 
-        $user->save();
+       $user->save();
+
+        \App\Models\ActivityLog::record('User', 'update', 'Memperbarui akun "' . $user->name . '".');
 
         return redirect()->route('users.index')->with('success', 'Akun berhasil diperbarui.');
     }
@@ -137,6 +141,10 @@ class UserController extends Controller
         }
 
         $user->delete();
+
+        $user->delete();
+
+        \App\Models\ActivityLog::record('User', 'delete', 'Menghapus akun "' . $user->name . '".');
 
         return redirect()->route('users.index')->with('success', 'Akun berhasil dihapus.');
     }

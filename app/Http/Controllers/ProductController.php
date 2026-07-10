@@ -6,6 +6,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -168,6 +169,8 @@ class ProductController extends Controller
             }
         }
 
+        ActivityLog::record('Produk', 'create', 'Menambahkan produk "' . $product->name . '".');
+
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
@@ -280,6 +283,8 @@ class ProductController extends Controller
             }
         }
 
+        ActivityLog::record('Produk', 'update', 'Memperbarui produk "' . $product->name . '".');
+
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
@@ -301,8 +306,10 @@ class ProductController extends Controller
     /**
      * ADMIN ONLY — DELETE /products/{product}
      */
-    public function destroy(Product $product)
+   public function destroy(Product $product)
     {
+        $productName = $product->name;
+
         // Hapus file gambar utama
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
@@ -314,6 +321,8 @@ class ProductController extends Controller
         }
 
         $product->delete();
+
+        ActivityLog::record('Produk', 'delete', 'Menghapus produk "' . $productName . '".');
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }

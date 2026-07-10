@@ -451,7 +451,14 @@ class OrderController extends Controller
             'status' => 'required|in:' . implode(',', self::STATUSES),
         ]);
 
+        $oldStatus = $order->status;
         $order->update($validated);
+
+        \App\Models\ActivityLog::record(
+            'Pesanan',
+            'update',
+            'Mengubah status pesanan #ORD-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) . ' dari "' . $oldStatus . '" ke "' . $order->status . '".'
+        );
 
         return redirect()->route('orders.show', $order)->with('success', 'Status pesanan berhasil diperbarui.');
     }

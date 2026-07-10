@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,9 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name',
         ]);
 
-        Category::create($validated);
+        $category = Category::create($validated);
+
+        ActivityLog::record('Kategori', 'create', 'Menambahkan kategori "' . $category->name . '".');
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
@@ -66,6 +69,8 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
+        ActivityLog::record('Kategori', 'update', 'Memperbarui kategori "' . $category->name . '".');
+
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
@@ -80,6 +85,8 @@ class CategoryController extends Controller
         }
 
         $category->delete();
+
+        ActivityLog::record('Kategori', 'delete', 'Menghapus kategori "' . $category->name . '".');
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus.');
     }

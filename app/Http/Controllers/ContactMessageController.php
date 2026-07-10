@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Notifications\ContactMessageReplyNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class ContactMessageController extends Controller
 {
@@ -42,6 +45,30 @@ class ContactMessageController extends Controller
         }
 
         return view('admin.contact-messages.show', compact('contactMessage'));
+    }
+
+    /**
+     * ADMIN ONLY — POST /pesan-kontak/{contactMessage}/reply
+     * Kirim balasan email ke customer, dan simpan riwayat balasannya.
+     */
+    public function reply(Request $request, ContactMessage $contactMessage)
+    {
+        $validated = $request->validate([
+            'reply_message' => 'required|string|max:2000',
+        ]);
+
+        $contactMessage->update([
+            'reply_message' => $validated['reply_message'],
+            'replied_at'    => now(),
+            'replied_by'    => Auth::id(),
+        ]);
+
+        // Kirim ke email customer langsung (bukan user terdaftar, jadi
+        // pakai on-demand notification lewat alamat emailnya).
+        Notification::route('mail', $contactMessage->email)
+            ->notify(new ContactMessageReplyNotification($contactMessage));
+
+        return back()->with('success', 'Balasan berhasil dikirim ke ' . $contactMessage->email . '.');
     }
 
     /**

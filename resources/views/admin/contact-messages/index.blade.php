@@ -80,16 +80,21 @@
                         <div class="flex-grow min-w-0">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <p class="font-semibold text-amber-950 flex items-center gap-2">
-                                        {{ $message->name }}
-                                        @if(! $message->read_at)
-                                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                                        @endif
-                                    </p>
-                                    <p class="text-xs text-gray-400">
-                                        {{ $message->email }} · {{ $message->created_at->translatedFormat('d M Y, H:i') }}
-                                    </p>
-                                </div>
+    <p class="font-semibold text-amber-950 flex items-center gap-2">
+        {{ $message->name }}
+        @if(! $message->read_at)
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+        @endif
+    </p>
+    <p class="text-xs text-gray-400">
+        {{ $message->email }} · {{ $message->created_at->translatedFormat('d M Y, H:i') }}
+    </p>
+</div>
+@if($message->replied_at)
+    <span class="text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1 shrink-0">
+        <i class="fa-solid fa-check"></i> Sudah Dibalas
+    </span>
+@endif
                             </div>
 
                             <p class="text-sm font-medium text-amber-800 mt-2">{{ $message->subject }}</p>

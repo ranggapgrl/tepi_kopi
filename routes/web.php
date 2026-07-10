@@ -102,6 +102,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/pesan-kontak', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     Route::get('/pesan-kontak/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::post('/pesan-kontak/{contactMessage}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
     Route::delete('/pesan-kontak/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');

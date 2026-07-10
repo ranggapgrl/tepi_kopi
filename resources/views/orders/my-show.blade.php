@@ -29,10 +29,18 @@
         <a href="{{ route('orders.my') }}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-black/10 hover:bg-black/[0.03] transition-colors" style="color:#412D15;">
             <i class="fa-solid fa-arrow-left text-xs"></i>
         </a>
-        <div>
+        <div class="flex-grow">
             <h1 class="font-display text-2xl sm:text-3xl font-semibold text-[#1F150C]">Pesanan #{{ $order->order_code }}</h1>
             <p class="text-[#1F150C]/50 text-sm">Dibuat {{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
         </div>
+
+        @unless(in_array($order->status, ['Menunggu Pembayaran', 'Dibatalkan']))
+        <a href="{{ route('orders.invoice', $order) }}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 btn-primary text-sm font-bold rounded-lg shadow-sm transition-colors shrink-0">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span class="hidden sm:inline">Download Invoice</span>
+        </a>
+        @endunless
     </div>
 
     {{-- ============ VISUAL STATUS TIMELINE ============ --}}

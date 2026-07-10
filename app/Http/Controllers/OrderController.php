@@ -390,13 +390,35 @@ class OrderController extends Controller
         return view('orders.my-index', compact('orders'));
     }
 
-    public function myOrderShow(Order $order)
+   public function myOrderShow(Order $order)
     {
         abort_unless($order->user_id === Auth::id(), 403);
 
         $order->load('items.product', 'items.variant');
 
         return view('orders.my-show', compact('order'));
+    }
+
+    /**
+     * CUSTOMER — GET /my-orders/{order}/invoice
+     * Unduh invoice/struk pesanan dalam bentuk PDF. Cuma bisa diakses
+     * pemilik pesanan, dan cuma untuk pesanan yang sudah dibayar
+     * (bukan "Menunggu Pembayaran" atau "Dibatalkan").
+     */
+    public function downloadInvoice(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        if (in_array($order->status, ['Menunggu Pembayaran', 'Dibatalkan'])) {
+            return back()->with('error', 'Invoice hanya tersedia untuk pesanan yang sudah dibayar.');
+        }
+
+        $order->load('items.product', 'items.variant', 'user');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('orders.invoice-pdf', compact('order'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('invoice-' . $order->order_code . '.pdf');
     }
 
     public function cancel(Order $order)

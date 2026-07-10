@@ -32,8 +32,24 @@
             selectedVariant: null,
             qty: 1,
             lightboxOpen: false,
-            infoTab: 'deskripsi',
-            init() { if (this.variants.length) { this.selectedVariant = this.variants[0]; } },
+infoTab: 'deskripsi',
+wishlisted: {{ in_array($product->id, $wishlistedProductIds ?? []) ? 'true' : 'false' }},
+wishlistLoading: false,
+toggleWishlist() {
+    if (this.wishlistLoading) return;
+    this.wishlistLoading = true;
+    fetch('{{ route('wishlist.toggle', $product) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+            'Accept': 'application/json',
+        },
+    })
+    .then(res => res.json())
+    .then(data => { this.wishlisted = data.wishlisted; })
+    .finally(() => { this.wishlistLoading = false; });
+},
+init() { if (this.variants.length) { this.selectedVariant = this.variants[0]; } },
             get currentPrice() { return this.selectedVariant ? this.selectedVariant.price : {{ (float) $product->price }}; },
             get currentStock() { return this.selectedVariant ? this.selectedVariant.stock : {{ (int) $product->stock }}; },
             nextImage() { let i = this.images.indexOf(this.activeImage); this.activeImage = this.images[(i + 1) % this.images.length]; },
@@ -108,7 +124,22 @@
 
             {{-- BUY BOX --}}
             <div class="bg-white border border-black/10 rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-sm">
-                <h1 class="text-2xl sm:text-3xl font-black text-[#1F150C] mb-2 leading-tight">{{ $product->name }}</h1>
+                <div class="flex items-start justify-between gap-3 mb-2">
+    <h1 class="text-2xl sm:text-3xl font-black text-[#1F150C] leading-tight">{{ $product->name }}</h1>
+
+    @auth
+    <button type="button" @click="toggleWishlist()"
+            class="shrink-0 w-11 h-11 rounded-full border border-black/10 flex items-center justify-center transition"
+            :class="wishlisted ? 'text-rose-500 border-rose-200 bg-rose-50' : 'text-[#1F150C]/50 hover:text-rose-500 hover:border-rose-200'">
+        <i class="text-base" :class="wishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+    </button>
+    @else
+    <a href="{{ route('login') }}"
+       class="shrink-0 w-11 h-11 rounded-full border border-black/10 flex items-center justify-center text-[#1F150C]/50 hover:text-rose-500 hover:border-rose-200 transition">
+        <i class="fa-regular fa-heart text-base"></i>
+    </a>
+    @endauth
+</div>
 
                 <a href="#ulasan" class="inline-flex items-center gap-2 mb-5 group">
                     <div class="flex text-sm" style="color:#412D15;">

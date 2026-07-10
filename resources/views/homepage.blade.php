@@ -149,10 +149,39 @@
                                 <i class="fa-solid fa-fire mr-1"></i>Terlaris
                             </span>
                         @endif
-                        @if($product->stock <= 0)
-                            <span class="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10 shadow">Habis</span>
-                        @endif
-                    </div>
+                       @if($product->stock <= 0)
+    <span class="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10 shadow">Habis</span>
+@endif
+
+@auth
+<button type="button"
+        x-data="{ wishlisted: {{ in_array($product->id, $wishlistedProductIds ?? []) ? 'true' : 'false' }}, loading: false }"
+        @click.stop.prevent="
+            if (loading) return;
+            loading = true;
+            fetch('{{ route('wishlist.toggle', $product) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(res => res.json())
+            .then(data => { wishlisted = data.wishlisted; })
+            .finally(() => { loading = false; });
+        "
+        class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition z-10"
+        :class="wishlisted ? 'text-rose-500' : 'text-[#1F150C]/50 hover:text-rose-500'">
+    <i class="text-xs" :class="wishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+</button>
+@else
+<button type="button"
+        @click.stop.prevent="window.location.href = '{{ route('login') }}'"
+        class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1F150C]/50 hover:text-rose-500 transition z-10">
+    <i class="fa-regular fa-heart text-xs"></i>
+</button>
+@endauth
+</div>
                     <div class="p-5">
                         <div class="flex text-[10px] mb-1.5" style="color:#412D15;">
                             <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>

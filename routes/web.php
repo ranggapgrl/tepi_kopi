@@ -18,6 +18,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\WishlistController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -76,6 +77,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my');
     Route::get('/my-orders/{order}', [OrderController::class, 'myOrderShow'])->name('orders.myShow');
     Route::patch('/my-orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+});
+
+// Wishlist (customer, untuk semua user yang login)
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 });
 
 // Admin

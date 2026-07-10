@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tepi Kopi - @yield('title', 'Premium Coffee')</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('assets/icon.svg') }}">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -64,14 +65,25 @@
             </div>
 
             <div class="flex items-center gap-3 sm:gap-5">
-                <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    @if(($cartCount ?? 0) > 0)
-                    <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
-                        {{ $cartCount }}
-                    </span>
-                    @endif
-                </a>
+    @auth
+    <a href="{{ route('wishlist.index') }}" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
+        <i class="fa-solid fa-heart {{ request()->routeIs('wishlist.index') ? '' : 'text-[#1F150C]' }}"></i>
+        @if(($wishlistCount ?? 0) > 0)
+        <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
+            {{ $wishlistCount }}
+        </span>
+        @endif
+    </a>
+    @endauth
+
+    <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
+        <i class="fa-solid fa-bag-shopping"></i>
+        @if(($cartCount ?? 0) > 0)
+        <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
+            {{ $cartCount }}
+        </span>
+        @endif
+    </a>
 
                 @auth
                     <div class="relative hidden sm:block" x-data="{ open: false }">
@@ -90,7 +102,8 @@
                              x-transition
                              class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-black/5 py-2 z-50">
                             <a href="/profile" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-user w-4 text-[#412D15]"></i> Profil</a>
-                            <a href="{{ route('orders.my') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-receipt w-4 text-[#412D15]"></i> Pesanan</a>
+<a href="{{ route('orders.my') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-receipt w-4 text-[#412D15]"></i> Pesanan</a>
+<a href="{{ route('wishlist.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-heart w-4 text-[#412D15]"></i> Wishlist</a>
                             <hr class="my-1 border-black/5">
                             <form method="POST" action="/logout">
                                 @csrf
@@ -114,11 +127,12 @@
             <a href="/about" class="block text-sm font-medium text-[#1F150C]/80">Tentang</a>
             <a href="/contact" class="block text-sm font-medium text-[#1F150C]/80">Kontak</a>
             <hr class="border-black/5">
-            @auth
-                <a href="/profile" class="block text-sm font-medium text-[#1F150C]/80">Profil</a>
-                <a href="{{ route('orders.my') }}" class="block text-sm font-medium text-[#1F150C]/80">Pesanan</a>
-                <form method="POST" action="/logout">@csrf<button class="text-sm font-medium text-red-600">Keluar</button></form>
-            @else
+           @auth
+    <a href="/profile" class="block text-sm font-medium text-[#1F150C]/80">Profil</a>
+    <a href="{{ route('orders.my') }}" class="block text-sm font-medium text-[#1F150C]/80">Pesanan</a>
+    <a href="{{ route('wishlist.index') }}" class="block text-sm font-medium text-[#1F150C]/80">Wishlist</a>
+    <form method="POST" action="/logout">@csrf<button class="text-sm font-medium text-red-600">Keluar</button></form>
+@else
                 <a href="/login" class="inline-block px-5 py-2.5 btn-primary text-sm font-bold rounded-full">Masuk</a>
             @endauth
         </div>

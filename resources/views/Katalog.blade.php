@@ -160,9 +160,34 @@
                             {{ $product->category->name ?? 'Kopi' }}
                         </span>
 
-                        <button type="button" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1F150C]/50 hover:text-rose-500 transition z-10">
-                            <i class="fa-regular fa-heart text-xs"></i>
-                        </button>
+                        @auth
+<button type="button"
+        x-data="{ wishlisted: {{ in_array($product->id, $wishlistedProductIds ?? []) ? 'true' : 'false' }}, loading: false }"
+        @click.stop.prevent="
+            if (loading) return;
+            loading = true;
+            fetch('{{ route('wishlist.toggle', $product) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(res => res.json())
+            .then(data => { wishlisted = data.wishlisted; })
+            .finally(() => { loading = false; });
+        "
+        class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition z-10"
+        :class="wishlisted ? 'text-rose-500' : 'text-[#1F150C]/50 hover:text-rose-500'">
+    <i class="text-xs" :class="wishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+</button>
+@else
+<button type="button"
+        @click.stop.prevent="window.location.href = '{{ route('login') }}'"
+        class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1F150C]/50 hover:text-rose-500 transition z-10">
+    <i class="fa-regular fa-heart text-xs"></i>
+</button>
+@endauth
 
                         @if($product->stock <= 0)
                             <span class="absolute bottom-2.5 left-2.5 bg-red-600 text-white text-[9px] font-bold px-2.5 py-1 rounded-full z-10 shadow">Habis</span>

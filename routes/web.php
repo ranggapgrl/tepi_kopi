@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\CustomerNotificationController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -86,6 +87,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+});
+
+// Notifikasi customer (status pesanan, dst) — terpisah dari notifikasi admin
+// di bawah karena rute admin ada di belakang middleware 'admin'.
+Route::middleware('auth')->group(function () {
+    Route::post('/my-notifications/read-all', [CustomerNotificationController::class, 'readAll'])->name('my-notifications.readAll');
+    Route::post('/my-notifications/{id}/read', [CustomerNotificationController::class, 'read'])->name('my-notifications.read');
 });
 
 // Admin

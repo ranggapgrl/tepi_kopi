@@ -24,13 +24,24 @@ class ProductController extends Controller
 
         $products = Product::with('category')
             ->withAvg('reviews', 'rating')
+            ->withSum('orderItems as sold_count', 'quantity')
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search . '%');
             })
             ->when($request->kategori, function ($query) use ($request) {
                 $query->where('category_id', $request->kategori);
             })
-            ->latest()
+            ->when($request->sort, function ($query) use ($request) {
+                match ($request->sort) {
+                    'harga_termurah' => $query->orderBy('price', 'asc'),
+                    'harga_termahal' => $query->orderBy('price', 'desc'),
+                    'rating_tertinggi' => $query->orderByDesc('reviews_avg_rating'),
+                    'terlaris' => $query->orderByDesc('sold_count'),
+                    default => $query->latest(),
+                };
+            }, function ($query) {
+                $query->latest();
+            })
             ->paginate(12)
             ->withQueryString();
 

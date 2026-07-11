@@ -482,6 +482,12 @@ class OrderController extends Controller
             'Mengubah status pesanan #ORD-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) . ' dari "' . $oldStatus . '" ke "' . $order->status . '".'
         );
 
+        // Kabari customer kalau statusnya memang berubah, supaya tidak perlu
+        // cek manual ke halaman "Pesanan Saya".
+        if ($oldStatus !== $order->status && $order->user) {
+            Notification::send($order->user, new \App\Notifications\OrderStatusUpdatedNotification($order, $oldStatus));
+        }
+
         return redirect()->route('orders.show', $order)->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }

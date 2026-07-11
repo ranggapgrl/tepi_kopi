@@ -21,6 +21,7 @@
         {{-- ============ DESKTOP FILTER SIDEBAR ============ --}}
         <aside class="hidden lg:block sticky top-24">
             <form action="/katalog" method="GET" class="bg-white border border-black/10 rounded-2xl p-5">
+                @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-[#1F150C] text-sm uppercase tracking-wider">Filter</h3>
                     @if(request('search') || request('kategori'))
@@ -64,6 +65,7 @@
                     <button @click="filterOpen=false" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
                 </div>
                 <form action="/katalog" method="GET">
+                    @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
                     <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wider mb-2">Cari</label>
                     <div class="relative mb-6">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1F150C]/30 text-xs"></i>
@@ -91,29 +93,43 @@
         {{-- ============ MAIN CONTENT ============ --}}
         <div>
             {{-- SIDEBAR --}}
-            <div class="flex items-center justify-between gap-3 mb-6">
-                <button @click="filterOpen=true" class="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-black/10 rounded-lg text-sm font-semibold text-[#1F150C]">
-                    <i class="fa-solid fa-sliders"></i> Filter
-                </button>
+            <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <button @click="filterOpen=true" class="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-black/10 rounded-lg text-sm font-semibold text-[#1F150C]">
+                        <i class="fa-solid fa-sliders"></i> Filter
+                    </button>
 
-                @if(request('search') || request('kategori'))
-                <div class="flex flex-wrap items-center gap-2">
-                    @if(request('search'))
-                    <span class="inline-flex items-center gap-1.5 bg-[#E1DCC9] text-[#1F150C] text-xs font-semibold px-3 py-1.5 rounded-full">
-                        "{{ request('search') }}"
-                        <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
-                    </span>
-                    @endif
-                    @if(request('kategori'))
-                    <span class="inline-flex items-center gap-1.5 bg-[#E1DCC9] text-[#1F150C] text-xs font-semibold px-3 py-1.5 rounded-full">
-                        {{ optional($categories->firstWhere('id', request('kategori')))->name ?? 'Kategori' }}
-                        <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
-                    </span>
+                    @if(request('search') || request('kategori'))
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if(request('search'))
+                        <span class="inline-flex items-center gap-1.5 bg-[#E1DCC9] text-[#1F150C] text-xs font-semibold px-3 py-1.5 rounded-full">
+                            "{{ request('search') }}"
+                            <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
+                        @endif
+                        @if(request('kategori'))
+                        <span class="inline-flex items-center gap-1.5 bg-[#E1DCC9] text-[#1F150C] text-xs font-semibold px-3 py-1.5 rounded-full">
+                            {{ optional($categories->firstWhere('id', request('kategori')))->name ?? 'Kategori' }}
+                            <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
+                        @endif
+                    </div>
                     @endif
                 </div>
-                @else
-                <span></span>
-                @endif
+
+                <form action="/katalog" method="GET" class="flex items-center gap-2">
+                    @if(request('search'))<input type="hidden" name="search" value="{{ request('search') }}">@endif
+                    @if(request('kategori'))<input type="hidden" name="kategori" value="{{ request('kategori') }}">@endif
+                    <label class="text-xs font-semibold text-[#1F150C]/50 hidden sm:block">Urutkan</label>
+                    <select name="sort" onchange="this.form.submit()"
+                            class="text-sm border border-black/10 rounded-lg px-3 py-2.5 bg-white outline-none focus:border-[#412D15]/40 focus:ring-2 focus:ring-[#412D15]/20 transition">
+                        <option value="" {{ !request('sort') ? 'selected' : '' }}>Terbaru</option>
+                        <option value="harga_termurah" {{ request('sort') === 'harga_termurah' ? 'selected' : '' }}>Harga Terendah</option>
+                        <option value="harga_termahal" {{ request('sort') === 'harga_termahal' ? 'selected' : '' }}>Harga Tertinggi</option>
+                        <option value="rating_tertinggi" {{ request('sort') === 'rating_tertinggi' ? 'selected' : '' }}>Rating Tertinggi</option>
+                        <option value="terlaris" {{ request('sort') === 'terlaris' ? 'selected' : '' }}>Terlaris</option>
+                    </select>
+                </form>
             </div>
 
             @if(session('success'))

@@ -77,6 +77,47 @@
     @endauth
 
     <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
+        @auth
+    <div class="relative" x-data="{ notifOpen: false }">
+        <button @click="notifOpen = !notifOpen" @click.outside="notifOpen = false"
+            class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
+            <i class="fa-solid fa-bell"></i>
+            @if($unreadCustomerNotifications->count() > 0)
+            <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
+                {{ $unreadCustomerNotifications->count() > 9 ? '9+' : $unreadCustomerNotifications->count() }}
+            </span>
+            @endif
+        </button>
+        <div x-show="notifOpen" x-cloak x-transition
+             class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-black/5 py-2 z-50 max-h-96 overflow-y-auto">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-black/5">
+                <p class="text-sm font-bold text-[#1F150C]">Notifikasi</p>
+                @if($unreadCustomerNotifications->count() > 0)
+                <form method="POST" action="{{ route('my-notifications.readAll') }}">
+                    @csrf
+                    <button type="submit" class="text-xs font-medium hover:underline" style="color:var(--brown);">Tandai semua dibaca</button>
+                </form>
+                @endif
+            </div>
+
+            @forelse($unreadCustomerNotifications as $notification)
+            <form method="POST" action="{{ route('my-notifications.read', $notification->id) }}">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-3 hover:bg-[#E1DCC9]/30 border-b border-black/5 last:border-0 flex gap-3">
+                    <i class="fa-solid fa-receipt mt-0.5" style="color:var(--brown);"></i>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-[#1F150C]">Pesanan {{ $notification->data['order_code'] ?? '' }}</p>
+                        <p class="text-xs text-[#1F150C]/60 mt-0.5">{{ $notification->data['message'] }}</p>
+                        <p class="text-[11px] text-[#1F150C]/40 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                    </div>
+                </button>
+            </form>
+            @empty
+            <p class="px-4 py-6 text-center text-sm text-[#1F150C]/40">Tidak ada notifikasi baru.</p>
+            @endforelse
+        </div>
+    </div>
+    @endauth
         <i class="fa-solid fa-bag-shopping"></i>
         @if(($cartCount ?? 0) > 0)
         <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">

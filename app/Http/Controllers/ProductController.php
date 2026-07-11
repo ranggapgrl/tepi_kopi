@@ -23,6 +23,7 @@ class ProductController extends Controller
         $categories = Category::all();
 
         $products = Product::with('category')
+            ->withAvg('reviews', 'rating')
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search . '%');
             })

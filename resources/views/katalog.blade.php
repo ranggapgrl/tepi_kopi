@@ -195,9 +195,14 @@
                     </div>
 
                     <div class="p-3.5 sm:p-4">
-                        <div class="flex text-[9px] mb-1" style="color:#412D15;">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
-                        </div>
+                        <div class="flex items-center gap-1 text-[9px] mb-1" style="color:#412D15;">
+    @for($i = 1; $i <= 5; $i++)
+        <i class="fa-{{ $i <= round($product->reviews_avg_rating ?? 0) ? 'solid' : 'regular' }} fa-star"></i>
+    @endfor
+    @if($product->reviews_avg_rating)
+        <span class="text-[9px] text-[#1F150C]/40 ml-0.5">({{ number_format($product->reviews_avg_rating, 1) }})</span>
+    @endif
+</div>
                         <h3 class="text-sm sm:text-base font-bold text-[#1F150C] leading-tight line-clamp-1">{{ $product->name }}</h3>
                         <p class="font-extrabold text-sm sm:text-base mt-1.5" style="color:#412D15;">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                     </div>

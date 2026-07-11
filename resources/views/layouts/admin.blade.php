@@ -61,15 +61,23 @@
     <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
         @csrf
         <button type="submit" class="w-full text-left px-4 py-3 hover:bg-amber-50 border-b border-amber-50/70 last:border-0 flex gap-3">
-            @if($notifType === 'low_stock')
-                <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
-            @else
-                <i class="fa-solid fa-receipt text-emerald-600 mt-0.5"></i>
-            @endif
-            <div class="min-w-0">
-                <p class="text-sm font-semibold text-amber-900">
-                    {{ $notifType === 'low_stock' ? 'Stok Menipis' : 'Pesanan Baru — ' . ($notification->data['order_code'] ?? '') }}
-                </p>
+           @if($notifType === 'low_stock')
+    <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+@elseif($notifType === 'contact')
+    <i class="fa-solid fa-envelope text-sky-600 mt-0.5"></i>
+@else
+    <i class="fa-solid fa-receipt text-emerald-600 mt-0.5"></i>
+@endif
+<div class="min-w-0">
+    <p class="text-sm font-semibold text-amber-900">
+        @if($notifType === 'low_stock')
+            Stok Menipis
+        @elseif($notifType === 'contact')
+            Pesan Kontak Baru
+        @else
+            Pesanan Baru — {{ $notification->data['order_code'] ?? '' }}
+        @endif
+    </p>
                 <p class="text-xs text-gray-500 mt-0.5">{{ $notification->data['message'] }}</p>
                 <p class="text-[11px] text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
             </div>

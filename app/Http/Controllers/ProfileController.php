@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
@@ -36,6 +37,10 @@ public function update(Request $request)
         $freshUser = \App\Models\User::find($user->id);
 
         if ($request->hasFile('avatar')) {
+            // Hapus file avatar lama supaya tidak numpuk jadi sampah di storage
+            if ($freshUser->avatar) {
+                Storage::disk('public')->delete($freshUser->avatar);
+            }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         } else {
             unset($validated['avatar']);

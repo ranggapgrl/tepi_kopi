@@ -4,11 +4,29 @@ Tepi Kopi adalah aplikasi web berbasis **Laravel** untuk mengelola operasional k
 
 ## ✨ Fitur
 
-- Manajemen data menu/produk 
-- Pencatatan transaksi penjualan
-- Laporan penjualan
-- Autentikasi pengguna (login/register)
-- Tampilan antarmuka menggunakan Blade + Vite
+### Customer
+
+- Autentikasi (login, register, lupa/reset password)
+- Katalog produk dengan pencarian & filter kategori
+- Detail produk (galeri foto, varian, ulasan & rating)
+- Keranjang belanja & checkout dengan pembayaran online (Midtrans Snap)
+- Riwayat pesanan, pembatalan pesanan, download invoice (PDF)
+- Wishlist produk
+- Ulasan produk (khusus pembeli yang pesanannya sudah selesai)
+- Form kontak/hubungi kami
+
+### Admin
+
+- Dashboard ringkasan
+- Kelola produk (CRUD, multi-foto, varian, upload gambar)
+- Kelola kategori produk
+- Kelola pesanan masuk (update status, notifikasi pesanan baru)
+- Laporan penjualan (filter tanggal, grafik, produk terlaris) + export PDF
+- Kelola ulasan pelanggan
+- Kelola pesan kontak + balas langsung ke email pelanggan
+- Manajemen user
+- Log aktivitas admin
+- Notifikasi in-app (pesanan baru, stok menipis)
 
 ## 🛠️ Tech Stack
 
@@ -30,70 +48,82 @@ Pastikan sudah terinstall di komputer kamu:
 ## 🚀 Instalasi
 
 1. **Clone repository**
-   ```bash
-   git clone https://github.com/ranggapgrl/tepi_kopi.git
-   cd tepi_kopi
-   ```
+
+    ```bash
+    git clone https://github.com/ranggapgrl/tepi_kopi.git
+    cd tepi_kopi
+    ```
 
 2. **Install dependency PHP**
-   ```bash
-   composer install
-   ```
+
+    ```bash
+    composer install
+    ```
 
 3. **Install dependency JavaScript**
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 4. **Salin file environment**
-   ```bash
-   cp .env.example .env
-   ```
+
+    ```bash
+    cp .env.example .env
+    ```
 
 5. **Generate application key**
-   ```bash
-   php artisan key:generate
-   ```
+
+    ```bash
+    php artisan key:generate
+    ```
 
 6. **Konfigurasi database**
 
-   Buka file `.env` dan sesuaikan kredensial database:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306 #Menyesuaikan dengan port yang terpasang
-   DB_DATABASE=tepi_kopi
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
+    Buka file `.env` dan sesuaikan kredensial database:
+
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306 #Menyesuaikan dengan port yang terpasang
+    DB_DATABASE=tepi_kopi
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
 
 7. **Import database**
 
-   Buat database baru bernama `tepi_kopi`, lalu import file `tepi_kopi.sql` yang sudah disediakan:
-   ```bash
-   mysql -u root -p tepi_kopi < tepi_kopi.sql
-   ```
+    Buat database baru bernama `tepi_kopi`, lalu import file `tepi_kopi.sql` yang sudah disediakan:
 
-   Atau jika ingin menggunakan migration bawaan Laravel:
-   ```bash
-   php artisan migrate
-   ```
+    ```bash
+    mysql -u root -p tepi_kopi < tepi_kopi.sql
+    ```
+
+    Atau jika ingin menggunakan migration bawaan Laravel:
+
+    ```bash
+    php artisan migrate
+    ```
 
 8. **Build asset frontend**
-   ```bash
-   npm run build
-   ```
-   atau untuk mode development:
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run build
+    ```
+
+    atau untuk mode development:
+
+    ```bash
+    npm run dev
+    ```
 
 9. **Jalankan server lokal**
-   ```bash
-   php artisan serve
-   ```
 
-   Aplikasi bisa diakses di `http://127.0.0.1:8000`
+    ```bash
+    php artisan serve
+    ```
+
+    Aplikasi bisa diakses di `http://127.0.0.1:8000`
 
 ## 🧪 Menjalankan Test
 
@@ -132,11 +162,12 @@ Kontribusi sangat terbuka! Silakan:
 Project ini menggunakan lisensi [MIT](https://opensource.org/licenses/MIT), kecuali dinyatakan lain.
 
 ## 👤 Author
+
 - Andika M Ridho
 - Andi Adi S
 - Haichal R
 - M Sandi
 - Rangga Pagar A
 - Rayyan Nur S K
-  
+
 GitHub: [@ranggapgrl](https://github.com/ranggapgrl)

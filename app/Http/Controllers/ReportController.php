@@ -63,6 +63,13 @@ class ReportController extends Controller
      */
     private function buildReportData(Request $request): array
     {
+        // Validasi dulu supaya input tanggal yang formatnya ngaco (mis. lewat
+        // URL yang diutak-atik manual) tidak bikin query di bawah ini error 500.
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date'   => 'nullable|date',
+        ]);
+
         // Default: 30 hari terakhir kalau belum ada filter
         $startDate = $request->filled('start_date')
             ? $request->start_date
@@ -71,6 +78,13 @@ class ReportController extends Controller
         $endDate = $request->filled('end_date')
             ? $request->end_date
             : now()->toDateString();
+
+        // Kalau end_date ternyata lebih awal dari start_date (mis. user salah pilih
+        // di date picker), tukar posisinya biar rentangnya tetap valid dan laporan
+        // tidak kosong.
+        if ($startDate > $endDate) {
+            [$startDate, $endDate] = [$endDate, $startDate];
+        }
 
         // Query dasar: pesanan dalam rentang tanggal, tidak termasuk yang dibatalkan
         $baseQuery = Order::whereDate('created_at', '>=', $startDate)

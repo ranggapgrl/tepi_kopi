@@ -344,6 +344,15 @@ class ProductController extends Controller
     {
         $productName = $product->name;
 
+        // Jangan sampai produk yang pernah dipesan dihapus — order_items.product_id
+        // pakai cascadeOnDelete, jadi kalau produk ini dihapus, semua baris
+        // order_items yang mereferensikannya (termasuk dari pesanan yang sudah
+        // "Selesai") ikut terhapus dan riwayat pesanan customer jadi rusak.
+        if (OrderItem::where('product_id', $product->id)->exists()) {
+            return redirect()->route('products.index')
+                ->with('error', 'Produk "' . $productName . '" tidak bisa dihapus karena masih ada di riwayat pesanan. Nonaktifkan stoknya jadi 0 kalau ingin menyembunyikannya dari katalog.');
+        }
+
         // Hapus file gambar utama
         if ($product->image) {
             Storage::disk('public')->delete($product->image);

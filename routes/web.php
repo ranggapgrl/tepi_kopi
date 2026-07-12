@@ -21,6 +21,7 @@ use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CustomerNotificationController;
+use App\Http\Controllers\AddressController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -87,6 +88,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+});
+
+// Alamat tersimpan (customer, untuk semua user yang login)
+Route::middleware('auth')->group(function () {
+    Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::patch('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.setDefault');
 });
 
 // Notifikasi customer (status pesanan, dst) — terpisah dari notifikasi admin

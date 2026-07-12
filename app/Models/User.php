@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class)->orderByDesc('is_default')->latest();
+    }
 }

@@ -76,8 +76,7 @@
     </a>
     @endauth
 
-    <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
-        @auth
+    @auth
     <div class="relative" x-data="{ notifOpen: false }">
         <button @click="notifOpen = !notifOpen" @click.outside="notifOpen = false"
             class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
@@ -118,6 +117,8 @@
         </div>
     </div>
     @endauth
+
+    <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
         <i class="fa-solid fa-bag-shopping"></i>
         @if(($cartCount ?? 0) > 0)
         <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
@@ -144,6 +145,7 @@
                              class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-black/5 py-2 z-50">
                             <a href="/profile" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-user w-4 text-[#412D15]"></i> Profil</a>
 <a href="{{ route('orders.my') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-receipt w-4 text-[#412D15]"></i> Pesanan</a>
+<a href="{{ route('addresses.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-location-dot w-4 text-[#412D15]"></i> Alamat Tersimpan</a>
 <a href="{{ route('wishlist.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#1F150C] hover:bg-[#E1DCC9]/40 transition"><i class="fa-solid fa-heart w-4 text-[#412D15]"></i> Wishlist</a>
                             <hr class="my-1 border-black/5">
                             <form method="POST" action="/logout">
@@ -171,6 +173,7 @@
            @auth
     <a href="/profile" class="block text-sm font-medium text-[#1F150C]/80">Profil</a>
     <a href="{{ route('orders.my') }}" class="block text-sm font-medium text-[#1F150C]/80">Pesanan</a>
+    <a href="{{ route('addresses.index') }}" class="block text-sm font-medium text-[#1F150C]/80">Alamat Tersimpan</a>
     <a href="{{ route('wishlist.index') }}" class="block text-sm font-medium text-[#1F150C]/80">Wishlist</a>
     <form method="POST" action="/logout">@csrf<button class="text-sm font-medium text-red-600">Keluar</button></form>
 @else

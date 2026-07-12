@@ -74,6 +74,23 @@
                 </h3>
 
                 <div class="space-y-5">
+                    @if($addresses->isNotEmpty())
+                    <div>
+                        <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">Alamat Tersimpan</label>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($addresses as $address)
+                            <button type="button"
+                                onclick="fillFromSavedAddress({{ $address->id }})"
+                                class="text-xs font-semibold px-3 py-2 rounded-lg border border-black/10 hover:border-[#412D15]/40 hover:bg-[#E1DCC9]/30 transition text-[#1F150C]">
+                                <i class="fa-solid fa-location-dot mr-1" style="color:#412D15;"></i>
+                                {{ $address->label }}{{ $address->is_default ? ' (Utama)' : '' }}
+                            </button>
+                            @endforeach
+                        </div>
+                        <p class="text-[11px] text-[#1F150C]/40 mt-2">Klik salah satu untuk isi otomatis, atau tulis manual di bawah.</p>
+                    </div>
+                    @endif
+
                     <div>
                         <label for="shipping_address" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
                             Alamat Lengkap
@@ -186,6 +203,20 @@
 </div>
 
 <script>
+    // Data alamat tersimpan, dipakai untuk isi otomatis form saat salah satu
+    // chip "Alamat Tersimpan" diklik.
+    const savedAddresses = {!! $addresses->keyBy('id')->map(fn($a) => [
+        'address' => $a->address,
+        'phone' => $a->phone,
+    ])->toJson() !!};
+
+    function fillFromSavedAddress(id) {
+        const data = savedAddresses[id];
+        if (!data) return;
+        document.getElementById('shipping_address').value = data.address;
+        document.getElementById('shipping_phone').value = data.phone;
+    }
+
     function checkoutForm() {
         return {
             loading: false,

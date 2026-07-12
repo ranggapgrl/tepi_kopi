@@ -53,13 +53,15 @@ class OrderController extends Controller
             ->latest()
             ->first();
 
+        $addresses = Auth::user()->addresses;
+
         // Dibutuhkan di view agar Snap.js bisa dimuat langsung di halaman checkout,
         // supaya popup pembayaran muncul di sini tanpa redirect ke halaman terpisah.
         $midtransClientKey = config('services.midtrans.client_key');
         $midtransIsProduction = (bool) config('services.midtrans.is_production');
 
         return view('checkout.index', compact(
-            'cartItems', 'subtotal', 'tax', 'total', 'lastOrder',
+            'cartItems', 'subtotal', 'tax', 'total', 'lastOrder', 'addresses',
             'midtransClientKey', 'midtransIsProduction'
         ));
     }

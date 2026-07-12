@@ -70,4 +70,36 @@ class BugFixesTest extends TestCase
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
     }
+
+    public function test_hapus_produk_langsung_dari_database_tidak_merusak_riwayat_pesanan(): void
+    {
+        // Simulasikan penghapusan produk yang melewati guard controller (mis.
+        // lewat tinker / query manual langsung), untuk memastikan FK
+        // product_id sudah nullOnDelete (bukan lagi cascadeOnDelete) dan
+        // snapshot product_name tetap menyimpan nama aslinya.
+        $user = User::factory()->create();
+        $product = Product::factory()->create(['name' => 'Kopi Gayo Arabica']);
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_price' => $product->price,
+            'status' => 'Selesai',
+        ]);
+        $orderItem = OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'quantity' => 1,
+            'price' => $product->price,
+        ]);
+
+        $product->delete();
+
+        $orderItem->refresh();
+
+        $this->assertDatabaseHas('order_items', ['id' => $orderItem->id]);
+        $this->assertNull($orderItem->product_id);
+        $this->assertSame('Kopi Gayo Arabica', $orderItem->product_name);
+        $this->assertSame('Kopi Gayo Arabica', $orderItem->display_name);
+    }
 }

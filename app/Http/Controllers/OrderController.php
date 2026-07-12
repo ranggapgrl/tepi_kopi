@@ -153,6 +153,9 @@ class OrderController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
+                    // Snapshot nama produk saat pesanan dibuat, supaya riwayat
+                    // pesanan tetap terbaca walau produknya nanti dihapus.
+                    'product_name' => $item->product->name ?? 'Produk',
                     'variant_id' => $item->variant_id,
                     'quantity' => $item->quantity,
                     'price' => $entry['price']

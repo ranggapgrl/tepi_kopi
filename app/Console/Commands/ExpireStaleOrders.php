@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\console\commands;
 
 use App\Models\ActivityLog;
 use App\Models\Order;

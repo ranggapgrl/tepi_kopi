@@ -172,7 +172,7 @@
         <tbody>
             @foreach($order->items as $item)
             <tr>
-                <td>{{ $item->product->name ?? 'Produk Dihapus' }}</td>
+                <td>{{ $item->product->name ?? $item->product_name ?? 'Produk Dihapus' }}</td>
                 <td>{{ $item->variant->name ?? '-' }}</td>
                 <td class="text-right">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                 <td class="text-right">{{ $item->quantity }}</td>

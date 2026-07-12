@@ -154,7 +154,7 @@
             <tbody>
                 @foreach($topProducts as $item)
                 <tr>
-                    <td>{{ $item->product->name ?? 'Produk Dihapus' }}</td>
+                    <td>{{ $item->product->name ?? $item->product_name ?? 'Produk Dihapus' }}</td>
                     <td>{{ $item->total_qty }} pcs</td>
                     <td class="text-right">Rp {{ number_format($item->total_sales, 0, ',', '.') }}</td>
                 </tr>

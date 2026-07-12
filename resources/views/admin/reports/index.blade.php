@@ -104,7 +104,7 @@
                         @foreach($topProducts as $item)
                         <li class="px-6 py-3.5 flex items-center justify-between gap-3">
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-amber-950 truncate">{{ $item->product->name ?? 'Produk Dihapus' }}</p>
+                                <p class="text-sm font-semibold text-amber-950 truncate">{{ $item->product->name ?? $item->product_name ?? 'Produk Dihapus' }}</p>
                                 <p class="text-xs text-gray-400">{{ $item->total_qty }} terjual</p>
                             </div>
                             <span class="text-xs font-bold text-amber-700 whitespace-nowrap">

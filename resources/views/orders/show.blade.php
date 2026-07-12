@@ -55,7 +55,7 @@
                                                 <i class="fa-solid fa-mug-hot text-xs opacity-60"></i>
                                             @endif
                                         </div>
-                                        <span class="font-semibold text-[#1F150C]">{{ $item->product->name ?? 'Produk dihapus' }}</span>
+                                        <span class="font-semibold text-[#1F150C]">{{ $item->product->name ?? $item->product_name ?? 'Produk dihapus' }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">Rp {{ number_format($item->price, 0, ',', '.') }}</td>

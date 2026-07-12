@@ -93,7 +93,7 @@
                         @endif
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-bold text-[#1F150C] text-sm sm:text-base truncate">{{ $item->product->name ?? 'Produk dihapus' }}</p>
+                        <p class="font-bold text-[#1F150C] text-sm sm:text-base truncate">{{ $item->product->name ?? $item->product_name ?? 'Produk dihapus' }}</p>
                         <p class="text-xs text-[#1F150C]/45 mt-0.5">{{ $item->quantity }} x Rp {{ number_format($item->price, 0, ',', '.') }}</p>
                     </div>
                     <p class="font-bold text-[#1F150C] text-sm sm:text-base shrink-0">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</p>

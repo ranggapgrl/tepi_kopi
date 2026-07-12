@@ -105,7 +105,34 @@ Pastikan sudah terinstall di komputer kamu:
     php artisan migrate
     ```
 
-8. **Build asset frontend**
+8. **Buat symbolic link storage**
+
+    Wajib dijalankan supaya foto produk, foto varian, dan avatar user bisa
+    tampil di halaman web (file upload disimpan di `storage/app/public`,
+    tapi yang bisa diakses browser cuma `public/storage`).
+
+    ```bash
+    php artisan storage:link
+    ```
+
+    ⚠️ **Kalau muncul pesan `The [public/storage] link already exists.`
+    padahal foto tetap gak muncul di web:** itu tandanya `public/storage`
+    ke-bentuk sebagai folder biasa, bukan symlink asli (sering kejadian di
+    Windows kalau symlink gagal dibuat tapi errornya gak kelihatan). Cek
+    dulu dengan `ls -la public/storage` — kalau barisnya **tidak** diawali
+    huruf `l` (harusnya `lrwxrwxrwx ... public/storage -> ...`), berarti itu
+    folder biasa dan perlu dibersihkan dulu:
+
+    ```bash
+    rm -rf public/storage
+    php artisan storage:link
+    ```
+
+    Symlink ini spesifik per-komputer dan **tidak ikut ke-push ke Git**,
+    jadi langkah ini harus diulang tiap kali clone/setup project di laptop
+    baru.
+
+9. **Build asset frontend**
 
     ```bash
     npm run build
@@ -117,7 +144,7 @@ Pastikan sudah terinstall di komputer kamu:
     npm run dev
     ```
 
-9. **Jalankan server lokal**
+10. **Jalankan server lokal**
 
     ```bash
     php artisan serve
@@ -146,6 +173,29 @@ tepi_kopi/
 ├── tests/          # Unit & feature test
 └── tepi_kopi.sql   # Dump database
 ```
+
+## 🔧 Troubleshooting
+
+### Foto produk/avatar tidak muncul (404/403) di halaman web
+
+Penyebabnya hampir selalu symlink `public/storage` yang rusak atau belum
+dibuat. Lihat langkah 8 di bagian Instalasi di atas untuk cara cek & benerinnya.
+
+### `php artisan orders:expire-stale` / command lain "does not exist"
+
+Laravel cuma auto-discover Artisan command dari folder `app/Console/Commands`
+(**C besar** di keduanya). Kalau bikin command baru, pastikan:
+
+- Folder & file-nya persis `app/Console/Commands/NamaCommand.php`
+- Namespace di dalam file persis `namespace App\Console\Commands;`
+
+Di Windows/Mac hal ini gak kerasa masalah karena filesystem-nya
+case-insensitive (`app/console/commands` dianggap sama dengan
+`app/Console/Commands`), tapi begitu di-pull di Linux (server produksi,
+CI, atau laptop teman yang pakai WSL/Linux) command-nya jadi gak
+kedeteksi sama sekali tanpa ada error yang jelas. Selalu double-check
+casing folder ini sebelum push, terutama kalau bikin/pindahin file di IDE
+yang jalan di Windows.
 
 ## 🤝 Kontribusi
 

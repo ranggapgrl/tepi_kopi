@@ -361,6 +361,8 @@ class OrderController extends Controller
             return response()->json(['message' => 'OK - status sudah final']);
         }
 
+        $oldStatus = $order->status;
+
         if (($transactionStatus == 'capture' && $fraudStatus == 'accept') || $transactionStatus == 'settlement') {
             $order->update([
                 'status' => 'Diproses',
@@ -377,6 +379,14 @@ class OrderController extends Controller
                 }
             }
             $order->update(['status' => 'Dibatalkan']);
+        }
+
+        // BUGFIX: sebelumnya customer tidak pernah dikabari saat status order
+        // berubah lewat webhook (pembayaran sukses -> "Diproses", atau
+        // gagal/kadaluwarsa -> "Dibatalkan"). Notifikasi cuma dikirim kalau
+        // admin yang ubah status manual dari dashboard. Sekarang disamakan.
+        if ($order->user && $order->status !== $oldStatus) {
+            Notification::send($order->user, new \App\Notifications\OrderStatusUpdatedNotification($order, $oldStatus));
         }
 
         return response()->json(['message' => 'OK']);

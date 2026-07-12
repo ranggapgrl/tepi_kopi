@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Models\ActivityLog;
 use App\Models\Order;
+use App\Notifications\OrderStatusUpdatedNotification;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * BUGFIX: sebelumnya tidak ada mekanisme apa pun untuk membereskan pesanan
@@ -34,7 +36,7 @@ class ExpireStaleOrders extends Command
 
         $staleOrders = Order::where('status', 'Menunggu Pembayaran')
             ->where('created_at', '<=', $cutoff)
-            ->with('items')
+            ->with('items', 'user')
             ->get();
 
         if ($staleOrders->isEmpty()) {
@@ -74,6 +76,17 @@ class ExpireStaleOrders extends Command
                     'Membatalkan otomatis pesanan #' . $lockedOrder->order_code
                         . ' karena tidak dibayar dalam batas waktu yang ditentukan.'
                 );
+
+                // BUGFIX: sebelumnya customer tidak pernah dikabari saat pesanannya
+                // di-cancel otomatis oleh scheduler ini — mereka baru tahu kalau
+                // buka manual halaman "Pesanan Saya". Sekarang dikirimi notifikasi
+                // yang sama seperti update status manual/webhook.
+                if ($order->user) {
+                    Notification::send(
+                        $order->user,
+                        new OrderStatusUpdatedNotification($lockedOrder, 'Menunggu Pembayaran')
+                    );
+                }
             });
 
             $count++;

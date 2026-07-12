@@ -242,8 +242,8 @@
                         </template>
                     </div>
                     <p class="text-[11px] text-amber-500 mt-2">
-                        <i class="fa-solid fa-circle-info"></i> Varian yang dihapus dari daftar ini di sini <strong>tidak otomatis terhapus</strong> dari database saat disimpan — fitur hapus varian individual belum tersedia, hubungi developer kalau perlu.
-                    </p>
+    <i class="fa-solid fa-circle-info"></i> Varian yang dihapus dari daftar ini akan ikut <strong>terhapus permanen</strong> dari database begitu tombol "Simpan" di bawah diklik.
+</p>
                 </div>
 
                 {{-- Tampilkan di Beranda --}}

@@ -353,17 +353,22 @@ class ProductController extends Controller
      * ADMIN ONLY — DELETE /products/{product}
      */
    public function destroy(Product $product)
-    {
-        $productName = $product->name;
+{
+    $productName = $product->name;
 
-        // Jangan sampai produk yang pernah dipesan dihapus — order_items.product_id
-        // pakai cascadeOnDelete, jadi kalau produk ini dihapus, semua baris
-        // order_items yang mereferensikannya (termasuk dari pesanan yang sudah
-        // "Selesai") ikut terhapus dan riwayat pesanan customer jadi rusak.
-        if (OrderItem::where('product_id', $product->id)->exists()) {
-            return redirect()->route('products.index')
-                ->with('error', 'Produk "' . $productName . '" tidak bisa dihapus karena masih ada di riwayat pesanan. Nonaktifkan stoknya jadi 0 kalau ingin menyembunyikannya dari katalog.');
-        }
+    // Produk yang pernah dipesan sengaja tidak boleh dihapus langsung.
+    // Catatan: order_items.product_id sekarang sudah nullOnDelete + ada
+    // snapshot product_name, jadi menghapus produk ini TIDAK LAGI merusak
+    // riwayat pesanan seperti dulu (lihat migration snapshot_product_name_
+    // on_order_items_table). Guard ini sekarang murni keputusan bisnis —
+    // supaya laporan penjualan & riwayat pesanan tetap bisa menampilkan
+    // link/relasi ke produk aslinya selama mungkin. Kalau produk memang
+    // ingin "dihilangkan" dari katalog, matikan lewat stok 0, bukan hapus.
+    if (OrderItem::where('product_id', $product->id)->exists()) {
+        return redirect()->route('products.index')
+            ->with('error', 'Produk "' . $productName . '" tidak bisa dihapus karena masih ada di riwayat pesanan. Nonaktifkan stoknya jadi 0 kalau ingin menyembunyikannya dari katalog.');
+    }
+    // ... sisanya nggak berubah
 
         // Hapus file gambar utama
         if ($product->image) {

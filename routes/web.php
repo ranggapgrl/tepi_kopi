@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout.show');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
     Route::get('/checkout/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay'); // BARU
+    Route::post('/orders/{order}/verify-status', [OrderController::class, 'verifyStatus'])->name('orders.verifyStatus'); // BARU
     Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
 });
 

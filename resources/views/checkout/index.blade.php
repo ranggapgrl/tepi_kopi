@@ -246,9 +246,27 @@
                     }
 
                     if (data.snap_token && window.snap) {
+                        // BUGFIX: sebelumnya status order 100% bergantung webhook Midtrans
+                        // yang tidak bisa menjangkau localhost saat development, dan bisa
+                        // telat/gagal walau di production. Sekarang begitu Snap.js melapor
+                        // sukses/pending, kita minta server cek status transaksi langsung
+                        // ke Midtrans (endpoint verify-status) sebelum redirect.
+                        const verifikasiStatusLaluRedirect = () => {
+                            fetch(`/orders/${data.order_id}/verify-status`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                                        ?? formData.get('_token'),
+                                    'Accept': 'application/json',
+                                },
+                            }).finally(() => {
+                                window.location.href = data.redirect_url;
+                            });
+                        };
+
                         window.snap.pay(data.snap_token, {
-                            onSuccess: () => { window.location.href = data.redirect_url; },
-                            onPending: () => { window.location.href = data.redirect_url; },
+                            onSuccess: verifikasiStatusLaluRedirect,
+                            onPending: verifikasiStatusLaluRedirect,
                             onError: () => {
                                 this.loading = false;
                                 this.errorList = ['Pembayaran gagal, silakan coba lagi.'];

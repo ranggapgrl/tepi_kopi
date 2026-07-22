@@ -356,12 +356,72 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        // Idempotensi: kalau order sudah tidak lagi "Menunggu Pembayaran", abaikan
-        // notifikasi ini. Mencegah notifikasi telat/duplikat (mis. dari percobaan
+        $this->applyMidtransTransactionStatus($order, $transactionStatus, $fraudStatus, $notif->payment_type);
+
+        return response()->json(['message' => 'OK']);
+    }
+
+    /**
+     * CUSTOMER — POST /orders/{order}/verify-status
+     * Dipanggil dari frontend (callback onSuccess/onPending Snap.js) segera
+     * setelah pembayaran selesai di browser customer.
+     *
+     * BUGFIX: sebelumnya update status order 100% bergantung pada webhook
+     * midtransCallback(). Di local development webhook itu tidak akan pernah
+     * sampai karena Midtrans tidak bisa mengakses localhost, dan bahkan di
+     * production webhook bisa telat/gagal terkirim. Endpoint ini melakukan
+     * pengecekan aktif (bukan pasif menunggu) ke Transaction Status API
+     * Midtrans begitu customer selesai bayar, supaya status order langsung
+     * ter-update tanpa perlu menunggu webhook.
+     */
+    public function verifyStatus(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        if (! $order->midtrans_order_id) {
+            return response()->json(['status' => $order->status]);
+        }
+
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        try {
+            $status = \Midtrans\Transaction::status($order->midtrans_order_id);
+        } catch (\Exception $e) {
+            \Log::warning('Gagal cek status transaksi Midtrans', [
+                'order_id' => $order->id,
+                'midtrans_order_id' => $order->midtrans_order_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['status' => $order->status]);
+        }
+
+        $this->applyMidtransTransactionStatus(
+            $order,
+            $status->transaction_status ?? null,
+            $status->fraud_status ?? null,
+            $status->payment_type ?? null
+        );
+
+        return response()->json(['status' => $order->fresh()->status]);
+    }
+
+    /**
+     * Terapkan hasil status transaksi Midtrans (dari webhook ATAU dari
+     * pengecekan manual verifyStatus()) ke order. Idempoten: aman dipanggil
+     * berkali-kali untuk order yang sama.
+     */
+    private function applyMidtransTransactionStatus(Order $order, ?string $transactionStatus, ?string $fraudStatus, ?string $paymentType): void
+    {
+        // Idempotensi: kalau order sudah tidak lagi "Menunggu Pembayaran", abaikan.
+        // Mencegah notifikasi/pengecekan telat atau duplikat (mis. dari percobaan
         // bayar lama yang akhirnya expire) merusak status yang sudah final, dan
         // mencegah stok dikembalikan keliru.
         if ($order->status !== 'Menunggu Pembayaran') {
-            return response()->json(['message' => 'OK - status sudah final']);
+            return;
         }
 
         $oldStatus = $order->status;
@@ -369,7 +429,7 @@ class OrderController extends Controller
         if (($transactionStatus == 'capture' && $fraudStatus == 'accept') || $transactionStatus == 'settlement') {
             $order->update([
                 'status' => 'Diproses',
-                'payment_type' => $notif->payment_type,
+                'payment_type' => $paymentType,
                 'paid_at' => now(),
             ]);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
@@ -391,8 +451,6 @@ class OrderController extends Controller
         if ($order->user && $order->status !== $oldStatus) {
             Notification::send($order->user, new \App\Notifications\OrderStatusUpdatedNotification($order, $oldStatus));
         }
-
-        return response()->json(['message' => 'OK']);
     }
 
     public function myOrders()

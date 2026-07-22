@@ -36,14 +36,27 @@
     </div>
 
     <script>
+        // BUGFIX: sebelumnya status order 100% bergantung webhook Midtrans yang
+        // tidak bisa menjangkau localhost saat development, dan bisa telat/gagal
+        // walau di production. Sekarang begitu Snap.js melapor sukses/pending di
+        // browser, kita langsung minta server cek status transaksi ke Midtrans
+        // (endpoint verify-status), baru redirect setelah itu selesai.
+        function verifikasiStatusLaluRedirect() {
+            fetch("{{ route('orders.verifyStatus', $order) }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+            }).finally(function () {
+                window.location.href = "{{ route('orders.myShow', $order) }}";
+            });
+        }
+
         function bayarSekarang() {
             snap.pay('{{ $snapToken }}', {
-                onSuccess: function () {
-                    window.location.href = "{{ route('orders.myShow', $order) }}";
-                },
-                onPending: function () {
-                    window.location.href = "{{ route('orders.myShow', $order) }}";
-                },
+                onSuccess: verifikasiStatusLaluRedirect,
+                onPending: verifikasiStatusLaluRedirect,
                 onError: function () {
                     alert('Pembayaran gagal, silakan coba lagi.');
                 }

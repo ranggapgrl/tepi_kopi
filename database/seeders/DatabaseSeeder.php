@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         // Admin
         $admin = User::create([
-            'name' => 'Admin Roastery',
-            'email' => 'admin@roastery.com',
+            'name' => 'Admin Tepi Kopi',
+            'email' => 'admin@demo.com',
             'password' => bcrypt('password'),
         ]);
         $admin->role = 'admin';

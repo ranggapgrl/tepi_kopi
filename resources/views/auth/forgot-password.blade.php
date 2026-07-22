@@ -171,7 +171,7 @@
                     </div>
                     <input type="email" name="email" id="email"
                            class="w-full pl-10 pr-4 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
-                           placeholder="nama@email.com" value="{{ old('email') }}" required autofocus>
+                           placeholder="Masukkan Email" value="{{ old('email') }}" required autofocus>
                     <span class="input-underline"></span>
                 </div>
             </div>

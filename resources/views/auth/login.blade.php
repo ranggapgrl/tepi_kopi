@@ -243,7 +243,7 @@
                         </div>
                         <input type="email" name="email" id="email"
                                class="w-full pl-10 pr-4 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
-                               placeholder="nama@email.com" value="{{ old('email') }}" required autofocus>
+                               placeholder="Masukkan Email" value="{{ old('email') }}" required autofocus>
                         <span class="input-underline"></span>
                     </div>
                 </div>
@@ -256,7 +256,7 @@
                         </div>
                         <input :type="showPassword ? 'text' : 'password'" name="password" id="password"
                                class="w-full pl-10 pr-11 py-3 bg-black/[0.02] border border-black/10 rounded-xl focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 focus:bg-white outline-none transition-all placeholder:text-[#1F150C]/30 font-medium"
-                               placeholder="••••••••" required>
+                               placeholder="Masukkan Password" required>
                         <button type="button" @click="showPassword = !showPassword"
                                 class="icon-nudge absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#1F150C]/35 hover:text-[#412D15] transition-colors">
                             <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>

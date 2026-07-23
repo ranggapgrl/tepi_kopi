@@ -29,7 +29,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Halaman Statis
 Route::view('/about', 'about')->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store']);
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
 
 // Katalog
 Route::get('/katalog', [ProductController::class, 'index'])->name('katalog.index');

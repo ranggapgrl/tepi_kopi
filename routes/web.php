@@ -82,6 +82,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-orders/{order}', [OrderController::class, 'myOrderShow'])->name('orders.myShow');
     Route::get('/my-orders/{order}/invoice', [OrderController::class, 'downloadInvoice'])->name('orders.invoice');
     Route::patch('/my-orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::patch('/my-orders/{order}/confirm', [OrderController::class, 'confirmReceived'])->name('orders.confirm');
+});
+
+// Ulasan milik sendiri (customer, untuk semua user yang login)
+Route::middleware('auth')->group(function () {
+    Route::put('/my-reviews/{review}', [ReviewController::class, 'updateOwn'])->name('reviews.update');
+    Route::delete('/my-reviews/{review}', [ReviewController::class, 'destroyOwn'])->name('reviews.destroyOwn');
 });
 
 // Wishlist (customer, untuk semua user yang login)

@@ -13,3 +13,9 @@ Artisan::command('inspire', function () {
 // menutup popup pembayaran) tidak pernah dibatalkan otomatis, sehingga
 // stok yang sudah dikunci sejak order dibuat bisa tertahan selamanya.
 Schedule::command('orders:expire-stale')->hourly();
+
+// GAP FIX: pesanan "Dikirim" yang tidak pernah dikonfirmasi customer akan
+// nyangkut selamanya tanpa ini. Dijalankan harian karena batas waktunya
+// dihitung dalam hari (default 7 hari), tidak perlu secepat pengecekan
+// pembayaran yang dihitung dalam menit.
+Schedule::command('orders:auto-complete')->daily();

@@ -14,9 +14,14 @@ class AdminController extends Controller
      */
     public function index()
     {
-        // Pendapatan hari ini: total dari order yang dibuat hari ini, kecuali yang dibatalkan
+        // Pendapatan hari ini: total dari order yang dibuat hari ini.
+        // BUGFIX: sebelumnya cuma exclude status "Dibatalkan", padahal order
+        // "Menunggu Pembayaran" belum tentu jadi duit beneran (customer bisa
+        // belum bayar sama sekali). Sekarang konsisten dengan definisi "sudah
+        // dibayar" yang dipakai di tempat lain (mis. OrderController::downloadInvoice):
+        // bukan "Menunggu Pembayaran" dan bukan "Dibatalkan".
         $todayRevenue = Order::whereDate('created_at', today())
-            ->where('status', '!=', 'Dibatalkan')
+            ->whereNotIn('status', ['Menunggu Pembayaran', 'Dibatalkan'])
             ->sum('total_price');
 
         // Total varian produk yang ada di katalog

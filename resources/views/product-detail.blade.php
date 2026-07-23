@@ -342,20 +342,68 @@ init() { if (this.variants.length) { this.selectedVariant = this.variants[0]; } 
             {{-- Reviews grid --}}
             <div class="lg:col-span-2 grid sm:grid-cols-2 gap-4 content-start">
                 @forelse($product->reviews->sortByDesc('created_at') as $review)
-                <div class="border border-black/10 rounded-2xl p-5">
+                @php $isOwnReview = auth()->check() && $review->user_id === auth()->id(); @endphp
+                <div class="border border-black/10 rounded-2xl p-5" @if($isOwnReview) x-data="{ editing: false }" @endif>
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-9 h-9 shrink-0 rounded-full text-white flex items-center justify-center font-bold text-xs" style="background:#412D15;">
                             {{ strtoupper(substr($review->user->name ?? 'P', 0, 1)) }}
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <p class="font-bold text-[#1F150C] text-sm truncate">{{ $review->user->name ?? 'Pengguna' }}</p>
                             <span class="text-[11px] text-[#1F150C]/40">{{ $review->created_at->translatedFormat('d M Y') }}</span>
                         </div>
+                        @if($isOwnReview)
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" @click="editing = ! editing" class="text-xs text-[#1F150C]/40 hover:text-[#412D15]" title="Edit ulasan">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <form action="{{ route('reviews.destroyOwn', $review) }}" method="POST"
+                                  onsubmit="return confirm('Hapus ulasan ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs text-[#1F150C]/40 hover:text-rose-600" title="Hapus ulasan">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        @endif
                     </div>
-                    <div class="flex text-xs mb-2" style="color:#412D15;">
-                        @for($i = 1; $i <= 5; $i++) <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i> @endfor
-                    </div>
-                    @if($review->comment) <p class="text-sm text-[#1F150C]/65 leading-relaxed">{{ $review->comment }}</p> @endif
+
+                    @if($isOwnReview)
+                        {{-- Tampilan biasa --}}
+                        <div x-show="! editing">
+                            <div class="flex text-xs mb-2" style="color:#412D15;">
+                                @for($i = 1; $i <= 5; $i++) <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i> @endfor
+                            </div>
+                            @if($review->comment) <p class="text-sm text-[#1F150C]/65 leading-relaxed">{{ $review->comment }}</p> @endif
+                        </div>
+
+                        {{-- Form edit --}}
+                        <form x-show="editing" x-data="{ selectedRating: {{ $review->rating }} }"
+                              action="{{ route('reviews.update', $review) }}" method="POST" class="space-y-3">
+                            @csrf
+                            @method('PUT')
+                            <div class="flex gap-1">
+                                <template x-for="i in 5" :key="i">
+                                    <button type="button" @click="selectedRating = i" class="text-xl">
+                                        <i class="fa-star" :class="i <= selectedRating ? 'fa-solid' : 'fa-regular text-black/20'" :style="i <= selectedRating ? 'color:#412D15' : ''"></i>
+                                    </button>
+                                </template>
+                            </div>
+                            <input type="hidden" name="rating" :value="selectedRating">
+                            <textarea name="comment" rows="2" placeholder="Ceritakan pengalamanmu (opsional)"
+                                      class="w-full px-3 py-2.5 rounded-xl border border-black/10 bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 resize-none">{{ $review->comment }}</textarea>
+                            <button type="submit" :disabled="selectedRating < 1"
+                                    class="px-4 py-1.5 btn-primary font-bold rounded-xl text-xs shadow-sm transition-colors disabled:opacity-40 disabled:pointer-events-none">
+                                Simpan Perubahan
+                            </button>
+                        </form>
+                    @else
+                        <div class="flex text-xs mb-2" style="color:#412D15;">
+                            @for($i = 1; $i <= 5; $i++) <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i> @endfor
+                        </div>
+                        @if($review->comment) <p class="text-sm text-[#1F150C]/65 leading-relaxed">{{ $review->comment }}</p> @endif
+                    @endif
                 </div>
                 @empty
                 <p class="text-sm text-[#1F150C]/40 sm:col-span-2">Belum ada ulasan untuk produk ini.</p>

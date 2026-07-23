@@ -10,6 +10,13 @@ class Order extends Model
         'user_id', 'total_price', 'status',
         'shipping_address', 'shipping_phone', 'shipping_notes',
         'midtrans_order_id', 'payment_type', 'paid_at',
+        'shipped_at', 'completed_at',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'shipped_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public function user()

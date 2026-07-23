@@ -77,8 +77,9 @@
 
     <div class="grid lg:grid-cols-3 gap-6">
 
-        {{-- ============ ITEMS ============ --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-black/10 shadow-sm overflow-hidden">
+        {{-- ============ KOLOM KIRI: item pesanan + ulasan ============ --}}
+        <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-2xl border border-black/10 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-black/5 text-white" style="background:#1F150C;">
                 <h3 class="font-bold">Item Pesanan</h3>
             </div>
@@ -104,6 +105,59 @@
                 <span class="font-bold text-[#1F150C] text-sm">Total (termasuk pajak 11%)</span>
                 <span class="font-display font-semibold text-lg" style="color:#412D15;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
             </div>
+        </div>
+
+        {{-- ============ BERI ULASAN (hanya untuk pesanan berstatus Selesai) ============ --}}
+        @if($order->status === 'Selesai')
+        <div class="bg-white rounded-2xl border border-black/10 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-black/5" style="background:#F2F0EA;">
+                <h3 class="font-bold text-[#1F150C]">Beri Ulasan Produk</h3>
+                <p class="text-xs text-[#1F150C]/45 mt-0.5">Bagikan pengalamanmu untuk produk yang sudah kamu terima.</p>
+            </div>
+            <div class="divide-y divide-black/5">
+                @foreach($order->items->unique('product_id') as $item)
+                    @continue(! $item->product)
+                    <div class="p-5 sm:p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden border border-black/10 flex items-center justify-center" style="background:#E1DCC9; color:#412D15;">
+                                @if($item->product->image)
+                                    <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover">
+                                @else
+                                    <i class="fa-solid fa-mug-hot text-sm opacity-50"></i>
+                                @endif
+                            </div>
+                            <p class="font-bold text-[#1F150C] text-sm">{{ $item->product->name }}</p>
+                        </div>
+
+                        @if($reviewedProductIds->contains($item->product_id))
+                            <a href="{{ route('katalog.show', $item->product) }}#tulis-ulasan"
+                               class="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 inline-flex items-center gap-2 hover:bg-emerald-100 transition-colors">
+                                <i class="fa-solid fa-circle-check"></i> Sudah diulas — lihat / edit ulasan
+                            </a>
+                        @else
+                            <form action="{{ route('reviews.store', $item->product) }}" method="POST" class="space-y-3" x-data="{ selectedRating: 0 }">
+                                @csrf
+                                <div class="flex gap-1">
+                                    <template x-for="i in 5" :key="i">
+                                        <button type="button" @click="selectedRating = i" class="text-xl">
+                                            <i class="fa-star" :class="i <= selectedRating ? 'fa-solid' : 'fa-regular text-black/20'" :style="i <= selectedRating ? 'color:#412D15' : ''"></i>
+                                        </button>
+                                    </template>
+                                </div>
+                                <input type="hidden" name="rating" :value="selectedRating">
+                                <textarea name="comment" rows="2" placeholder="Ceritakan pengalamanmu (opsional)"
+                                          class="w-full px-3 py-2.5 rounded-xl border border-black/10 bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 resize-none"></textarea>
+                                <button type="submit" :disabled="selectedRating < 1"
+                                        class="px-5 py-2 btn-primary font-bold rounded-xl text-xs shadow-sm transition-colors disabled:opacity-40 disabled:pointer-events-none">
+                                    Kirim Ulasan
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
         </div>
 
         {{-- ============ SIDEBAR status action + shipping details ============ --}}
@@ -143,6 +197,23 @@
                     </form>
                 @elseif($order->status === 'Dibatalkan')
                     <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">Pesanan ini telah dibatalkan.</p>
+                @elseif($order->status === 'Dikirim')
+                    <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">
+                        Pesananmu sedang dalam perjalanan. Kalau barang sudah sampai, konfirmasi di bawah ini ya.
+                    </p>
+                    <form action="{{ route('orders.confirm', $order) }}" method="POST"
+                          onsubmit="return confirm('Pastikan barang sudah kamu terima sebelum konfirmasi ya.')" class="mt-4">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                                class="w-full py-2.5 btn-primary text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check"></i> Pesanan Diterima
+                        </button>
+                    </form>
+                @elseif($order->status === 'Selesai')
+                    <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">
+                        Pesanan ini sudah selesai. Terima kasih sudah berbelanja di Tepi Kopi!
+                    </p>
                 @else
                     <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">
                         Kami akan memperbarui status pesanan ini seiring prosesnya. Terima kasih sudah berbelanja di Tepi Kopi!

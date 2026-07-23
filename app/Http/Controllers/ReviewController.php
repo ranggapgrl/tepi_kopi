@@ -91,4 +91,35 @@ public function destroy(Review $review)
 
         return back()->with('success', 'Terima kasih atas ulasannya!');
     }
+
+    /**
+     * CUSTOMER — PUT /my-reviews/{review}
+     * Customer mengedit ulasannya sendiri (rating & komentar).
+     */
+    public function updateOwn(Request $request, Review $review)
+    {
+        abort_unless($review->user_id === Auth::id(), 403);
+
+        $validated = $request->validate([
+            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $review->update($validated);
+
+        return back()->with('success', 'Ulasan berhasil diperbarui.');
+    }
+
+    /**
+     * CUSTOMER — DELETE /my-reviews/{review}
+     * Customer menghapus ulasannya sendiri.
+     */
+    public function destroyOwn(Review $review)
+    {
+        abort_unless($review->user_id === Auth::id(), 403);
+
+        $review->delete();
+
+        return back()->with('success', 'Ulasan berhasil dihapus.');
+    }
 }

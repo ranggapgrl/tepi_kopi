@@ -327,6 +327,10 @@
 
                         <div class="grid grid-cols-2 gap-3">
 
+                            @php
+                                $allowedNext = \App\Http\Controllers\OrderController::allowedTransitionsFrom($order->status);
+                            @endphp
+
                             @foreach($statuses as $status)
 
                             @php
@@ -338,16 +342,19 @@
                                     'Dibatalkan' => 'fa-circle-xmark',
                                     default => 'fa-circle'
                                 };
+                                $isCurrent = $order->status === $status;
+                                $isSelectable = $isCurrent || in_array($status, $allowedNext, true);
                             @endphp
 
-                            <label class="cursor-pointer">
+                            <label class="{{ $isSelectable ? 'cursor-pointer' : 'cursor-not-allowed' }}">
 
                                 <input
                                     type="radio"
                                     name="status"
                                     value="{{ $status }}"
                                     class="peer sr-only"
-                                    {{ $order->status == $status ? 'checked' : '' }}>
+                                    {{ $isCurrent ? 'checked' : '' }}
+                                    {{ $isSelectable ? '' : 'disabled' }}>
 
                                 <div
                                     class="h-20 rounded-xl border border-black/10
@@ -356,9 +363,7 @@
                                     bg-white
                                     transition-all duration-200
 
-                                    hover:border-[#412D15]
-                                    hover:bg-[#FAF8F4]
-                                    hover:shadow-sm
+                                    {{ $isSelectable ? 'hover:border-[#412D15] hover:bg-[#FAF8F4] hover:shadow-sm' : 'opacity-40' }}
 
                                     peer-checked:border-[#412D15]
                                     peer-checked:ring-2

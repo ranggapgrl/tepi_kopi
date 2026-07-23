@@ -31,6 +31,28 @@ class OrderController extends Controller
         'Dibatalkan',
     ];
 
+    /**
+     * Transisi status yang diperbolehkan untuk admin (dari => [tujuan yang valid]).
+     * Mencegah loncat status (mis. "Menunggu Pembayaran" langsung ke "Selesai")
+     * atau mundur status (mis. "Selesai" balik ke "Diproses") lewat dashboard admin.
+     */
+    private const ALLOWED_TRANSITIONS = [
+        'Menunggu Pembayaran' => ['Diproses', 'Dibatalkan'],
+        'Diproses'            => ['Dikirim', 'Dibatalkan'],
+        'Dikirim'             => ['Selesai', 'Dibatalkan'],
+        'Selesai'             => [],
+        'Dibatalkan'          => [],
+    ];
+
+    /**
+     * Dipakai dari view (resources/views/orders/show.blade.php) untuk tahu
+     * status mana saja yang boleh dipilih admin dari status saat ini.
+     */
+    public static function allowedTransitionsFrom(string $status): array
+    {
+        return self::ALLOWED_TRANSITIONS[$status] ?? [];
+    }
+
     public function showCheckout()
     {
         $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
@@ -469,8 +491,15 @@ class OrderController extends Controller
 
         $order->load('items.product', 'items.variant');
 
-        return view('orders.my-show', compact('order'));
+        // Produk mana saja (dari pesanan ini) yang sudah pernah direview user,
+        // dipakai view untuk memutuskan tampilkan form ulasan atau badge "sudah direview".
+        $reviewedProductIds = \App\Models\Review::where('user_id', Auth::id())
+            ->whereIn('product_id', $order->items->pluck('product_id')->filter())
+            ->pluck('product_id');
+
+        return view('orders.my-show', compact('order', 'reviewedProductIds'));
     }
+
 
     /**
      * CUSTOMER — GET /my-orders/{order}/invoice
@@ -516,6 +545,41 @@ class OrderController extends Controller
         return redirect()->route('orders.myShow', $order)->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
+    /**
+     * CUSTOMER — PATCH /my-orders/{order}/confirm
+     * Customer menandai pesanan sebagai diterima. Hanya bisa dilakukan
+     * kalau status masih "Dikirim", supaya tidak ada yang loncat status
+     * (mis. dari "Diproses" langsung "Selesai").
+     */
+    public function confirmReceived(Order $order)
+    {
+        abort_unless($order->user_id === Auth::id(), 403);
+
+        if ($order->status !== 'Dikirim') {
+            return back()->with('error', 'Pesanan ini belum bisa dikonfirmasi selesai.');
+        }
+
+        $oldStatus = $order->status;
+
+        $order->update([
+            'status' => 'Selesai',
+            'completed_at' => now(),
+        ]);
+
+        \App\Models\ActivityLog::record(
+            'Pesanan',
+            'update',
+            'Pesanan #ORD-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) . ' dikonfirmasi diterima oleh customer.'
+        );
+
+        // Beri tahu admin juga kalau perlu; minimal customer dapat feedback sukses.
+        if ($order->user && $order->status !== $oldStatus) {
+            // Tidak perlu notif ke diri sendiri; cukup flash message.
+        }
+
+        return redirect()->route('orders.myShow', $order)->with('success', 'Terima kasih! Pesanan sudah dikonfirmasi diterima.');
+    }
+
     public function index(Request $request)
     {
         $orders = Order::with('user')
@@ -547,7 +611,41 @@ class OrderController extends Controller
         ]);
 
         $oldStatus = $order->status;
-        $order->update($validated);
+        $newStatus = $validated['status'];
+
+        // BUGFIX: sebelumnya admin bisa mengubah status ke apa saja tanpa
+        // aturan urutan (mis. "Menunggu Pembayaran" langsung ke "Selesai",
+        // atau "Selesai" dimundurkan ke "Diproses"). Sekarang dibatasi hanya
+        // ke transisi yang masuk akal sesuai alur pesanan.
+        if ($oldStatus !== $newStatus && ! in_array($newStatus, self::ALLOWED_TRANSITIONS[$oldStatus] ?? [], true)) {
+            return back()->with('error', "Status tidak bisa diubah dari \"{$oldStatus}\" ke \"{$newStatus}\".");
+        }
+
+        DB::transaction(function () use ($order, $oldStatus, $newStatus) {
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            // BUGFIX: sebelumnya kalau admin membatalkan pesanan lewat dashboard,
+            // stok produk yang sudah dikurangi saat checkout TIDAK dikembalikan —
+            // beda dengan pembatalan oleh customer, webhook Midtrans, dan
+            // ExpireStaleOrders yang semuanya sudah restock. Sekarang disamakan.
+            if ($newStatus === 'Dibatalkan' && $oldStatus !== 'Dibatalkan') {
+                $lockedOrder->load('items');
+                foreach ($lockedOrder->items as $item) {
+                    if ($item->variant_id) {
+                        $item->variant?->increment('stock', $item->quantity);
+                    } else {
+                        $item->product?->increment('stock', $item->quantity);
+                    }
+                }
+            }
+
+            $lockedOrder->update([
+                'status' => $newStatus,
+                'shipped_at' => $newStatus === 'Dikirim' ? now() : $lockedOrder->shipped_at,
+            ]);
+        });
+
+        $order->refresh();
 
         \App\Models\ActivityLog::record(
             'Pesanan',

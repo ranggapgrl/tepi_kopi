@@ -86,10 +86,14 @@ class ReportController extends Controller
             [$startDate, $endDate] = [$endDate, $startDate];
         }
 
-        // Query dasar: pesanan dalam rentang tanggal, tidak termasuk yang dibatalkan
+        // Query dasar: pesanan dalam rentang tanggal yang sudah dibayar.
+        // BUGFIX: sebelumnya cuma exclude "Dibatalkan", sehingga pesanan
+        // "Menunggu Pembayaran" (belum tentu ada duitnya masuk) ikut kehitung
+        // sebagai pendapatan di kartu statistik, grafik, dan produk terlaris.
+        // Disamakan dengan definisi "sudah dibayar" di OrderController::downloadInvoice.
         $baseQuery = Order::whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
-            ->where('status', '!=', 'Dibatalkan');
+            ->whereNotIn('status', ['Menunggu Pembayaran', 'Dibatalkan']);
 
         // ==== Kartu Statistik ====
         $totalRevenue = (clone $baseQuery)->sum('total_price');
@@ -98,7 +102,7 @@ class ReportController extends Controller
         $totalItemsSold = OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate)
-                ->where('status', '!=', 'Dibatalkan');
+                ->whereNotIn('status', ['Menunggu Pembayaran', 'Dibatalkan']);
         })->sum('quantity');
 
         $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
@@ -123,7 +127,7 @@ class ReportController extends Controller
         $topProducts = OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate)
-                    ->where('status', '!=', 'Dibatalkan');
+                    ->whereNotIn('status', ['Menunggu Pembayaran', 'Dibatalkan']);
             })
             ->selectRaw('product_id, SUM(quantity) as total_qty, SUM(quantity * price) as total_sales')
             ->groupBy('product_id')

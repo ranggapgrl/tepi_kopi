@@ -81,12 +81,18 @@
                                 onclick="window.location='{{ route('orders.show', $order) }}'">
                                 <td class="px-6 py-4 font-bold text-[#1F150C]">#ORD-{{ str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</td>
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2.5">
+                                <div class="flex items-center gap-2.5">
+                                    @if($order->user && $order->user->avatar)
+                                        <img src="{{ asset('storage/'.$order->user->avatar) }}"
+                                            alt="{{ $order->user->name }}"
+                                            class="w-7 h-7 shrink-0 rounded-full object-cover">
+                                    @else
                                         <span class="w-7 h-7 shrink-0 rounded-full text-white text-[10px] font-bold flex items-center justify-center" style="background:#412D15;">
                                             {{ strtoupper(substr($order->user->name ?? 'T', 0, 1)) }}
                                         </span>
-                                        {{ $order->user->name ?? 'Tamu' }}
-                                    </div>
+                                    @endif
+                                    {{ $order->user->name ?? 'Tamu' }}
+                                </div>
                                 </td>
                                 <td class="px-6 py-4">{{ $order->items_count }} item</td>
                                 <td class="px-6 py-4 font-bold text-[#1F150C] whitespace-nowrap">

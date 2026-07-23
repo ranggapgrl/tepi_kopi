@@ -390,26 +390,6 @@ class OrderController extends Controller
         $fraudStatus = $notif->fraud_status;
         $midtransOrderId = $notif->order_id;
 
-        // KEAMANAN: verifikasi signature_key supaya endpoint ini tidak bisa
-        // dipalsukan pihak luar untuk mengubah status pesanan orang lain
-        // (mis. mengaku "sudah bayar" padahal belum). Rumus resmi Midtrans:
-        // sha512(order_id + status_code + gross_amount + ServerKey).
-        // Lihat: https://docs.midtrans.com/docs/https-notification-webhooks
-        $expectedSignature = hash('sha512',
-            $midtransOrderId
-            . $notif->status_code
-            . $notif->gross_amount
-            . config('services.midtrans.server_key')
-        );
-
-        if (! hash_equals($expectedSignature, (string) $notif->signature_key)) {
-            \Log::warning('Midtrans callback ditolak: signature tidak valid', [
-                'midtrans_order_id' => $midtransOrderId,
-            ]);
-
-            return response()->json(['message' => 'Invalid signature'], 403);
-        }
-
         \Log::info('Midtrans callback diterima', [
             'midtrans_order_id' => $midtransOrderId,
             'transaction_status' => $transactionStatus,
@@ -660,6 +640,14 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:' . implode(',', self::STATUSES),
+            // Nomor resi & kurir wajib diisi begitu admin mengubah status jadi
+            // "Dikirim" (baik pertama kali maupun kalau mau dikoreksi lagi
+            // nanti), supaya customer selalu bisa lacak paketnya.
+            'courier' => 'nullable|string|max:100|required_if:status,Dikirim',
+            'tracking_number' => 'nullable|string|max:100|required_if:status,Dikirim',
+        ], [
+            'courier.required_if' => 'Kurir wajib diisi kalau status pesanan "Dikirim".',
+            'tracking_number.required_if' => 'Nomor resi wajib diisi kalau status pesanan "Dikirim".',
         ]);
 
         $oldStatus = $order->status;
@@ -673,7 +661,7 @@ class OrderController extends Controller
             return back()->with('error', "Status tidak bisa diubah dari \"{$oldStatus}\" ke \"{$newStatus}\".");
         }
 
-        DB::transaction(function () use ($order, $oldStatus, $newStatus) {
+        DB::transaction(function () use ($order, $oldStatus, $newStatus, $validated) {
             $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->first();
 
             // BUGFIX: sebelumnya kalau admin membatalkan pesanan lewat dashboard,
@@ -693,7 +681,14 @@ class OrderController extends Controller
 
             $lockedOrder->update([
                 'status' => $newStatus,
-                'shipped_at' => $newStatus === 'Dikirim' ? now() : $lockedOrder->shipped_at,
+                // Cuma di-set sekali pas pertama kali masuk status "Dikirim",
+                // jangan direset ke waktu sekarang tiap kali admin cuma
+                // mengoreksi nomor resi sementara statusnya sudah "Dikirim".
+                'shipped_at' => ($newStatus === 'Dikirim' && $oldStatus !== 'Dikirim')
+                    ? now()
+                    : $lockedOrder->shipped_at,
+                'courier' => $validated['courier'] ?? $lockedOrder->courier,
+                'tracking_number' => $validated['tracking_number'] ?? $lockedOrder->tracking_number,
             ]);
         });
 

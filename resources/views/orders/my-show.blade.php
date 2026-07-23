@@ -199,7 +199,8 @@
                     <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">Pesanan ini telah dibatalkan.</p>
                 @elseif($order->status === 'Dikirim')
                     <p class="text-xs text-[#1F150C]/45 mt-4 leading-relaxed">
-                        Pesananmu sedang dalam perjalanan. Kalau barang sudah sampai, konfirmasi di bawah ini ya.
+                        Pesananmu sedang dalam perjalanan{{ $order->courier ? ' via ' . $order->courier : '' }}.
+                        Kalau barang sudah sampai, konfirmasi di bawah ini ya.
                     </p>
                     <form action="{{ route('orders.confirm', $order) }}" method="POST"
                           onsubmit="return confirm('Pastikan barang sudah kamu terima sebelum konfirmasi ya.')" class="mt-4">
@@ -242,6 +243,19 @@
                         </div>
                         @endif
                     </dl>
+
+                    @if($order->tracking_number)
+                    <div class="mt-5 rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                        <p class="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold mb-1">
+                            <i class="fa-solid fa-truck-fast"></i> Info Pengiriman
+                        </p>
+                        <p class="text-sm text-[#1F150C]">
+                            Dikirim via <span class="font-bold">{{ $order->courier ?? '-' }}</span>
+                            dengan nomor resi
+                            <span class="font-bold tracking-wide">{{ $order->tracking_number }}</span>
+                        </p>
+                    </div>
+                    @endif
                 @else
                     <p class="text-xs text-[#1F150C]/40 italic">Pesanan ini dibuat sebelum fitur alamat pengiriman ada.</p>
                 @endif

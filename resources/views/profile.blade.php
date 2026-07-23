@@ -14,6 +14,13 @@
     </div>
     @endif
 
+    @if(auth()->user()->role === 'admin')
+    <a href="{{ route('admin.dashboard') }}"
+    class="inline-flex items-center gap-2 text-sm font-bold text-[#412D15] hover:text-[#1F150C] transition-colors mb-6">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+    @endif
+
     <div class="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
 
         {{-- ============ SIDEBAR ============ --}}

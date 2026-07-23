@@ -27,7 +27,7 @@
 
             <div class="flex items-center gap-4">
                 <a href="/katalog" target="_blank"
-                   class="hidden sm:flex items-center gap-2 text-xs font-medium text-amber-100/80 hover:text-white transition-colors">
+                class="hidden sm:flex items-center gap-2 text-xs font-medium text-amber-100/80 hover:text-white transition-colors">
                 </a>
 
                 <div class="h-6 w-[1px] bg-white/10 hidden sm:block"></div>
@@ -45,7 +45,7 @@
                             @endif
                         </button>
                         <div x-show="notifOpen" x-transition x-cloak
-                             class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border border-amber-100 py-2 z-50 max-h-96 overflow-y-auto">
+                            class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border border-amber-100 py-2 z-50 max-h-96 overflow-y-auto">
                             <div class="flex items-center justify-between px-4 py-2 border-b border-amber-50">
                                 <p class="text-sm font-bold text-amber-900">Notifikasi</p>
                                 @if($unreadNotifications->count() > 0)
@@ -55,13 +55,14 @@
                                     </form>
                                 @endif
                             </div>
+                            
 
                             @forelse($unreadNotifications as $notification)
     @php $notifType = $notification->data['type'] ?? 'order'; @endphp
     <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
         @csrf
         <button type="submit" class="w-full text-left px-4 py-3 hover:bg-amber-50 border-b border-amber-50/70 last:border-0 flex gap-3">
-           @if($notifType === 'low_stock')
+        @if($notifType === 'low_stock')
     <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
 @elseif($notifType === 'contact')
     <i class="fa-solid fa-envelope text-sky-600 mt-0.5"></i>
@@ -92,14 +93,20 @@
 
                 @auth
                     <div class="relative" x-data="{ userMenuOpen: false }">
-                        <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false"
-                            class="flex items-center gap-2 text-sm font-medium text-amber-50 hover:text-white transition-colors">
+                    <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false"
+                        class="flex items-center gap-2 text-sm font-medium text-amber-50 hover:text-white transition-colors">
+                        @if(auth()->user()->avatar)
+                            <img src="{{ asset('storage/'.auth()->user()->avatar) }}"
+                                alt="Avatar"
+                                class="w-7 h-7 rounded-full object-cover border border-white/20">
+                        @else
                             <i class="fa-solid fa-circle-user text-lg"></i>
-                            <span class="hidden sm:inline">{{ explode(' ', auth()->user()->name)[0] }}</span>
-                            <i class="fa-solid fa-chevron-down text-xs" :class="userMenuOpen ? 'rotate-180' : ''"></i>
-                        </button>
+                        @endif
+                        <span class="hidden sm:inline">{{ explode(' ', auth()->user()->name)[0] }}</span>
+                        <i class="fa-solid fa-chevron-down text-xs" :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                    </button>
                         <div x-show="userMenuOpen" x-transition x-cloak
-                             class="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-amber-100 py-2 z-50">
+                            class="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-amber-100 py-2 z-50">
                             <a href="/profile" class="block px-4 py-2 text-sm text-amber-900 hover:bg-amber-50">Profil Saya</a>
                             <form method="POST" action="/logout">
                                 @csrf

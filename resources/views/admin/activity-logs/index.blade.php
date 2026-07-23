@@ -13,9 +13,9 @@
             <p class="text-amber-700/80 text-sm">Riwayat aksi yang dilakukan admin di dalam sistem.</p>
         </div>
 
-        {{-- Filter --}}
+        {{-- Filter --}} 
         <form method="GET" action="{{ route('activity-logs.index') }}"
-              class="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm flex flex-wrap items-end gap-3">
+            class="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm flex flex-wrap items-end gap-3">
             <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Modul</label>
                 <select name="module" class="border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-[10rem]">
@@ -40,7 +40,7 @@
             </button>
             @if(request('module') || request('user_id'))
             <a href="{{ route('activity-logs.index') }}"
-               class="px-5 py-2.5 border border-amber-200 text-amber-800 hover:bg-amber-50 text-sm font-bold rounded-lg transition-colors">
+            class="px-5 py-2.5 border border-amber-200 text-amber-800 hover:bg-amber-50 text-sm font-bold rounded-lg transition-colors">
                 Reset
             </a>
             @endif

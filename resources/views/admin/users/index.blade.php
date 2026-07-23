@@ -120,19 +120,25 @@
                         <tbody>
                             @foreach($users as $user)
                             <tr class="border-b border-gray-100 hover:bg-gray-50 align-middle">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    @if($user->avatar)
+                                        <img src="{{ asset('storage/'.$user->avatar) }}"
+                                            alt="{{ $user->name }}"
+                                            class="w-9 h-9 rounded-full object-cover flex-shrink-0">
+                                    @else
                                         <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                                             {{ strtoupper(substr($user->name, 0, 1)) }}
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <p class="font-semibold text-amber-950">{{ $user->name }}</p>
-                                            @if($user->id === auth()->id())
-                                                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded">Kamu</span>
-                                            @endif
-                                        </div>
+                                    @endif
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-semibold text-amber-950">{{ $user->name }}</p>
+                                        @if($user->id === auth()->id())
+                                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded">Kamu</span>
+                                        @endif
                                     </div>
-                                </td>
+                                </div>
+                            </td>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4">
                                     @if($user->role === 'admin')

@@ -237,7 +237,27 @@ class OrderController extends Controller
         // kembalikan sebagai JSON supaya popup pembayaran bisa langsung dibuka
         // di halaman checkout, tanpa redirect ke halaman lain.
         if ($request->wantsJson()) {
-            $snapToken = $this->generateSnapToken($order);
+            // BUGFIX: sebelumnya kalau Snap::getSnapToken() gagal (mis. server/client
+            // key Midtrans belum diisi di .env, atau API Midtrans sedang bermasalah),
+            // exception-nya tidak ditangkap sama sekali dan customer langsung melihat
+            // halaman 500 mentah. Order-nya sendiri tetap aman tersimpan sebagai
+            // "Menunggu Pembayaran" (nanti otomatis dibatalkan & stok dikembalikan oleh
+            // ExpireStaleOrders kalau tidak pernah dibayar), tapi customer perlu diberi
+            // tahu dengan pesan yang jelas, bukan crash.
+            try {
+                $snapToken = $this->generateSnapToken($order);
+            } catch (\Throwable $e) {
+                \Log::error('Gagal membuat Snap token Midtrans', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'Gagal menghubungi layanan pembayaran. Pesanan kamu sudah tersimpan (Menunggu Pembayaran) dan bisa dicoba bayar lagi lewat halaman "Pesanan Saya".',
+                    'order_id' => $order->id,
+                    'redirect_url' => route('orders.myShow', $order),
+                ], 502);
+            }
 
             return response()->json([
                 'snap_token' => $snapToken,
@@ -263,7 +283,19 @@ class OrderController extends Controller
             return redirect()->route('orders.myShow', $order)->with('error', 'Pesanan ini sudah tidak bisa dibayar.');
         }
 
-        $snapToken = $this->generateSnapToken($order);
+        // BUGFIX: sama seperti di checkout() — jangan biarkan kegagalan Midtrans
+        // (key kosong/salah, API down, dll) tampil sebagai halaman 500 mentah.
+        try {
+            $snapToken = $this->generateSnapToken($order);
+        } catch (\Throwable $e) {
+            \Log::error('Gagal membuat Snap token Midtrans', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('orders.myShow', $order)
+                ->with('error', 'Gagal menghubungi layanan pembayaran. Silakan coba lagi beberapa saat lagi.');
+        }
 
         return view('orders.pay', compact('order', 'snapToken'));
     }

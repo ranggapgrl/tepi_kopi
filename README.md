@@ -132,7 +132,28 @@ Pastikan sudah terinstall di komputer kamu:
     jadi langkah ini harus diulang tiap kali clone/setup project di laptop
     baru.
 
-9. **Build asset frontend**
+9. **Konfigurasi Midtrans (wajib untuk fitur checkout/pembayaran)**
+
+    Fitur checkout memakai [Midtrans Snap](https://midtrans.com) untuk pembayaran online.
+    Tanpa langkah ini, tombol "Buat Pesanan" di halaman checkout akan gagal
+    dengan pesan "Gagal menghubungi layanan pembayaran" (pesanannya sendiri
+    tetap tersimpan aman sebagai "Menunggu Pembayaran", cuma popup
+    pembayarannya yang tidak akan muncul).
+    - Daftar akun sandbox gratis di [dashboard.midtrans.com](https://dashboard.midtrans.com/register)
+    - Ambil **Server Key** dan **Client Key** dari menu _Settings → Access Keys_ (pastikan masih dalam mode **Sandbox**, bukan Production)
+    - Isi di file `.env`:
+
+    ```env
+    MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxxxxxxxxxxxxxxxxxx
+    MIDTRANS_CLIENT_KEY=SB-Mid-client-xxxxxxxxxxxxxxxxxxxxxxxx
+    MIDTRANS_IS_PRODUCTION=false
+    ```
+
+    ⚠️ Kalau cuma mau develop fitur lain di luar checkout (mis. kelola produk,
+    laporan, dsb) dan malas bikin akun Midtrans dulu, ini boleh dilewati —
+    seluruh bagian aplikasi lain tetap berfungsi normal tanpa key ini.
+
+10. **Build asset frontend**
 
     ```bash
     npm run build
@@ -144,7 +165,7 @@ Pastikan sudah terinstall di komputer kamu:
     npm run dev
     ```
 
-10. **Jalankan server lokal**
+11. **Jalankan server lokal**
 
     ```bash
     php artisan serve

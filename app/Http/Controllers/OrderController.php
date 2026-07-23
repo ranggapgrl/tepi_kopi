@@ -390,6 +390,26 @@ class OrderController extends Controller
         $fraudStatus = $notif->fraud_status;
         $midtransOrderId = $notif->order_id;
 
+        // KEAMANAN: verifikasi signature_key supaya endpoint ini tidak bisa
+        // dipalsukan pihak luar untuk mengubah status pesanan orang lain
+        // (mis. mengaku "sudah bayar" padahal belum). Rumus resmi Midtrans:
+        // sha512(order_id + status_code + gross_amount + ServerKey).
+        // Lihat: https://docs.midtrans.com/docs/https-notification-webhooks
+        $expectedSignature = hash('sha512',
+            $midtransOrderId
+            . $notif->status_code
+            . $notif->gross_amount
+            . config('services.midtrans.server_key')
+        );
+
+        if (! hash_equals($expectedSignature, (string) $notif->signature_key)) {
+            \Log::warning('Midtrans callback ditolak: signature tidak valid', [
+                'midtrans_order_id' => $midtransOrderId,
+            ]);
+
+            return response()->json(['message' => 'Invalid signature'], 403);
+        }
+
         \Log::info('Midtrans callback diterima', [
             'midtrans_order_id' => $midtransOrderId,
             'transaction_status' => $transactionStatus,

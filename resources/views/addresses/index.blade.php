@@ -143,13 +143,13 @@
 
 <script>
     // Data alamat dari server, dipakai buat isi ulang form modal saat "Ubah" diklik.
-    const addressData = {!! $addresses->keyBy('id')->map(fn($a) => [
+    const addressData = {{ Illuminate\Support\Js::from($addresses->keyBy('id')->map(fn($a) => [
         'label' => $a->label,
         'recipient_name' => $a->recipient_name,
         'phone' => $a->phone,
         'address' => $a->address,
         'is_default' => $a->is_default,
-    ])->toJson() !!};
+    ])) }};
 
     function resetForm() {
         document.getElementById('addressForm').reset();

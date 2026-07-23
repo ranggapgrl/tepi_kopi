@@ -205,10 +205,10 @@
 <script>
     // Data alamat tersimpan, dipakai untuk isi otomatis form saat salah satu
     // chip "Alamat Tersimpan" diklik.
-    const savedAddresses = {!! $addresses->keyBy('id')->map(fn($a) => [
+    const savedAddresses = {{ Illuminate\Support\Js::from($addresses->keyBy('id')->map(fn($a) => [
         'address' => $a->address,
         'phone' => $a->phone,
-    ])->toJson() !!};
+    ])) }};
 
     function fillFromSavedAddress(id) {
         const data = savedAddresses[id];

@@ -59,7 +59,7 @@
 
         <div class="space-y-16 sm:space-y-24">
             @foreach([
-                ['num' => '01', 'title' => 'Mesin Kopi', 'desc' => 'Mesin espresso rumahan hingga kelas komersial untuk kedai, sudah diuji tim kami sebelum dijual.', 'img' => 'https://images.unsplash.com/photo-1517663066410-f099dc34dfb4?auto=format&fit=crop&w=700&q=80', 'icon' => 'fa-mug-hot'],
+                ['num' => '01', 'title' => 'Mesin Kopi', 'desc' => 'Mesin espresso rumahan hingga kelas komersial untuk kedai, sudah diuji tim kami sebelum dijual.', 'img' => 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=700&q=80', 'icon' => 'fa-mug-hot'],
                 ['num' => '02', 'title' => 'Grinder', 'desc' => 'Penggiling manual & elektrik dengan hasil gilingan konsisten, cocok untuk semua metode seduh.', 'img' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=700&q=80', 'icon' => 'fa-gear'],
                 ['num' => '03', 'title' => 'Alat Seduh Manual', 'desc' => 'V60, Chemex, French press, dan aeropress pilihan untuk penyeduh rumahan maupun profesional.', 'img' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80', 'icon' => 'fa-flask'],
             ] as $i => $item)

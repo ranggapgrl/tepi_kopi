@@ -101,6 +101,12 @@
                 </div>
                 @endforeach
             </div>
+            @if($order->discount_amount > 0)
+            <div class="px-5 sm:px-6 py-2.5 flex justify-between items-center text-sm text-emerald-700 font-semibold">
+                <span>Diskon Kupon ({{ $order->coupon_code }})</span>
+                <span>- Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span>
+            </div>
+            @endif
             <div class="px-5 sm:px-6 py-4 flex justify-between items-center" style="background:#E1DCC9;">
                 <span class="font-bold text-[#1F150C] text-sm">Total (termasuk pajak 11%)</span>
                 <span class="font-display font-semibold text-lg" style="color:#412D15;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
@@ -227,31 +233,21 @@
                     <i class="fa-solid fa-location-dot" style="color:#412D15;"></i> Alamat Pengiriman
                 </h3>
                 @if($order->shipping_address)
-                    <dl class="space-y-4 text-sm">
-
+                    <dl class="space-y-3 text-sm">
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-2">Alamat</dt>
-                            <dd class="font-semibold text-[#1F150C] leading-6 whitespace-pre-wrap break-all">
-                                {{ $order->shipping_address }}
-                            </dd>
+                            <dt class="text-[#1F150C]/40 mb-1">Alamat</dt>
+                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_address }}</dd>
                         </div>
-
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-2">No. HP</dt>
-                            <dd class="font-semibold text-[#1F150C] break-all">
-                                {{ $order->shipping_phone }}
-                            </dd>
+                            <dt class="text-[#1F150C]/40 mb-1">No. HP</dt>
+                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_phone }}</dd>
                         </div>
-
                         @if($order->shipping_notes)
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-2">Catatan</dt>
-                            <dd class="font-semibold text-[#1F150C] leading-6 whitespace-pre-wrap break-all">
-                                {{ $order->shipping_notes }}
-                            </dd>
+                            <dt class="text-[#1F150C]/40 mb-1">Catatan</dt>
+                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_notes }}</dd>
                         </div>
                         @endif
-
                     </dl>
 
                     @if($order->tracking_number)

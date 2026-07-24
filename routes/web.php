@@ -22,6 +22,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CustomerNotificationController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CouponController;
 
 // Halaman Utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -47,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
     Route::post('/orders/{order}/verify-status', [OrderController::class, 'verifyStatus'])->name('orders.verifyStatus');
     Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/checkout/apply-coupon', [CouponController::class, 'apply'])->name('checkout.applyCoupon')->middleware('throttle:20,1');
 });
 
 // === AUTH ===
@@ -124,6 +126,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/products/{product}/images/{image}', [ProductController::class, 'destroyImage'])->name('products.images.destroy');
 
     Route::resource('categories', CategoryController::class);
+    Route::resource('coupons', CouponController::class)->except(['show']);
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update']);
 
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');

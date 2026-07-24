@@ -183,6 +183,12 @@
     </table>
 
     <table class="totals">
+        @if($order->discount_amount > 0)
+        <tr>
+            <td class="text-right" style="width: 80%;">Diskon Kupon ({{ $order->coupon_code }})</td>
+            <td class="text-right" style="width: 20%;">- Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</td>
+        </tr>
+        @endif
         <tr class="grand-total">
             <td class="text-right" style="width: 80%;">Total Pembayaran</td>
             <td class="text-right" style="width: 20%;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>

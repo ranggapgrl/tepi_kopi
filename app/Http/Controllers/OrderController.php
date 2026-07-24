@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -94,9 +95,12 @@ class OrderController extends Controller
             'shipping_address' => 'required|string|max:500',
             'shipping_phone'   => 'required|string|max:20',
             'shipping_notes'   => 'nullable|string|max:255',
+
             'courier'          => 'required|string',
             'courier_service'  => 'required|string',
             'shipping_cost'    => 'required|numeric|min:0',
+            'coupon_code'      => 'nullable|string|max:30',
+
         ], [
             'shipping_address.required' => 'Alamat pengiriman wajib diisi.',
             'shipping_phone.required'   => 'Nomor HP wajib diisi.',
@@ -115,6 +119,20 @@ class OrderController extends Controller
         $result = DB::transaction(function () use ($cartItems, $cart, $validated) {
             $insufficient = [];
             $lockedItems = [];
+
+            // Kupon dikunci (lockForUpdate) di awal transaksi supaya dua checkout
+            // yang berbarengan tidak bisa sama-sama lolos saat kupon tinggal
+            // sisa 1 pemakaian (race condition pada used_count).
+            $coupon = null;
+            if (! empty($validated['coupon_code'])) {
+                $coupon = Coupon::where('code', strtoupper($validated['coupon_code']))
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $coupon) {
+                    return ['error' => 'Kode kupon tidak ditemukan.'];
+                }
+            }
 
             foreach ($cartItems as $item) {
                 if ($item->variant_id) {
@@ -154,12 +172,31 @@ class OrderController extends Controller
                 ];
             }
 
-            $totalPrice = 0;
+            $subtotal = 0;
             foreach ($lockedItems as $entry) {
-                $totalPrice += $entry['price'] * $entry['item']->quantity;
+                $subtotal += $entry['price'] * $entry['item']->quantity;
             }
+
             $totalPrice = $totalPrice + ($totalPrice * 0.11);
             $totalPrice += $validated['shipping_cost'];
+
+
+            // BARU: validasi kupon ulang di server (jangan pernah percaya nominal
+            // diskon yang dikirim dari halaman checkout), supaya orang tidak bisa
+            // mengakali total belanja lewat request yang dimodifikasi manual.
+            $discountAmount = 0;
+            if ($coupon) {
+                $couponError = $coupon->errorForSubtotal($subtotal);
+
+                if ($couponError) {
+                    return ['error' => $couponError];
+                }
+
+                $discountAmount = $coupon->calculateDiscount($subtotal);
+            }
+
+            $taxableAmount = $subtotal - $discountAmount;
+            $totalPrice = $taxableAmount + ($taxableAmount * 0.11);
 
             $order = Order::create([
                 'user_id' => Auth::id() ?? 1,
@@ -170,7 +207,14 @@ class OrderController extends Controller
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_phone' => $validated['shipping_phone'],
                 'shipping_notes' => $validated['shipping_notes'] ?? null,
+                'coupon_id' => $coupon->id ?? null,
+                'coupon_code' => $coupon->code ?? null,
+                'discount_amount' => $discountAmount,
             ]);
+
+            if ($coupon) {
+                $coupon->increment('used_count');
+            }
 
             $lowStockThreshold = config('tepikopi.low_stock_threshold', 5);
             $lowStockAlerts = [];
@@ -346,6 +390,23 @@ class OrderController extends Controller
 
         // Hitung ulang pajak agar tidak mencampur dengan ongkir
         $tax = (int) round($order->total_price - $subtotal - ($order->shipping_cost ?? 0));
+        // Pajak diturunkan dari total_price yang sudah tersimpan (bukan dihitung
+        // ulang manual), supaya penjumlahan item_details selalu presisi sama
+        // dengan gross_amount walau ada pembulatan di proses checkout.
+        $tax = (int) round($order->total_price - ($subtotal - $order->discount_amount));
+
+        // BARU: kalau order pakai kupon, kirim juga sebagai baris item bernilai
+        // negatif. Tanpa ini, total item_details (subtotal + pajak) tidak akan
+        // pernah sama dengan gross_amount begitu ada diskon, dan Midtrans bisa
+        // menolak/menandai transaksinya tidak konsisten.
+        if ($order->discount_amount > 0) {
+            $itemDetails[] = [
+                'id' => 'DISCOUNT',
+                'price' => -1 * (int) round($order->discount_amount),
+                'quantity' => 1,
+                'name' => 'Diskon Kupon' . ($order->coupon_code ? ' (' . $order->coupon_code . ')' : ''),
+            ];
+        }
         if ($tax > 0) {
             $itemDetails[] = [
                 'id' => 'TAX',
@@ -511,6 +572,9 @@ class OrderController extends Controller
                     $item->product?->increment('stock', $item->quantity);
                 }
             }
+            if ($order->coupon_id) {
+                Coupon::whereKey($order->coupon_id)->decrement('used_count');
+            }
             $order->update(['status' => 'Dibatalkan']);
         }
 
@@ -586,6 +650,10 @@ class OrderController extends Controller
             } else {
                 $item->product?->increment('stock', $item->quantity);
             }
+        }
+
+        if ($order->coupon_id) {
+            Coupon::whereKey($order->coupon_id)->decrement('used_count');
         }
 
         $order->update(['status' => 'Dibatalkan']);
@@ -692,6 +760,10 @@ class OrderController extends Controller
                     } else {
                         $item->product?->increment('stock', $item->quantity);
                     }
+                }
+
+                if ($lockedOrder->coupon_id) {
+                    Coupon::whereKey($lockedOrder->coupon_id)->decrement('used_count');
                 }
             }
 

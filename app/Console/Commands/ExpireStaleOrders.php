@@ -68,6 +68,10 @@ class ExpireStaleOrders extends Command
                     }
                 }
 
+                if ($lockedOrder->coupon_id) {
+                    \App\Models\Coupon::whereKey($lockedOrder->coupon_id)->decrement('used_count');
+                }
+
                 $lockedOrder->update(['status' => 'Dibatalkan']);
 
                 ActivityLog::record(

@@ -147,6 +147,17 @@
 
                         <tfoot>
 
+                        @if($order->discount_amount > 0)
+                        <tr>
+                            <td colspan="3" class="px-6 py-2 text-right font-semibold text-emerald-700 text-sm">
+                                Diskon Kupon ({{ $order->coupon_code }})
+                            </td>
+                            <td class="px-6 py-2 text-right font-semibold text-emerald-700 text-sm whitespace-nowrap">
+                                - Rp {{ number_format($order->discount_amount, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @endif
+
                         <tr style="background:#E1DCC9;">
 
                             <td colspan="3"

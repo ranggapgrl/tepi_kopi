@@ -175,15 +175,19 @@
                         @foreach($product->images as $img)
                         <div class="relative group">
                             <img src="{{ asset('storage/' . $img->image) }}" class="w-20 h-20 object-cover rounded-lg border border-amber-100">
-                            <form action="{{ route('products.images.destroy', [$product, $img]) }}" method="POST"
-                                onsubmit="return confirm('Hapus foto ini?')"
-                                class="absolute -top-2 -right-2">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-6 h-6 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow-md">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </form>
+                            <button type="button"
+                                onclick="if(confirm('Hapus foto ini?')) {
+                                    fetch('{{ route('products.images.destroy', [$product, $img]) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'X-HTTP-Method-Override': 'DELETE'
+                                        }
+                                    }).then(() => window.location.reload());
+                                }"
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow-md">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
                         </div>
                         @endforeach
                     </div>

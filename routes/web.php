@@ -36,15 +36,16 @@ Route::get('/katalog', [ProductController::class, 'index'])->name('katalog.index
 Route::get('/katalog/{product}', [ProductController::class, 'show'])->name('katalog.show');
 Route::post('/katalog/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
 
-// Keranjang & Checkout
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::delete('/cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::post('/cart/add', [CartController::class, 'store'])->name('cart.add');
     Route::get('/checkout', [OrderController::class, 'showCheckout'])->name('checkout.show');
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-    Route::get('/checkout/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay'); // BARU
-    Route::post('/orders/{order}/verify-status', [OrderController::class, 'verifyStatus'])->name('orders.verifyStatus'); // BARU
+    Route::get('/checkout/search-destination', [OrderController::class, 'searchDestination'])->name('checkout.search-destination'); // BARU
+    Route::post('/checkout/shipping-cost', [OrderController::class, 'shippingCost'])->name('checkout.shipping-cost'); // BARU
+    Route::get('/checkout/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+    Route::post('/orders/{order}/verify-status', [OrderController::class, 'verifyStatus'])->name('orders.verifyStatus');
     Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
 });
 
@@ -155,3 +156,4 @@ Route::get('/dashboard', function () {
 
 // Webhook Midtrans — tanpa middleware auth, karena dipanggil server Midtrans, bukan browser user
 Route::post('/midtrans/callback', [OrderController::class, 'midtransCallback'])->name('midtrans.callback'); // BARU
+

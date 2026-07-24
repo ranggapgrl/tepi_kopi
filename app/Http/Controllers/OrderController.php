@@ -94,6 +94,9 @@ class OrderController extends Controller
             'shipping_address' => 'required|string|max:500',
             'shipping_phone'   => 'required|string|max:20',
             'shipping_notes'   => 'nullable|string|max:255',
+            'courier'          => 'required|string',
+            'courier_service'  => 'required|string',
+            'shipping_cost'    => 'required|numeric|min:0',
         ], [
             'shipping_address.required' => 'Alamat pengiriman wajib diisi.',
             'shipping_phone.required'   => 'Nomor HP wajib diisi.',
@@ -156,10 +159,13 @@ class OrderController extends Controller
                 $totalPrice += $entry['price'] * $entry['item']->quantity;
             }
             $totalPrice = $totalPrice + ($totalPrice * 0.11);
+            $totalPrice += $validated['shipping_cost'];
 
             $order = Order::create([
                 'user_id' => Auth::id() ?? 1,
                 'total_price' => $totalPrice,
+                'shipping_cost' => $validated['shipping_cost'],
+                'courier' => $validated['courier'],
                 'status' => 'Menunggu Pembayaran',
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_phone' => $validated['shipping_phone'],
@@ -338,13 +344,23 @@ class OrderController extends Controller
             ];
         }
 
-        $tax = (int) round($order->total_price - $subtotal);
+        // Hitung ulang pajak agar tidak mencampur dengan ongkir
+        $tax = (int) round($order->total_price - $subtotal - ($order->shipping_cost ?? 0));
         if ($tax > 0) {
             $itemDetails[] = [
                 'id' => 'TAX',
                 'price' => $tax,
                 'quantity' => 1,
                 'name' => 'Pajak (11%)',
+            ];
+        }
+
+        if (($order->shipping_cost ?? 0) > 0) {
+            $itemDetails[] = [
+                'id' => 'SHIPPING',
+                'price' => (int) round($order->shipping_cost),
+                'quantity' => 1,
+                'name' => 'Ongkos Kirim (' . strtoupper($order->courier ?? 'Kurir') . ')',
             ];
         }
 
@@ -707,5 +723,59 @@ class OrderController extends Controller
         }
 
         return redirect()->route('orders.show', $order)->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function trackShipment(Order $order, RajaOngkirService $rajaOngkir)
+    {
+        if (! $order->tracking_number || ! $order->courier) {
+            return back()->with('error', 'Nomor resi atau kurir belum diisi.');
+        }
+
+        $result = $rajaOngkir->trackWaybill($order->tracking_number, strtolower($order->courier));
+
+        if (! $result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('tracking', $result['data']);
+    }
+    /**
+     * CUSTOMER — GET /checkout/search-destination
+     * Mencari kota/kecamatan dari API RajaOngkir (Komerce)
+     */
+public function searchDestination(Request $request, \App\Services\RajaOngkirService $rajaOngkir)
+{
+    $keyword = $request->query('q') ?? $request->query('keyword');
+
+    if (!$keyword || strlen($keyword) < 3) {
+        return response()->json([]);
+    }
+
+    $result = $rajaOngkir->searchDestination($keyword);
+
+    return response()->json($result);
+}
+
+    /**
+     * CUSTOMER — POST /checkout/shipping-cost
+     * Menghitung ongkos kirim berdasarkan destination_id dan berat
+     */
+    public function shippingCost(Request $request, \App\Services\RajaOngkirService $rajaOngkir)
+    {
+        $validated = $request->validate([
+            'destination_id' => 'required',
+            'weight' => 'required|numeric|min:1'
+        ]);
+
+        $result = $rajaOngkir->calculateCost(
+            $validated['destination_id'],
+            $validated['weight']
+        );
+
+        if ($result['success']) {
+            return response()->json($result);
+        }
+
+        return response()->json(['success' => false, 'message' => $result['message']], 500);
     }
 }

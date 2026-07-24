@@ -226,21 +226,31 @@
                     <i class="fa-solid fa-location-dot" style="color:#412D15;"></i> Alamat Pengiriman
                 </h3>
                 @if($order->shipping_address)
-                    <dl class="space-y-3 text-sm">
+                    <dl class="space-y-4 text-sm">
+
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-1">Alamat</dt>
-                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_address }}</dd>
+                            <dt class="text-[#1F150C]/40 mb-2">Alamat</dt>
+                            <dd class="font-semibold text-[#1F150C] leading-6 whitespace-pre-wrap break-all">
+                                {{ $order->shipping_address }}
+                            </dd>
                         </div>
+
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-1">No. HP</dt>
-                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_phone }}</dd>
+                            <dt class="text-[#1F150C]/40 mb-2">No. HP</dt>
+                            <dd class="font-semibold text-[#1F150C] break-all">
+                                {{ $order->shipping_phone }}
+                            </dd>
                         </div>
+
                         @if($order->shipping_notes)
                         <div>
-                            <dt class="text-[#1F150C]/40 mb-1">Catatan</dt>
-                            <dd class="font-semibold text-[#1F150C]">{{ $order->shipping_notes }}</dd>
+                            <dt class="text-[#1F150C]/40 mb-2">Catatan</dt>
+                            <dd class="font-semibold text-[#1F150C] leading-6 whitespace-pre-wrap break-all">
+                                {{ $order->shipping_notes }}
+                            </dd>
                         </div>
                         @endif
+
                     </dl>
                 @else
                     <p class="text-xs text-[#1F150C]/40 italic">Pesanan ini dibuat sebelum fitur alamat pengiriman ada.</p>

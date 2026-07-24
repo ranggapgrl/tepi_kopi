@@ -95,6 +95,7 @@ class OrderController extends Controller
             'shipping_address' => 'required|string|max:500',
             'shipping_phone'   => 'required|string|max:20',
             'shipping_notes'   => 'nullable|string|max:255',
+            'destination_name' => 'nullable|string|max:255',
 
             'courier'          => 'required|string',
             'courier_service'  => 'required|string',
@@ -177,13 +178,7 @@ class OrderController extends Controller
                 $subtotal += $entry['price'] * $entry['item']->quantity;
             }
 
-            $totalPrice = $totalPrice + ($totalPrice * 0.11);
-            $totalPrice += $validated['shipping_cost'];
-
-
-            // BARU: validasi kupon ulang di server (jangan pernah percaya nominal
-            // diskon yang dikirim dari halaman checkout), supaya orang tidak bisa
-            // mengakali total belanja lewat request yang dimodifikasi manual.
+            // BARU: validasi kupon ulang di server
             $discountAmount = 0;
             if ($coupon) {
                 $couponError = $coupon->errorForSubtotal($subtotal);
@@ -196,7 +191,16 @@ class OrderController extends Controller
             }
 
             $taxableAmount = $subtotal - $discountAmount;
-            $totalPrice = $taxableAmount + ($taxableAmount * 0.11);
+            $tax = $taxableAmount * 0.11;
+            
+            // Hitung total harga akhir dengan benar (subtotal - diskon + pajak + ongkir)
+            $totalPrice = $taxableAmount + $tax + (float) $validated['shipping_cost'];
+
+            // Gabungkan alamat rumah dengan nama kota/kecamatan pilihan RajaOngkir
+            $fullAddress = $validated['shipping_address'];
+            if (!empty($validated['destination_name'])) {
+                $fullAddress .= ', Kec/Kota: ' . $validated['destination_name'];
+            }
 
             $order = Order::create([
                 'user_id' => Auth::id() ?? 1,
@@ -204,7 +208,7 @@ class OrderController extends Controller
                 'shipping_cost' => $validated['shipping_cost'],
                 'courier' => $validated['courier'],
                 'status' => 'Menunggu Pembayaran',
-                'shipping_address' => $validated['shipping_address'],
+                'shipping_address' => $fullAddress,
                 'shipping_phone' => $validated['shipping_phone'],
                 'shipping_notes' => $validated['shipping_notes'] ?? null,
                 'coupon_id' => $coupon->id ?? null,

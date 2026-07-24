@@ -12,6 +12,7 @@ class Order extends Model
         'midtrans_order_id', 'payment_type', 'paid_at',
         'shipped_at', 'completed_at',
         'courier', 'tracking_number',
+        'coupon_id', 'coupon_code', 'discount_amount',
     ];
 
     protected $casts = [
@@ -28,6 +29,11 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     /**

@@ -49,8 +49,9 @@
     </div>
     @endif
 
-    <form action="{{ route('checkout') }}" method="POST" x-data="checkoutForm()" @submit.prevent="submit($event)">
+    <form action="{{ route('checkout') }}" method="POST" x-data="checkoutForm({{ (int) $subtotal }})" @submit.prevent="submit($event)">
         @csrf
+        <input type="hidden" name="coupon_code" :value="appliedCode">
 
         {{-- Client-side errors --}}
         <div x-show="errorList.length > 0" x-cloak x-transition class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl">
@@ -170,21 +171,47 @@
 
                 <div class="border-t border-dashed border-black/15 mx-6 mt-2"></div>
 
+                {{-- Kupon diskon --}}
+                <div class="px-6 pt-4">
+                    <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">Kode Kupon</label>
+                    <div class="flex gap-2" x-show="!appliedCode">
+                        <input type="text" x-model="couponInput" @keyup.enter.prevent="applyCoupon()"
+                            placeholder="Contoh: TEPIKOPI10"
+                            class="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-black/10 bg-black/[0.02] text-sm text-[#1F150C] uppercase outline-none focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 transition-all">
+                        <button type="button" @click="applyCoupon()" :disabled="couponLoading || !couponInput"
+                            class="px-4 py-2.5 rounded-xl border border-[#412D15]/30 text-[#412D15] font-bold text-xs hover:bg-[#412D15]/5 transition-colors disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap">
+                            <span x-show="!couponLoading">Terapkan</span>
+                            <i x-show="couponLoading" x-cloak class="fa-solid fa-circle-notch fa-spin"></i>
+                        </button>
+                    </div>
+                    <div x-show="appliedCode" x-cloak class="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <span class="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> <span x-text="appliedCode"></span> terpasang
+                        </span>
+                        <button type="button" @click="removeCoupon()" class="text-emerald-700/60 hover:text-emerald-800 text-xs font-semibold">Hapus</button>
+                    </div>
+                    <p x-show="couponMessage && !appliedCode" x-cloak x-text="couponMessage" class="text-rose-600 text-xs font-medium mt-1.5"></p>
+                </div>
+
                 <div class="p-6">
                     <div class="space-y-3 mb-5 text-sm">
                         <div class="flex justify-between text-[#1F150C]/60">
                             <span>Subtotal ({{ $cartItems->sum('quantity') }} Barang)</span>
                             <span class="font-semibold text-[#1F150C]">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                         </div>
+                        <div class="flex justify-between text-emerald-700" x-show="discountAmount > 0" x-cloak>
+                            <span>Diskon Kupon</span>
+                            <span class="font-semibold" x-text="'- Rp ' + formatRupiah(discountAmount)"></span>
+                        </div>
                         <div class="flex justify-between text-[#1F150C]/60">
                             <span>Pajak (11%)</span>
-                            <span class="font-semibold text-[#1F150C]">Rp {{ number_format($tax, 0, ',', '.') }}</span>
+                            <span class="font-semibold text-[#1F150C]" x-text="'Rp ' + formatRupiah(displayTax)"></span>
                         </div>
                     </div>
 
                     <div class="flex justify-between items-center mb-6 pt-4 border-t border-black/5">
                         <span class="font-bold text-[#1F150C]">Total Akhir</span>
-                        <span class="font-display text-2xl font-semibold" style="color:#412D15;">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        <span class="font-display text-2xl font-semibold" style="color:#412D15;" x-text="'Rp ' + formatRupiah(displayTotal)"></span>
                     </div>
 
                     <button type="submit" :disabled="loading"
@@ -217,10 +244,65 @@
         document.getElementById('shipping_phone').value = data.phone;
     }
 
-    function checkoutForm() {
+    function checkoutForm(subtotal) {
         return {
+            subtotal: subtotal,
             loading: false,
             errorList: [],
+            couponInput: '',
+            couponLoading: false,
+            couponMessage: '',
+            appliedCode: '',
+            discountAmount: 0,
+
+            get displayTax() {
+                return Math.round((this.subtotal - this.discountAmount) * 0.11);
+            },
+            get displayTotal() {
+                return (this.subtotal - this.discountAmount) + this.displayTax;
+            },
+            formatRupiah(value) {
+                return new Intl.NumberFormat('id-ID').format(value);
+            },
+            async applyCoupon() {
+                if (!this.couponInput) return;
+                this.couponLoading = true;
+                this.couponMessage = '';
+
+                try {
+                    const response = await fetch(`{{ route('checkout.applyCoupon') }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                                ?? document.querySelector('input[name="_token"]')?.value,
+                        },
+                        body: JSON.stringify({ code: this.couponInput, subtotal: this.subtotal }),
+                    });
+                    const data = await response.json().catch(() => ({}));
+
+                    this.couponLoading = false;
+
+                    if (!response.ok || !data.valid) {
+                        this.couponMessage = data.message || 'Kupon tidak valid.';
+                        return;
+                    }
+
+                    this.appliedCode = data.code;
+                    this.discountAmount = data.discount;
+                    this.couponMessage = '';
+                } catch (e) {
+                    this.couponLoading = false;
+                    this.couponMessage = 'Gagal menghubungi server, coba lagi.';
+                }
+            },
+            removeCoupon() {
+                this.appliedCode = '';
+                this.discountAmount = 0;
+                this.couponInput = '';
+                this.couponMessage = '';
+            },
             async submit(event) {
                 this.loading = true;
                 this.errorList = [];

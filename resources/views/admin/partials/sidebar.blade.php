@@ -17,6 +17,11 @@
             <i class="fa-solid fa-tags w-5"></i> Kategori Produk
         </a>
 
+        <a href="{{ route('coupons.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('coupons*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
+            <i class="fa-solid fa-ticket w-5"></i> Kupon Diskon
+        </a>
+
         <a href="/orders"
            class="flex items-center justify-between gap-3 px-3 py-2.5 font-semibold rounded-xl transition-colors {{ request()->is('orders*') ? 'bg-amber-50 text-amber-800' : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800 font-medium' }}">
             <span class="flex items-center gap-3">

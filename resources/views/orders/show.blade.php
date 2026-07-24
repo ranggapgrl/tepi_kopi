@@ -390,6 +390,45 @@
 
                         </div>
 
+                        {{-- Kurir & Nomor Resi --}}
+                        <div>
+
+                            <label for="courier" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                                Kurir
+                            </label>
+
+                            <input
+                                type="text"
+                                name="courier"
+                                id="courier"
+                                value="{{ old('courier', $order->courier) }}"
+                                placeholder="mis. JNE, J&T, SiCepat"
+                                class="w-full px-4 py-2.5 rounded-xl border {{ $errors->has('courier') ? 'border-rose-300 focus:ring-rose-200' : 'border-black/10 focus:ring-[#412D15]/20' }} bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 transition-all">
+
+                            @error('courier')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+
+                        </div>
+
+                        <div>
+
+                            <label for="tracking_number" class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                                Nomor Resi
+                            </label>
+
+                            <input
+                                type="text"
+                                name="tracking_number"
+                                id="tracking_number"
+                                value="{{ old('tracking_number', $order->tracking_number) }}"
+                                placeholder="mis. JP1234567890"
+                                class="w-full px-4 py-2.5 rounded-xl border {{ $errors->has('tracking_number') ? 'border-rose-300 focus:ring-rose-200' : 'border-black/10 focus:ring-[#412D15]/20' }} bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 transition-all">
+
+                            @error('tracking_number')<p class="text-rose-600 text-xs font-medium mt-1.5">{{ $message }}</p>@enderror
+
+                            <p class="text-[11px] text-[#1F150C]/40 mt-1.5">Wajib diisi begitu status diubah ke "Dikirim".</p>
+
+                        </div>
+
                         <div class="rounded-xl border border-amber-200 bg-amber-50 p-3">
 
                             <div class="flex gap-2 items-start">

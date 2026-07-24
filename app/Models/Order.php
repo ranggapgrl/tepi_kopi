@@ -11,6 +11,7 @@ class Order extends Model
         'shipping_address', 'shipping_phone', 'shipping_notes',
         'midtrans_order_id', 'payment_type', 'paid_at',
         'shipped_at', 'completed_at',
+        'courier', 'tracking_number',
     ];
 
     protected $casts = [

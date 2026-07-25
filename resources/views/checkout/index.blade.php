@@ -132,15 +132,15 @@
                                         <input type="radio" name="courier_selection" :value="option.id" x-model="selectedCourier.id" @change="setCourier(option)" class="text-[#412D15] focus:ring-[#412D15]">
                                         
                                         {{-- Badge Inisial Kurir Modern --}}
-                                        <div class="w-12 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs uppercase shadow-xs tracking-wider"
-                                             :class="{
-                                                 'bg-blue-50 text-blue-700 border border-blue-200': option.courier.toLowerCase().includes('jne'),
-                                                 'bg-red-50 text-red-600 border border-red-200': option.courier.toLowerCase().includes('jnt') || option.courier.toLowerCase().includes('j&t'),
-                                                 'bg-amber-50 text-amber-700 border border-amber-200': option.courier.toLowerCase().includes('sicepat'),
-                                                 'bg-orange-50 text-orange-600 border border-orange-200': option.courier.toLowerCase().includes('tiki'),
-                                                 'bg-gray-100 text-gray-700 border border-gray-200': !['jne', 'jnt', 'j&t', 'sicepat', 'tiki'].some(k => option.courier.toLowerCase().includes(k))
-                                             }"
-                                             x-text="option.courier">
+                                        <div class="w-14 h-11 rounded-xl bg-white border border-black/10 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
+                                            <template x-if="getCourierLogo(option.courier)">
+                                                <img :src="getCourierLogo(option.courier)" :alt="option.courier"
+                                                    class="w-full h-full object-contain p-1.5">
+                                            </template>
+                                            <template x-if="!getCourierLogo(option.courier)">
+                                                <div class="w-full h-full flex items-center justify-center text-[10px] font-bold uppercase text-[#412D15]"
+                                                    x-text="option.courier"></div>
+                                            </template>
                                         </div>
 
                                         <div>
@@ -264,6 +264,20 @@
             selectedCourier: {
                 id: '', code: '', service: '', cost: 0
             },
+            getCourierLogo(courierName) {
+                const map = {
+                    'jne': 'jne',
+                    'jnt': 'jnt',
+                    'j&t': 'jnt',
+                    'sicepat': 'sicepat',
+                    'tiki': 'tiki',
+                    'pos': 'pos',
+                    'anteraja': 'anteraja',
+                };
+                const key = courierName.toLowerCase().replace(/[^a-z]/g, '');
+                const filename = map[key] || map[courierName.toLowerCase()] || null;
+                return filename ? `/assets/images/couriers/${filename}.jpg` : null;
+            },
 
             formatRupiah(angka) {
                 return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
@@ -284,7 +298,7 @@
 
             async selectDestination(dest) {
                 this.selectedDestinationName = dest.name || dest.label || dest.city_name || 'Destinasi Terpilih';
-                this.searchKeyword = '';
+                this.searchKeyword = this.selectedDestinationName;  // isi field dengan nama yang dipilih
                 this.destinations = [];
                 this.shippingOptions = [];
                 this.selectedCourier = { id: '', code: '', service: '', cost: 0 };

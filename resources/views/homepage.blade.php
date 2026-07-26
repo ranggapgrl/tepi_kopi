@@ -138,68 +138,9 @@
         @if(!empty($products) && count($products) > 0)
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach(collect($products)->take(4) as $i => $product)
-                <a href="/katalog/{{ $product->id }}"
-                   class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div class="relative h-52 overflow-hidden">
-                        <img src="{{ $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80' }}"
-                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                             alt="{{ $product->name }}">
-                        @if($i === 0)
-                            <span class="absolute top-3 left-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10" style="background:#412D15;">
-                                <i class="fa-solid fa-fire mr-1"></i>Terlaris
-                            </span>
-                        @endif
-                       @if($product->stock <= 0)
-    <span class="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-10 shadow">Habis</span>
-@endif
-
-@auth
-<button type="button"
-        x-data="{ wishlisted: {{ in_array($product->id, $wishlistedProductIds ?? []) ? 'true' : 'false' }}, loading: false }"
-        @click.stop.prevent="
-            if (loading) return;
-            loading = true;
-            fetch('{{ route('wishlist.toggle', $product) }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                    'Accept': 'application/json',
-                },
-            })
-            .then(res => res.json())
-            .then(data => { wishlisted = data.wishlisted; })
-            .finally(() => { loading = false; });
-        "
-        class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition z-10"
-        :class="wishlisted ? 'text-rose-500' : 'text-[#1F150C]/50 hover:text-rose-500'">
-    <i class="text-xs" :class="wishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-</button>
-@else
-<button type="button"
-        @click.stop.prevent="window.location.href = '{{ route('login') }}'"
-        class="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1F150C]/50 hover:text-rose-500 transition z-10">
-    <i class="fa-regular fa-heart text-xs"></i>
-</button>
-@endauth
-</div>
-                    <div class="p-5">
-                       <div class="flex items-center gap-1 text-[10px] mb-1.5" style="color:#412D15;">
-    @for($i = 1; $i <= 5; $i++)
-        <i class="fa-{{ $i <= round($product->reviews_avg_rating ?? 0) ? 'solid' : 'regular' }} fa-star"></i>
-    @endfor
-    @if($product->reviews_avg_rating)
-        <span class="text-[10px] text-[#1F150C]/40 ml-0.5">({{ number_format($product->reviews_avg_rating, 1) }})</span>
-    @endif
-</div>
-                        <h3 class="text-base font-bold text-[#1F150C] leading-tight line-clamp-1">{{ $product->name }}</h3>
-                        <div class="flex items-center justify-between mt-3">
-                            <p class="font-extrabold" style="color:#412D15;">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                            <span class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm transition-transform group-hover:scale-110" style="background:#1F150C;">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
+                <x-product-card :product="$product" 
+                                 :wishlisted="in_array($product->id, $wishlistedProductIds ?? [])" 
+                                 :featured="$i === 0" />
             @endforeach
         </div>
         @else

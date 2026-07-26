@@ -14,7 +14,7 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cart = Cart::firstOrCreate(['user_id' => Auth::id() ?? 1]);
+        $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
         $cartItems = CartItem::with(['product', 'variant'])->where('cart_id', $cart->id)->get();
 
         $subtotal = 0;
@@ -32,10 +32,6 @@ class CartController extends Controller
 
     public function store(Request $request)
     {
-        // BUGFIX: sebelumnya product_id/variant_id/quantity dipakai langsung dari
-        // request tanpa validasi. Produk yang tidak ada bisa membuat halaman cart
-        // error (null pointer), dan quantity 0/negatif/non-integer bisa dipakai
-        // untuk memanipulasi total harga saat checkout. Sekarang divalidasi dulu.
         $validated = $request->validate([
             'product_id' => 'required|integer|exists:products,id',
             'variant_id' => 'nullable|integer|exists:product_variants,id',
@@ -45,25 +41,19 @@ class CartController extends Controller
         $quantity = $validated['quantity'] ?? 1;
         $variantId = $validated['variant_id'] ?? null;
 
-        // BUGFIX: pastikan variant_id yang dikirim benar-benar milik product_id
-        // yang dikirim, supaya orang tidak bisa mencampur produk A dengan
-        // harga/stok varian produk B lewat request yang dipalsukan.
         if ($variantId) {
             $variantBelongsToProduct = ProductVariant::where('id', $variantId)
                 ->where('product_id', $validated['product_id'])
                 ->exists();
 
             if (! $variantBelongsToProduct) {
-                return back()->with('error', 'Varian produk tidak valid.');
+                return $this->jsonError('Varian produk tidak valid.', $request);
             }
         }
 
         $result = DB::transaction(function () use ($validated, $variantId, $quantity) {
-            $cart = Cart::firstOrCreate(['user_id' => Auth::id() ?? 1]);
+            $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
 
-            // Lock baris yang relevan supaya dua request "tambah ke keranjang"
-            // yang datang bersamaan (mis. double-klik) tidak membuat baris
-            // cart_items duplikat untuk produk/varian yang sama.
             $existingItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $validated['product_id'])
                 ->where('variant_id', $variantId)
@@ -72,9 +62,6 @@ class CartController extends Controller
 
             $newQuantity = $existingItem ? $existingItem->quantity + $quantity : $quantity;
 
-            // BUGFIX: sebelumnya stok baru dicek saat checkout. Sekarang dicek
-            // juga saat ditambahkan ke keranjang supaya user langsung tahu kalau
-            // stoknya tidak cukup, bukan baru gagal di halaman checkout.
             if ($variantId) {
                 $variant = ProductVariant::whereKey($variantId)->lockForUpdate()->first();
                 $availableStock = $variant->stock;
@@ -104,7 +91,15 @@ class CartController extends Controller
         });
 
         if (isset($result['error'])) {
-            return back()->with('error', $result['error']);
+            return $this->jsonError($result['error'], $request);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang.',
+                'cart_count' => $result['total_items']
+            ]);
         }
 
         return back()->with(
@@ -113,9 +108,20 @@ class CartController extends Controller
         );
     }
 
+    /**
+     * Helper to return JSON error responses.
+     */
+    private function jsonError(string $message, Request $request)
+    {
+        if ($request->wantsJson()) {
+            return response()->json(['error' => $message], 422);
+        }
+        return back()->with('error', $message);
+    }
+
     public function destroy(CartItem $cartItem)
     {
-        $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+        $cart = Cart::where('user_id', Auth::id())->first();
 
         // Pastikan item ini benar-benar milik keranjang user yang sedang login
         abort_unless($cart && $cartItem->cart_id === $cart->id, 403);
@@ -127,7 +133,7 @@ class CartController extends Controller
 
     public function update(Request $request, CartItem $cartItem)
 {
-    $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+    $cart = Cart::where('user_id', Auth::id())->first();
     abort_unless($cart && $cartItem->cart_id === $cart->id, 403);
 
     $validated = $request->validate([

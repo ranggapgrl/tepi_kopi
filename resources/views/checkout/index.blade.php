@@ -43,7 +43,9 @@
         <input type="hidden" name="shipping_cost" x-model="selectedCourier.cost">
 
         {{-- Client-side errors --}}
-        <div x-show="errorList.length > 0" x-cloak x-transition class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl">
+        <div x-show="errorList.length > 0" x-cloak x-transition
+            class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl"
+            aria-live="polite" role="alert">
             <p class="text-sm font-bold mb-1">Cek lagi isian di bawah:</p>
             <ul class="text-sm list-disc list-inside space-y-0.5">
                 <template x-for="err in errorList" :key="err">

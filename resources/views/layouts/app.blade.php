@@ -118,13 +118,15 @@
     </div>
     @endauth
 
-    <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition">
+    <a href="/cart" class="relative w-10 h-10 rounded-full flex items-center justify-center text-[#1F150C] hover:bg-[#E1DCC9]/60 transition" 
+    x-data="{ count: {{ $cartCount }} }" 
+    x-on:cart-updated.window="count = $event.detail">
         <i class="fa-solid fa-bag-shopping"></i>
-        @if(($cartCount ?? 0) > 0)
-        <span class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center" style="background:var(--brown);">
-            {{ $cartCount }}
+        <span x-show="count > 0" 
+            x-text="count > 99 ? '99+' : count"
+            class="absolute top-0 right-0 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center"
+            style="background:var(--brown);">
         </span>
-        @endif
     </a>
 
                 @auth

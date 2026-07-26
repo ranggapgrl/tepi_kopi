@@ -18,6 +18,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification as MidtransNotification;
 use App\Notifications\LowStockNotification;
+use App\Services\RajaOngkirService;
 
 class OrderController extends Controller
 {
@@ -56,7 +57,7 @@ class OrderController extends Controller
 
     public function showCheckout()
     {
-        $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+        $cart = Cart::where('user_id', Auth::id())->first();
         $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
 
         if ($cartItems->isEmpty()) {
@@ -107,7 +108,7 @@ class OrderController extends Controller
             'shipping_phone.required'   => 'Nomor HP wajib diisi.',
         ]);
 
-        $cart = Cart::where('user_id', Auth::id() ?? 1)->first();
+        $cart = Cart::where('user_id', Auth::id())->first();
         $cartItems = $cart ? $cart->items()->with(['product', 'variant'])->get() : collect();
 
         if (count($cartItems) == 0) {
@@ -203,7 +204,7 @@ class OrderController extends Controller
             }
 
             $order = Order::create([
-                'user_id' => Auth::id() ?? 1,
+                'user_id' => Auth::id(),
                 'total_price' => $totalPrice,
                 'shipping_cost' => $validated['shipping_cost'],
                 'courier' => $validated['courier'],
@@ -229,31 +230,43 @@ class OrderController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
-                    // Snapshot nama produk saat pesanan dibuat, supaya riwayat
-                    // pesanan tetap terbaca walau produknya nanti dihapus.
                     'product_name' => $item->product->name ?? 'Produk',
                     'variant_id' => $item->variant_id,
                     'quantity' => $item->quantity,
                     'price' => $entry['price']
                 ]);
 
+                $stockBefore = null;
+                $stockAfter = null;
+                $itemName = '';
+                $productId = $item->product_id;
+
                 if ($entry['variant']) {
-                    $stockBefore = $entry['variant']->stock;
-                    $entry['variant']->decrement('stock', $item->quantity);
+                    $variant = $entry['variant'];
+                    $stockBefore = $variant->stock;
+                    $affected = ProductVariant::where('id', $variant->id)
+                        ->where('stock', '>=', $item->quantity)
+                        ->decrement('stock', $item->quantity);
+                    if ($affected === 0) {
+                        throw new \Exception("Stok varian {$variant->name} tidak mencukupi.");
+                    }
                     $stockAfter = $stockBefore - $item->quantity;
-                    $itemName = ($item->product->name ?? 'Produk') . ' — ' . $entry['variant']->name;
-                    $productId = $item->product_id;
+                    $itemName = ($item->product->name ?? 'Produk') . ' — ' . $variant->name;
                 } else {
-                    $stockBefore = $entry['product']->stock;
-                    $entry['product']->decrement('stock', $item->quantity);
+                    $product = $entry['product'];
+                    $stockBefore = $product->stock;
+                    $affected = Product::where('id', $product->id)
+                        ->where('stock', '>=', $item->quantity)
+                        ->decrement('stock', $item->quantity);
+                    if ($affected === 0) {
+                        throw new \Exception("Stok produk {$product->name} tidak mencukupi.");
+                    }
                     $stockAfter = $stockBefore - $item->quantity;
-                    $itemName = $entry['product']->name;
-                    $productId = $entry['product']->id;
+                    $itemName = $product->name;
+                    $productId = $product->id;
                 }
 
-                // Hanya catat begitu stok BARU SAJA turun melewati batas gara-gara
-                // pesanan ini, supaya admin tidak dibanjiri notifikasi berulang
-                // untuk produk yang memang sudah lama menipis.
+                // Low stock alert logic (same as before)
                 if ($stockAfter <= $lowStockThreshold && $stockBefore > $lowStockThreshold) {
                     $lowStockAlerts[] = ['name' => $itemName, 'stock' => $stockAfter, 'product_id' => $productId];
                 }
@@ -773,12 +786,8 @@ class OrderController extends Controller
 
             $lockedOrder->update([
                 'status' => $newStatus,
-                // Cuma di-set sekali pas pertama kali masuk status "Dikirim",
-                // jangan direset ke waktu sekarang tiap kali admin cuma
-                // mengoreksi nomor resi sementara statusnya sudah "Dikirim".
-                'shipped_at' => ($newStatus === 'Dikirim' && $oldStatus !== 'Dikirim')
-                    ? now()
-                    : $lockedOrder->shipped_at,
+                'shipped_at' => ($newStatus === 'Dikirim' && $oldStatus !== 'Dikirim') ? now() : $lockedOrder->shipped_at,
+                'completed_at' => ($newStatus === 'Selesai' && $oldStatus !== 'Selesai') ? now() : $lockedOrder->completed_at,
                 'courier' => $validated['courier'] ?? $lockedOrder->courier,
                 'tracking_number' => $validated['tracking_number'] ?? $lockedOrder->tracking_number,
             ]);
@@ -819,18 +828,18 @@ class OrderController extends Controller
      * CUSTOMER — GET /checkout/search-destination
      * Mencari kota/kecamatan dari API RajaOngkir (Komerce)
      */
-public function searchDestination(Request $request, \App\Services\RajaOngkirService $rajaOngkir)
-{
-    $keyword = $request->query('q') ?? $request->query('keyword');
+    public function searchDestination(Request $request, \App\Services\RajaOngkirService $rajaOngkir)
+    {
+        $keyword = $request->query('q') ?? $request->query('keyword');
 
-    if (!$keyword || strlen($keyword) < 3) {
-        return response()->json([]);
+        if (!$keyword || strlen($keyword) < 3) {
+            return response()->json([]);
+        }
+
+        $result = $rajaOngkir->searchDestination($keyword);
+
+        return response()->json($result);
     }
-
-    $result = $rajaOngkir->searchDestination($keyword);
-
-    return response()->json($result);
-}
 
     /**
      * CUSTOMER — POST /checkout/shipping-cost

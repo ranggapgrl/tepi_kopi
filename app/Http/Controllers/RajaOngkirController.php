@@ -22,10 +22,10 @@ class RajaOngkirController extends Controller
 
     public function calculateCost(Request $request, RajaOngkirService $rajaOngkir)
     {
-        $request->validate([
+        $validated = $request->validate([
             'destination_id' => 'required',
-            'weight'         => 'required|numeric|min:1',
-            'courier'        => 'nullable|string'
+            'weight' => 'required|numeric|min:1',
+            'courier' => 'nullable|string|regex:/^(jne|jnt|sicepat|pos|anteraja)(:(jne|jnt|sicepat|pos|anteraja))*$/'
         ]);
 
         // Default kurir kalau tidak dikirim dari frontend

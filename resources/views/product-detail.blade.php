@@ -442,20 +442,8 @@ init() { if (this.variants.length) { this.selectedVariant = this.variants[0]; } 
         <h2 class="font-display text-xl sm:text-2xl font-semibold text-[#1F150C] mb-8">Produk Lainnya</h2>
         <div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0 lg:snap-none">
             @foreach($related as $item)
-            <a href="/katalog/{{ $item->id }}" class="group flex-shrink-0 w-[70vw] sm:w-[45vw] lg:w-auto snap-start bg-white rounded-2xl border border-black/10 overflow-hidden hover:shadow-lg transition-shadow">
-                <div class="aspect-[4/3] overflow-hidden" style="background:#E1DCC9;">
-                    @if($item->image)
-                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center" style="color:#412D15;"><i class="fa-solid fa-mug-hot text-3xl opacity-50"></i></div>
-                    @endif
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-[#1F150C] text-sm line-clamp-1">{{ $item->name }}</h3>
-                    <p class="font-extrabold text-sm mt-1" style="color:#412D15;">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                    <span class="text-xs text-[#1F150C]/45 font-medium mt-2 inline-block">{{ $item->category->name ?? 'Kopi' }}</span>
-                </div>
-            </a>
+                <x-product-card :product="$item" 
+                                :wishlisted="in_array($item->id, $wishlistedProductIds ?? [])" />
             @endforeach
         </div>
     </section>

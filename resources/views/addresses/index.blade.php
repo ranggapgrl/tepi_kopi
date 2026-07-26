@@ -5,14 +5,50 @@
 @section('content')
 <style>[x-cloak]{display:none!important;}</style>
 
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" x-data="{ formOpen: false, editingId: null }">
+{{-- ============ WRAPPER DIV WITH MODAL LOGIC ============ --}}
+{{-- CHANGED: Added x-data with modal methods, and @keydown.escape --}}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12"
+     x-data="{
+         formOpen: false,
+         editingId: null,
+         prevFocus: null,
+         openModal() {
+             this.prevFocus = document.activeElement;
+             this.formOpen = true;
+             this.$nextTick(() => {
+                 const firstInput = this.$el.querySelector('#addressForm input:not([type=hidden]), #addressForm textarea, #addressForm select');
+                 if (firstInput) firstInput.focus();
+             });
+         },
+         closeModal() {
+             this.formOpen = false;
+             if (this.prevFocus) {
+                 this.prevFocus.focus();
+                 this.prevFocus = null;
+             }
+         },
+         resetForm() {
+             document.getElementById('addressForm').reset();
+         },
+         fillForm(id) {
+             const data = addressData[id];
+             if (!data) return;
+             document.getElementById('field_label').value = data.label;
+             document.getElementById('field_recipient_name').value = data.recipient_name;
+             document.getElementById('field_phone').value = data.phone;
+             document.getElementById('field_address').value = data.address;
+             document.getElementById('field_is_default').checked = !!data.is_default;
+         }
+     }"
+     @keydown.escape="if (formOpen) closeModal()">
 
     <div class="mb-8 flex items-center justify-between gap-3">
         <div>
             <p class="text-xs text-[#1F150C]/40 mb-2"><a href="/profile" class="hover:text-[#412D15]">Profil</a> <i class="fa-solid fa-chevron-right text-[8px] mx-1.5"></i> Alamat Tersimpan</p>
             <h1 class="font-display text-2xl sm:text-3xl font-semibold text-[#1F150C]">Alamat Tersimpan</h1>
         </div>
-        <button @click="formOpen = true; editingId = null; $nextTick(() => resetForm())"
+        {{-- CHANGED: Use openModal() instead of directly setting formOpen --}}
+        <button @click="openModal(); editingId = null; $nextTick(() => resetForm())"
                 class="px-4 py-2.5 btn-primary text-sm font-bold rounded-lg shrink-0">
             <i class="fa-solid fa-plus mr-1.5"></i> Tambah
         </button>
@@ -65,8 +101,9 @@
             </div>
 
             <div class="flex sm:flex-col items-start gap-2 shrink-0">
+                {{-- CHANGED: Use openModal() instead of directly setting formOpen --}}
                 <button
-                    @click="formOpen = true; editingId = {{ $address->id }}; $nextTick(() => fillForm({{ $address->id }}))"
+                    @click="openModal(); editingId = {{ $address->id }}; $nextTick(() => fillForm({{ $address->id }}))"
                     class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-black/10 hover:bg-black/5 transition text-[#1F150C]">
                     <i class="fa-solid fa-pen mr-1"></i> Ubah
                 </button>
@@ -92,14 +129,20 @@
     </div>
     @endif
 
-    {{-- ============ MODAL TAMBAH/UBAH ALAMAT ============ --}}
-    <div x-show="formOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div @click="formOpen = false" x-show="formOpen" x-transition.opacity class="absolute inset-0 bg-black/40"></div>
+    {{-- ============ MODAL TAMBAH/UBAH ALAMAT (CHANGED) ============ --}}
+    <div x-show="formOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         role="dialog" aria-modal="true" aria-labelledby="address-modal-title">
+        {{-- Backdrop: calls closeModal() --}}
+        <div @click="closeModal()" x-show="formOpen" x-transition.opacity class="absolute inset-0 bg-black/40"></div>
 
+        {{-- Modal panel --}}
         <div x-show="formOpen" x-transition class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-5">
-                <h3 class="font-display text-lg font-semibold text-[#1F150C]" x-text="editingId ? 'Ubah Alamat' : 'Tambah Alamat'"></h3>
-                <button @click="formOpen = false" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
+                <h3 id="address-modal-title" class="font-display text-lg font-semibold text-[#1F150C]" x-text="editingId ? 'Ubah Alamat' : 'Tambah Alamat'"></h3>
+                {{-- CHANGED: Close button uses closeModal() --}}
+                <button @click="closeModal()" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition" aria-label="Tutup">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
 
             <form :action="editingId ? `/addresses/${editingId}` : '{{ route('addresses.store') }}'" method="POST" id="addressForm">
@@ -151,18 +194,9 @@
         'is_default' => $a->is_default,
     ])) }};
 
-    function resetForm() {
-        document.getElementById('addressForm').reset();
-    }
-
-    function fillForm(id) {
-        const data = addressData[id];
-        if (!data) return;
-        document.getElementById('field_label').value = data.label;
-        document.getElementById('field_recipient_name').value = data.recipient_name;
-        document.getElementById('field_phone').value = data.phone;
-        document.getElementById('field_address').value = data.address;
-        document.getElementById('field_is_default').checked = !!data.is_default;
-    }
+    // The resetForm and fillForm functions are now defined in Alpine's x-data,
+    // so we don't need these global functions anymore.
+    // However, to keep compatibility with the inline @click, we can remove them.
+    // But the Alpine methods are now used, so we can delete these functions.
 </script>
 @endsection

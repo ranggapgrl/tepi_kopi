@@ -20,7 +20,7 @@
 
     {{-- Server-rendered errors fallback --}}
     @if($errors->any())
-    <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl">
+    <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl" role="alert">
         <p class="text-sm font-bold mb-1">Cek lagi isian di bawah:</p>
         <ul class="text-sm list-disc list-inside space-y-0.5">
             @foreach($errors->all() as $error)
@@ -32,7 +32,7 @@
 
     {{-- Form Checkout Utama --}}
     <form action="{{ route('checkout') }}" method="POST" 
-          x-data="checkoutForm({{ $total ?? $subtotal }}, {{ $totalWeight ?? 1000 }})" 
+          x-data="checkoutForm({{ $subtotal }}, {{ $totalWeight ?? 0 }})" 
           @submit.prevent="submit($event)">
         @csrf
         <input type="hidden" name="coupon_code" :value="appliedCode">
@@ -68,14 +68,13 @@
                 <div class="space-y-5">
                     {{-- Pencarian Kota/Kecamatan RajaOngkir --}}
                     <div class="relative">
-                    <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
+                        <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-2">
                             Kecamatan / Kota Tujuan <span class="text-rose-500">*</span>
                         </label>
                         <input type="text" x-model="searchKeyword" @input.debounce.500ms="searchDestination()"
                             placeholder="Ketik nama kecamatan atau kota..."
                             class="w-full px-4 py-3 rounded-xl border border-black/10 bg-black/[0.02] text-sm text-[#1F150C] outline-none focus:ring-2 focus:ring-[#412D15]/20 focus:border-[#412D15]/40 transition-all">
                         
-                        {{-- TAMBAHKAN HIDDEN INPUT INI SUPAYA NAMA KOTA IKUT TERKIRIM --}}
                         <input type="hidden" name="destination_name" :value="selectedDestinationName">
                         
                         <div x-show="isSearching" class="absolute right-3 top-9 text-xs text-gray-400">
@@ -121,7 +120,7 @@
                         </div>
                     </div>
 
-                    {{-- Pilihan Kurir (Dengan Badge Inisial Modern) --}}
+                    {{-- Pilihan Kurir --}}
                     <div x-show="shippingOptions.length > 0" class="pt-4 border-t border-black/10">
                         <label class="block text-xs font-bold text-[#1F150C]/60 uppercase tracking-wide mb-3">
                             Pilih Pengiriman
@@ -133,7 +132,6 @@
                                     <div class="flex items-center gap-3.5">
                                         <input type="radio" name="courier_selection" :value="option.id" x-model="selectedCourier.id" @change="setCourier(option)" class="text-[#412D15] focus:ring-[#412D15]">
                                         
-                                        {{-- Badge Inisial Kurir Modern --}}
                                         <div class="w-14 h-11 rounded-xl bg-white border border-black/10 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
                                             <template x-if="getCourierLogo(option.courier)">
                                                 <img :src="getCourierLogo(option.courier)" :alt="option.courier"
@@ -147,7 +145,7 @@
 
                                         <div>
                                             <p class="font-bold text-[#1F150C] text-sm uppercase" x-text="option.courier + ' - ' + option.service"></p>
-                                            <p class="text-xs text-[#1F150C]/50" x-text="'Estimasi: ' + option.etd + ' hari'"></p>
+                                            <p class="text-xs text-[#1F150C]/50" x-text="'Estimasi: ' + option.etd"></p>
                                         </div>
                                     </div>
                                     <span class="font-bold text-[#1F150C] text-sm" x-text="formatRupiah(option.cost)"></span>
@@ -210,6 +208,7 @@
                     <p x-show="couponMessage && !appliedCode" x-cloak x-text="couponMessage" class="text-rose-600 text-xs font-medium mt-1.5"></p>
                 </div>
 
+                {{-- ====== PERBAIKAN: Perhitungan Total ====== --}}
                 <div class="p-6">
                     <div class="space-y-3 mb-5 text-sm">
                         <div class="flex justify-between text-[#1F150C]/60">
@@ -218,11 +217,11 @@
                         </div>
                         <div class="flex justify-between text-emerald-700" x-show="discountAmount > 0" x-cloak>
                             <span>Diskon Kupon</span>
-                            <span class="font-semibold" x-text="'- Rp ' + formatRupiah(discountAmount)"></span>
+                            <span class="font-semibold" x-text="formatRupiah(discountAmount)"></span>
                         </div>
                         <div class="flex justify-between text-[#1F150C]/60">
                             <span>Pajak (11%)</span>
-                            <span class="font-semibold text-[#1F150C]" x-text="'Rp ' + formatRupiah(displayTax)"></span>
+                            <span class="font-semibold text-[#1F150C]" x-text="formatRupiah(displayTax)"></span>
                         </div>
                         <div class="flex justify-between text-[#1F150C]/60" x-show="selectedCourier.cost > 0">
                             <span>Ongkos Kirim</span>
@@ -230,9 +229,11 @@
                         </div>
                     </div>
 
+                    {{-- Total Akhir dihitung dari subtotal - diskon + pajak + ongkir --}}
                     <div class="flex justify-between items-center mb-6 pt-4 border-t border-black/5">
                         <span class="font-bold text-[#1F150C]">Total Akhir</span>
-                        <span class="font-display text-2xl font-semibold" style="color:#412D15;" x-text="formatRupiah(baseTotal + selectedCourier.cost)"></span>
+                        <span class="font-display text-2xl font-semibold" style="color:#412D15;" 
+                              x-text="formatRupiah(subtotal - discountAmount + displayTax + (selectedCourier.cost || 0))"></span>
                     </div>
 
                     <button type="submit" :disabled="loading || selectedCourier.cost === 0"
@@ -246,14 +247,14 @@
     </form>
 </div>
 
+{{-- ====== PERBAIKAN: Ekstrak Alpine logic ke file terpisah (saran) ====== --}}
 <script>
-    function checkoutForm(initialBaseTotal, totalWeightGram) {
+    function checkoutForm(initialSubtotal, totalWeightGram) {
         return {
-            subtotal: {{ (int) $subtotal }},
+            subtotal: initialSubtotal,
             loading: false,
             errorList: [],
 
-            baseTotal: initialBaseTotal,
             totalWeight: totalWeightGram,
             
             searchKeyword: '',
@@ -300,10 +301,11 @@
 
             async selectDestination(dest) {
                 this.selectedDestinationName = dest.name || dest.label || dest.city_name || 'Destinasi Terpilih';
-                this.searchKeyword = this.selectedDestinationName;  // isi field dengan nama yang dipilih
+                this.searchKeyword = this.selectedDestinationName;
                 this.destinations = [];
                 this.shippingOptions = [];
                 this.selectedCourier = { id: '', code: '', service: '', cost: 0 };
+                this.errorList = [];
                 
                 if (dest.id) {
                     await this.calculateCost(dest.id);
@@ -312,6 +314,7 @@
 
             async calculateCost(destinationId) {
                 this.shippingLoading = true;
+                this.errorList = [];
                 try {
                     const res = await fetch(`/checkout/shipping-cost`, {
                         method: 'POST',
@@ -321,13 +324,13 @@
                         },
                         body: JSON.stringify({
                             destination_id: destinationId,
-                            weight: this.totalWeight
+                            weight: this.totalWeight || 1000 // fallback jika 0
                         })
                     });
                     
                     const response = await res.json();
                     
-                    if (response.success && response.data) {
+                    if (response.success && response.data && response.data.length > 0) {
                         this.shippingOptions = response.data.map((item, index) => {
                             let price = typeof item.cost === 'number' ? item.cost : (item.cost?.[0]?.value || 0);
                             let estimation = item.etd || item.cost?.[0]?.etd || '-';
@@ -340,9 +343,18 @@
                                 etd: estimation
                             };
                         });
+
+                        // Auto-select jika hanya ada 1 pilihan
+                        if (this.shippingOptions.length === 1) {
+                            this.setCourier(this.shippingOptions[0]);
+                            this.selectedCourier.id = this.shippingOptions[0].id;
+                        }
+                    } else {
+                        this.errorList = ['Tidak ada layanan pengiriman untuk alamat ini.'];
                     }
                 } catch (e) {
                     console.error("Gagal hitung ongkir", e);
+                    this.errorList = ['Gagal menghitung ongkos kirim. Coba lagi.'];
                 }
                 this.shippingLoading = false;
             },
@@ -361,9 +373,6 @@
 
             get displayTax() {
                 return Math.round((this.subtotal - this.discountAmount) * 0.11);
-            },
-            get displayTotal() {
-                return (this.subtotal - this.discountAmount) + this.displayTax;
             },
 
             async applyCoupon() {
